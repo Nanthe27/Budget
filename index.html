@@ -34,7 +34,7 @@
   --shadow:0 4px 20px rgba(0,0,0,.08);
   --shadow-lg:0 16px 48px rgba(0,0,0,.14);
   --r-sm:6px;--r:12px;--r-lg:18px;--r-xl:24px;
-  --nav-h:68px;--safe-b:env(safe-area-inset-bottom,12px);--safe-t:env(safe-area-inset-top,0px);
+  --nav-h:68px;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
   --sidebar-w:240px;
 }
 [data-theme=dark]{
@@ -109,6 +109,7 @@ select{appearance:none;-webkit-appearance:none;}
   .bottom-nav{display:none!important;}
   .fab{display:none!important;}
   .desktop-add-btn{display:flex!important;}
+  #mobile-add-trip-btn{display:none!important;}
 }
 @media(max-width:959px){
   .sidebar{display:none!important;}
@@ -125,7 +126,7 @@ select{appearance:none;-webkit-appearance:none;}
 @media(min-width:960px){.page-content{padding-bottom:24px;}}
 
 /* ── Header ── */
-.page-header{display:flex;align-items:center;gap:12px;padding:max(var(--safe-t),16px) 16px 12px;position:sticky;top:0;z-index:50;background:var(--bg);transition:box-shadow .2s;}
+.page-header{display:flex;align-items:center;gap:12px;padding:clamp(12px, env(safe-area-inset-top, 12px), 44px) 16px 12px;position:sticky;top:0;z-index:50;background:var(--bg);transition:box-shadow .2s;}
 .page-header.scrolled{box-shadow:0 1px 0 var(--border);}
 .page-header h1{font-size:20px;font-weight:700;flex:1;letter-spacing:-.3px;}
 @media(min-width:960px){.page-header{padding:20px 32px 16px;}}
@@ -193,7 +194,7 @@ select{appearance:none;-webkit-appearance:none;}
 /* ══════════════════════════════════════════
    TOAST
 ══════════════════════════════════════════ */
-#toast-container{position:fixed;top:max(var(--safe-t),16px);left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+#toast-container{position:fixed;top:clamp(12px,env(safe-area-inset-top,12px),52px);left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
 .toast{background:var(--text);color:var(--bg);padding:10px 18px;border-radius:100px;font-size:13px;font-weight:500;animation:toastIn .2s ease;white-space:nowrap;pointer-events:none;}
 .toast.error{background:var(--red);}
 .toast.success{background:var(--green);}
@@ -442,6 +443,19 @@ select.form-input{cursor:pointer;}
 .pin-dot{width:14px;height:14px;border-radius:50%;background:var(--border);transition:all .15s;}
 .pin-dot.filled{background:var(--text);}
 .pin-dot.error{background:var(--red);}
+.pin-dot.loading{background:var(--text);animation:pinPulse .6s ease-in-out infinite alternate;}
+@keyframes pinPulse{from{opacity:1;transform:scale(1);}to{opacity:.3;transform:scale(.7);}}
+.numpad.pin-loading{opacity:.4;pointer-events:none;}
+
+/* transaction action sheet */
+.txn-action-sheet{padding:0 20px 4px;}
+.txn-action-title{font-size:15px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.txn-action-sub{font-size:12px;color:var(--text3);margin-bottom:16px;}
+.txn-action-btn{display:flex;align-items:center;gap:12px;width:100%;padding:13px 0;border-bottom:1px solid var(--border);background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--text);font-family:var(--font);}
+.txn-action-btn:last-child{border-bottom:none;}
+.txn-action-btn svg{width:18px;height:18px;stroke:var(--text2);stroke-width:1.8;fill:none;flex-shrink:0;}
+.txn-action-btn.danger{color:var(--red);}
+.txn-action-btn.danger svg{stroke:var(--red);}
 
 /* ══════════════════════════════════════════
    TRIP MODE
@@ -451,8 +465,8 @@ select.form-input{cursor:pointer;}
 .trip-card:active{transform:scale(.98);}
 @media(min-width:960px){.trip-card{margin:0 32px 10px;}}
 .trip-card-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.trip-card-icon{width:36px;height:36px;border-radius:var(--r-sm);background:var(--purple-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.trip-card-icon svg{width:16px;height:16px;stroke:var(--purple);stroke-width:1.8;fill:none;}
+.trip-card-icon{width:36px;height:36px;border-radius:var(--r-sm);background:var(--amber-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.trip-card-icon svg{width:16px;height:16px;stroke:var(--amber);stroke-width:1.8;fill:none;}
 .trip-card-name{font-size:14px;font-weight:700;flex:1;}
 .trip-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
 .trip-status.active{background:var(--green-bg);color:var(--green);}
@@ -462,10 +476,10 @@ select.form-input{cursor:pointer;}
 .trip-spent{font-size:13px;font-weight:700;font-family:var(--mono);}
 .trip-budget{font-size:11px;color:var(--text3);font-family:var(--mono);}
 .trip-bar-bg{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
-.trip-bar-fill{height:100%;border-radius:3px;background:var(--purple);transition:width .5s ease;}
+.trip-bar-fill{height:100%;border-radius:3px;background:var(--amber);transition:width .5s ease;}
 
 /* trip detail */
-.trip-detail-hero{margin:10px 16px 14px;background:var(--purple);border-radius:var(--r-xl);padding:22px;color:#fff;position:relative;overflow:hidden;}
+.trip-detail-hero{margin:10px 16px 14px;background:var(--amber);border-radius:var(--r-xl);padding:22px;color:#fff;position:relative;overflow:hidden;}
 @media(min-width:960px){.trip-detail-hero{margin:16px 32px 14px;}}
 .trip-detail-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.05);border-radius:50%;}
 .tdh-name{font-size:20px;font-weight:800;margin-bottom:3px;}
@@ -574,6 +588,8 @@ select.form-input{cursor:pointer;}
   .cat-grid{grid-template-columns:repeat(3,1fr);}
   .numpad-btn{padding:11px;}
 }
+/* ══════════════════════════════════════════
+   LOADING OVERLAY
 ══════════════════════════════════════════ */
 #loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .4s ease;}
 #loading-overlay.hidden{opacity:0;pointer-events:none;}
@@ -856,6 +872,8 @@ select.form-input{cursor:pointer;}
     <div class="page-header">
       <button class="icon-btn" id="trip-detail-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <h1 id="trip-detail-title">Trip</h1>
+      <button class="icon-btn" id="trip-edit-budget-btn" title="Edit Budget"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      <button class="icon-btn" id="trip-delete-btn" title="Delete Trip" style="display:none"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       <button class="icon-btn" id="trip-end-btn" title="End Trip"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></button>
     </div>
     <div class="page-content">
@@ -868,6 +886,7 @@ select.form-input{cursor:pointer;}
           <div class="tdh-stats">
             <div class="tdh-stat"><div class="tdh-stat-label">Spent</div><div class="tdh-stat-value" id="tdh-spent">$0</div></div>
             <div class="tdh-stat"><div class="tdh-stat-label">Budget</div><div class="tdh-stat-value" id="tdh-budget">$0</div></div>
+            <div class="tdh-stat" style="grid-column:1/-1"><div class="tdh-stat-label">After Trip (from your income)</div><div class="tdh-stat-value" id="tdh-from-income">$0</div></div>
           </div>
         </div>
       </div>
@@ -1142,12 +1161,53 @@ select.form-input{cursor:pointer;}
   </div>
 </div>
 
+<!-- Transaction Action Sheet -->
+<div class="modal-overlay" id="txn-action-modal">
+  <div class="backdrop" id="txn-action-backdrop"></div>
+  <div class="bottom-sheet" style="max-height:50dvh">
+    <div class="sheet-handle"></div>
+    <div class="txn-action-sheet">
+      <div class="txn-action-title" id="txn-action-title">Transaction</div>
+      <div class="txn-action-sub" id="txn-action-sub"></div>
+      <button class="txn-action-btn" id="txn-action-edit">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Transaction
+      </button>
+      <button class="txn-action-btn danger" id="txn-action-delete">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Delete Transaction
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Trip Budget Modal -->
+<div class="modal-overlay" id="edit-trip-budget-modal">
+  <div class="backdrop" id="edit-trip-budget-backdrop"></div>
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h3>Edit Trip Budget</h3>
+      <button class="sheet-close" id="edit-trip-budget-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">Budget ($)</label>
+        <input class="form-input" id="edit-trip-budget-input" type="number" inputmode="decimal" placeholder="e.g. 1500">
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn-primary" id="save-trip-budget-btn">Save Budget</button>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
 /* ══════════════════════════════════════════
    CONFIG
 ══════════════════════════════════════════ */
-const GAS_URL='https://script.google.com/macros/s/AKfycbzFUCJ79JXodkV9J0YXqT-uudzzErXZJkZsExFxa_yqCyQyYl0KLT0TA6IWZP1DPTQo/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbx4ntxjXlcZdQY4OdfZhiXr5P_d5SJDT0bdKxMfeMYVKdGbDnM3F975R9ijelWzBM7a/exec';
 const COLORS=['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#84cc16','#6b7280','#1a1a1f'];
 
 /* ══════════════════════════════════════════
@@ -1164,7 +1224,9 @@ const state={
   txnMonth:now.getMonth()+1, txnYear:now.getFullYear(),
   anaMonth:now.getMonth()+1, anaYear:now.getFullYear(),
   txnFilter:'all',
-  isSaving:false, // prevent double-submit
+  isSaving:false,
+  editingTxn:null, // txn object being edited, null = adding new
+  currentTripId:null,
 };
 
 /* ══════════════════════════════════════════
@@ -1307,9 +1369,17 @@ function mockAPI(action,data){
     case 'getIncomeSources':return{success:true,sources:mockDB.sources.filter(s=>s.userId===data.userId&&s.isActive)};
     case 'addIncomeSource':{const s={sourceId:'src'+Date.now(),...data,isActive:true};mockDB.sources.push(s);return{success:true,sourceId:s.sourceId};}
     case 'deleteIncomeSource':{const s=mockDB.sources.find(x=>x.sourceId===data.sourceId&&x.userId===data.userId);if(s)s.isActive=false;return{success:true};}
-    case 'getTrips':return{success:true,trips:mockDB.trips.filter(t=>t.userId===data.userId)};
+    case 'getTrips':return{success:true,trips:mockDB.trips.filter(t=>t.userId===data.userId).map(t=>({...t,spent:mockDB.transactions.filter(x=>x.tripId===t.tripId&&x.type==='expense').reduce((s,x)=>s+x.amount,0)}))};
+    case 'getAll':{
+      const uid=data.userId;
+      const txns=mockDB.transactions.filter(x=>x.userId===uid).sort((a,b)=>new Date(b.date)-new Date(a.date));
+      const trips=mockDB.trips.filter(t=>t.userId===uid).map(t=>({...t,spent:txns.filter(x=>x.tripId===t.tripId&&x.type==='expense').reduce((s,x)=>s+x.amount,0)}));
+      return{success:true,transactions:txns,categories:mockDB.categories.filter(x=>x.userId==='default'||x.userId===uid),budgets:mockDB.budgets.filter(b=>b.userId===uid),sources:mockDB.sources.filter(s=>s.userId===uid&&s.isActive),trips};
+    }
     case 'addTrip':{const t={tripId:'trip'+Date.now(),...data,createdAt:new Date().toISOString(),isActive:true};mockDB.trips.push(t);return{success:true,tripId:t.tripId};}
     case 'endTrip':{const t=mockDB.trips.find(x=>x.tripId===data.tripId);if(t){t.isActive=false;t.endDate=data.endDate||todayStr();}return{success:true};}
+    case 'deleteTrip':{const i=mockDB.trips.findIndex(x=>x.tripId===data.tripId&&x.userId===data.userId);if(i>-1)mockDB.trips.splice(i,1);return{success:true};}
+    case 'editTripBudget':{const t=mockDB.trips.find(x=>x.tripId===data.tripId&&x.userId===data.userId);if(t)t.budget=parseFloat(data.budget)||0;return{success:true};}
     case 'updateUserPhoto':{const u=mockDB.users.find(x=>x.userId===data.userId);if(u)u.photoUrl=data.photoUrl;return{success:true};}
     case 'getSummary':{
       const m=data.month||now.getMonth()+1;
@@ -1401,20 +1471,26 @@ document.querySelectorAll('#login-screen .numpad-btn[data-n]').forEach(b=>{
     pinBuffer+=b.dataset.n;
     updatePinDots();
     if(pinBuffer.length===4){
+      // Show loading state on dots
+      document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('loading'));
+      document.querySelector('#login-screen .numpad')?.classList.add('pin-loading');
       // Use first user (single-user mode)
       const user=state.users[0];
       if(!user){
-        // Users not loaded yet, wait and retry
         const r=await api('getUsers');
         if(r.success) state.users=r.users;
       }
       const targetUser=state.users[0];
       if(!targetUser){
+        document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('loading'));
+        document.querySelector('#login-screen .numpad')?.classList.remove('pin-loading');
         document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('error'));
         setTimeout(()=>{document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('error','filled');});pinBuffer='';},800);
         return;
       }
       const r=await api('login',{userId:targetUser.userId,pin:pinBuffer});
+      document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('loading'));
+      document.querySelector('#login-screen .numpad')?.classList.remove('pin-loading');
       if(r.success){
         state.user=r.user;
         localStorage.setItem('bbn-user',JSON.stringify(r.user));
@@ -1438,11 +1514,20 @@ function afterLogin(){
   showScreen('home-screen');
   document.getElementById('greeting-time').textContent=greeting();
   document.getElementById('home-username-display').textContent=state.user.name;
-  // Load from cache immediately
+  // Load ALL data from cache immediately — zero network wait
   const cached=localStorage.getItem('bbn-data-'+state.user.userId);
-  if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
-  // Render home immediately with cached/mock data then sync
-  refreshHome();
+  if(cached){
+    try{
+      const d=JSON.parse(cached);
+      if(d.categories) state.categories=d.categories;
+      if(d.sources)    state.sources=d.sources;
+      if(d.budgets)    state.budgets=d.budgets;
+      if(d.trips)      state.trips=d.trips;
+      if(d.transactions) state.transactions=d.transactions;
+    }catch(e){}
+  }
+  // Render immediately from cache, then sync in background
+  if(state.transactions.length) renderHomeFromTransactions(state.transactions);
   syncInBackground();
 }
 
@@ -1480,7 +1565,19 @@ document.getElementById('sync-btn').addEventListener('click',forceSync);
 
 function saveCache(){
   if(!state.user) return;
-  localStorage.setItem('bbn-data-'+state.user.userId,JSON.stringify({categories:state.categories,sources:state.sources,budgets:state.budgets,trips:state.trips,transactions:state.transactions.slice(0,200)}));
+  try{
+    localStorage.setItem('bbn-data-'+state.user.userId, JSON.stringify({
+      categories: state.categories,
+      sources: state.sources,
+      budgets: state.budgets,
+      trips: state.trips,
+      transactions: state.transactions.slice(0,500), // keep last 500
+      cachedAt: Date.now(),
+    }));
+  }catch(e){
+    // Storage full — try with fewer transactions
+    try{localStorage.setItem('bbn-data-'+state.user.userId,JSON.stringify({categories:state.categories,sources:state.sources,budgets:state.budgets,trips:state.trips,transactions:state.transactions.slice(0,100),cachedAt:Date.now()}));}catch(e2){}
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -1497,8 +1594,28 @@ async function refreshHome(){
   renderHomeFromSummary(s);
 }
 
-function dateStr(v){return String(v).split('T')[0];}
-function safeDate(v){return new Date(dateStr(v)+'T00:00');}
+function dateStr(v){
+  if(!v) return '';
+  const s=String(v).trim();
+  // Already ISO yyyy-MM-dd
+  const iso=s.match(/^(\d{4}-\d{2}-\d{2})/);
+  if(iso) return iso[1];
+  // Try parsing as a date — handles "Feb 26, 2026", "2/26/2026", etc.
+  const d=new Date(s);
+  if(!isNaN(d.getTime())){
+    const y=d.getFullYear();
+    const mo=String(d.getMonth()+1).padStart(2,'0');
+    const dy=String(d.getDate()).padStart(2,'0');
+    return y+'-'+mo+'-'+dy;
+  }
+  return '';
+}
+function safeDate(v){
+  const s=dateStr(v);
+  if(!s) return new Date(NaN);
+  // Force local midnight — appending T00:00 prevents UTC offset shifting the day
+  return new Date(s+'T00:00:00');
+}
 
 function renderHomeFromTransactions(txns){
   // Compute cycle from last salary
@@ -1518,7 +1635,7 @@ function renderHomeFromTransactions(txns){
     document.getElementById('cycle-badge-text').textContent='Cycle '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+fmt(lastSalary.amount);
   } else {
     const m=state.currentMonth, y=state.currentYear;
-    const cur=txns.filter(t=>{const d=new Date(t.date);return(d.getMonth()+1)===m&&d.getFullYear()===y;});
+    const cur=txns.filter(t=>{const d=safeDate(t.date);return !isNaN(d)&&(d.getMonth()+1)===m&&d.getFullYear()===y;});
     const inc=cur.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
     const exp=cur.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
     document.getElementById('hero-balance').textContent=fmt(inc-exp).replace('$','');
@@ -1559,7 +1676,9 @@ function renderRecentTxns(txns){
   const el=document.getElementById('recent-txn-list');
   if(!txns||!txns.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><p>No transactions yet</p></div>';return;}
   el.innerHTML='<div class="txn-list">'+txns.map(t=>txnHtml(t)).join('')+'</div>';
-  el.querySelectorAll('.txn-item').forEach(item=>{item.addEventListener('click',()=>handleDeleteTxn(item.dataset.id,item));});
+  el.querySelectorAll('.txn-item').forEach(item=>{
+    item.addEventListener('click',()=>openTxnActionSheet(item.dataset.id));
+  });
 }
 
 /* ══════════════════════════════════════════
@@ -1574,7 +1693,7 @@ function txnHtml(t){
   const d=safeDate(t.date);
   const dateStr2=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const salaryBadge=t.isSalary?'<span style="font-size:9px;background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px">SALARY</span>':'';
-  const tripBadge=t.tripId?'<span style="font-size:9px;background:var(--purple-bg);color:var(--purple);padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px">TRIP</span>':'';
+  const tripBadge=t.tripId?'<span style="font-size:9px;background:var(--amber-bg);color:var(--amber);padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px">TRIP</span>':'';
   return`<div class="txn-item" data-id="${t.txnId}">
     <div class="txn-icon" style="background:${cat.color}20">${icon.replace('svg ','svg style="stroke:'+cat.color+'" ')}</div>
     <div class="txn-info">
@@ -1586,19 +1705,35 @@ function txnHtml(t){
 }
 
 /* ══════════════════════════════════════════
+   TXN ACTION SHEET (edit/delete)
+══════════════════════════════════════════ */
+function openTxnActionSheet(txnId){
+  const t=state.transactions.find(x=>x.txnId===txnId);
+  if(!t) return;
+  document.getElementById('txn-action-title').textContent=t.description||t.category;
+  document.getElementById('txn-action-sub').textContent=(t.type==='expense'?'-':'+')+'$'+t.amount+' · '+t.category+' · '+(t.date||'');
+  openModal('txn-action-modal');
+  document.getElementById('txn-action-edit').onclick=()=>{closeModal('txn-action-modal');openEditTxnModal(t);};
+  document.getElementById('txn-action-delete').onclick=async()=>{
+    closeModal('txn-action-modal');
+    await handleDeleteTxn(txnId);
+  };
+}
+document.getElementById('txn-action-backdrop').addEventListener('click',()=>closeModal('txn-action-modal'));
+
+/* ══════════════════════════════════════════
    DELETE TXN — optimistic
 ══════════════════════════════════════════ */
-async function handleDeleteTxn(txnId,el){
+async function handleDeleteTxn(txnId){
   const ok=await confirmDlg('Delete transaction','This will be removed permanently.');
   if(!ok) return;
-  // Optimistic: remove from UI & state immediately
+  // Remove from DOM if visible
+  const el=document.querySelector(`.txn-item[data-id="${txnId}"]`);
   if(el){el.style.transition='opacity .15s,transform .15s';el.style.opacity='0';el.style.transform='translateX(20px)';setTimeout(()=>el.remove(),150);}
   state.transactions=state.transactions.filter(t=>t.txnId!==txnId);
   saveCache();
-  // Update home balance in background without reloading whole screen
   const active=document.querySelector('.screen.active')?.id;
   if(active==='home-screen') renderHomeFromTransactions(state.transactions);
-  // Background delete
   api('deleteTransaction',{txnId,userId:state.user.userId});
 }
 
@@ -1608,16 +1743,41 @@ async function handleDeleteTxn(txnId,el){
 function openAddTxnModal(type='expense',tripId=null){
   state.txnType=type; state.txnAmount=''; state.txnCat=''; state.txnSource='';
   state.currentTripId=tripId||null;
+  state.editingTxn=null;
   document.getElementById('txn-amount-display').textContent='0';
   document.getElementById('txn-amount-input').value='';
   document.getElementById('txn-desc').value='';
   document.getElementById('txn-date').value=todayStr();
   document.getElementById('add-txn-title').textContent=tripId?'Add Trip Expense':'Add Transaction';
+  document.getElementById('save-txn-btn').textContent='Add Transaction';
   renderTypeToggle();
   renderCatGrid();
   renderSourceSelect();
   openModal('add-txn-modal');
   setTimeout(()=>document.getElementById('txn-amount-input').focus(),300);
+}
+
+function openEditTxnModal(t){
+  state.editingTxn=t;
+  state.txnType=t.type;
+  state.txnCat=t.category;
+  state.txnSource=t.incomeSourceId||'';
+  state.currentTripId=null;
+  document.getElementById('txn-amount-display').textContent=t.amount;
+  document.getElementById('txn-amount-input').value=t.amount;
+  document.getElementById('txn-desc').value=t.description||'';
+  document.getElementById('txn-date').value=t.date||todayStr();
+  document.getElementById('add-txn-title').textContent='Edit Transaction';
+  document.getElementById('save-txn-btn').textContent='Save Changes';
+  renderTypeToggle();
+  renderCatGrid();
+  renderSourceSelect();
+  // Set source value after render
+  setTimeout(()=>{
+    if(t.incomeSourceId) document.getElementById('txn-source').value=t.incomeSourceId;
+    document.getElementById('txn-amount-input').focus();
+  },300);
+  openModal('add-txn-modal');
 }
 
 function renderTypeToggle(){
@@ -1695,27 +1855,43 @@ document.getElementById('save-txn-btn').addEventListener('click',async()=>{
     tripId:state.currentTripId||'',
   };
 
-  // Optimistic: close modal & update UI immediately
   closeModal('add-txn-modal');
-  toast('Saved ✓','success');
-  const tmpId='tmp'+Date.now();
-  const optimisticTxn={...txnData,txnId:tmpId,createdAt:new Date().toISOString()};
-  state.transactions.unshift(optimisticTxn);
-  saveCache();
-  const active=document.querySelector('.screen.active')?.id;
-  if(active==='home-screen') renderHomeFromTransactions(state.transactions);
-  else if(active==='transactions-screen') renderTxnList(state.transactions);
-  else if(active==='trip-detail-screen') loadTripDetail(state.activeTrip);
 
-  // Background save - replace tmp id with real one
-  const r=await api('addTransaction',txnData);
-  if(r.success){
-    const idx=state.transactions.findIndex(t=>t.txnId===tmpId);
-    if(idx>-1) state.transactions[idx].txnId=r.txnId;
+  if(state.editingTxn){
+    // EDIT mode: update in-place
+    const idx=state.transactions.findIndex(t=>t.txnId===state.editingTxn.txnId);
+    if(idx>-1) state.transactions[idx]={...state.transactions[idx],...txnData};
     saveCache();
+    toast('Updated ✓','success');
+    refreshCurrentScreen();
+    // Backend: delete old + add new (no updateTransaction endpoint needed)
+    await api('deleteTransaction',{txnId:state.editingTxn.txnId,userId:state.user.userId});
+    const r=await api('addTransaction',{...txnData});
+    if(r.success){
+      const idx2=state.transactions.findIndex(t=>t.txnId===state.editingTxn.txnId);
+      if(idx2>-1) state.transactions[idx2].txnId=r.txnId;
+      saveCache();
+    }
+  } else {
+    // ADD mode: optimistic
+    toast('Saved ✓','success');
+    const tmpId='tmp'+Date.now();
+    const optimisticTxn={...txnData,txnId:tmpId,createdAt:new Date().toISOString()};
+    state.transactions.unshift(optimisticTxn);
+    saveCache();
+    refreshCurrentScreen();
+    const r=await api('addTransaction',txnData);
+    if(r.success){
+      const idx=state.transactions.findIndex(t=>t.txnId===tmpId);
+      if(idx>-1) state.transactions[idx].txnId=r.txnId;
+      saveCache();
+    }
   }
+
   state.isSaving=false;
-  btn.disabled=false; btn.textContent='Add Transaction';
+  btn.disabled=false;
+  btn.textContent='Add Transaction';
+  state.editingTxn=null;
 });
 
 /* ══════════════════════════════════════════
@@ -1749,12 +1925,18 @@ document.getElementById('ana-next-month').addEventListener('click',()=>{state.an
 ══════════════════════════════════════════ */
 function renderTxnList(txns){
   document.getElementById('txn-month-label').textContent=monthName(state.txnMonth,state.txnYear);
-  let filtered=txns.filter(t=>{const d=new Date(t.date);return(d.getMonth()+1)===state.txnMonth&&d.getFullYear()===state.txnYear;});
+  let filtered=txns.filter(t=>{
+    const d=safeDate(t.date);
+    if(isNaN(d)) return false;
+    return (d.getMonth()+1)===state.txnMonth && d.getFullYear()===state.txnYear;
+  });
   if(state.txnFilter!=='all') filtered=filtered.filter(t=>t.type===state.txnFilter);
   const el=document.getElementById('txn-list');
   if(!filtered.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><p>No transactions</p></div>';return;}
   el.innerHTML=filtered.map(t=>txnHtml(t)).join('');
-  el.querySelectorAll('.txn-item').forEach(item=>{item.addEventListener('click',()=>handleDeleteTxn(item.dataset.id,item));});
+  el.querySelectorAll('.txn-item').forEach(item=>{
+    item.addEventListener('click',()=>openTxnActionSheet(item.dataset.id));
+  });
 }
 
 async function loadTransactions(){
@@ -1765,7 +1947,7 @@ async function loadTransactions(){
   if(!r.success) return;
   // Merge fetched into state (replace same month+year)
   const fetched=r.transactions;
-  const others=state.transactions.filter(t=>{const d=new Date(t.date);return!((d.getMonth()+1)===state.txnMonth&&d.getFullYear()===state.txnYear);});
+  const others=state.transactions.filter(t=>{const d=safeDate(t.date);return isNaN(d)||!((d.getMonth()+1)===state.txnMonth&&d.getFullYear()===state.txnYear);});
   state.transactions=[...fetched,...others];
   saveCache();
   renderTxnList(state.transactions);
@@ -1864,9 +2046,13 @@ document.getElementById('save-budget-btn').addEventListener('click',async()=>{
 ══════════════════════════════════════════ */
 async function loadTrips(){
   renderTrips(); // render cached immediately
-  // Always fetch fresh from API
   const r=await api('getTrips',{userId:state.user.userId});
-  if(r.success){
+  if(r.success && r.trips.length >= state.trips.length){
+    // Only replace if server has at least as many trips (prevents wiping optimistic adds)
+    state.trips=r.trips;
+    saveCache();
+    renderTrips();
+  } else if(r.success && r.trips.length > 0){
     state.trips=r.trips;
     saveCache();
     renderTrips();
@@ -1912,6 +2098,8 @@ async function openTripDetail(trip){
   showScreen('trip-detail-screen');
   document.getElementById('trip-detail-title').textContent=trip.name;
   document.getElementById('trip-end-btn').style.display=trip.isActive?'flex':'none';
+  // Delete btn shown for ENDED trips only
+  document.getElementById('trip-delete-btn').style.display=trip.isActive?'none':'flex';
   loadTripDetail(trip);
 }
 
@@ -1920,27 +2108,85 @@ async function loadTripDetail(trip){
   const s=trip.startDate?safeDate(trip.startDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
   const e=trip.endDate?safeDate(trip.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'ongoing';
   document.getElementById('tdh-dates').textContent=`${s} → ${e}`;
+
+  // Fetch trip transactions fresh
   const r=await api('getTransactions',{userId:state.user.userId,tripId:trip.tripId});
-  let spent=0;
+  let spent=0, tripTxns=[];
   if(r.success){
-    spent=r.transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    tripTxns=r.transactions;
+    // Also sync into state.transactions
+    r.transactions.forEach(t=>{
+      const idx=state.transactions.findIndex(x=>x.txnId===t.txnId);
+      if(idx>-1) state.transactions[idx]=t; else state.transactions.push(t);
+    });
+    saveCache();
+    spent=tripTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
     const el=document.getElementById('trip-txn-list');
-    if(!r.transactions.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><p>No spending yet</p></div>';
+    if(!tripTxns.length){
+      el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><p>No spending yet</p></div>';
     } else {
-      el.innerHTML=r.transactions.map(t=>txnHtml(t)).join('');
-      el.querySelectorAll('.txn-item').forEach(item=>{item.addEventListener('click',()=>handleDeleteTxn(item.dataset.id,item));});
+      el.innerHTML=tripTxns.map(t=>txnHtml(t)).join('');
+      el.querySelectorAll('.txn-item').forEach(item=>{
+        item.addEventListener('click',()=>openTxnActionSheet(item.dataset.id));
+      });
     }
   }
-  // update trip spent in state
+
+  // Update trip spent in state
   const idx=state.trips.findIndex(t=>t.tripId===trip.tripId);
   if(idx>-1) state.trips[idx].spent=spent;
-  document.getElementById('tdh-spent').textContent=fmt(spent);
-  document.getElementById('tdh-budget').textContent=trip.budget?fmt(trip.budget):'No limit';
+
+  // Calculation 1: vs trip budget (expected spend)
   const rem=trip.budget?trip.budget-spent:null;
   document.getElementById('tdh-balance').textContent=rem!==null?fmt(rem):'—';
+  document.getElementById('tdh-label')&&(document.getElementById('tdh-label').textContent='Budget Remaining');
+  document.getElementById('tdh-spent').textContent=fmt(spent);
+  document.getElementById('tdh-budget').textContent=trip.budget?fmt(trip.budget):'No limit';
+
+  // Calculation 2: real income impact
+  // Total income from all transactions up to now
+  const totalIncome=state.transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const afterTrip=totalIncome-spent;
+  const fromIncomeEl=document.getElementById('tdh-from-income');
+  if(fromIncomeEl){
+    fromIncomeEl.textContent=fmt(afterTrip);
+    fromIncomeEl.style.color=afterTrip>=0?'#6ee7b7':'#fca5a5';
+  }
 }
 
 document.getElementById('trip-detail-back').addEventListener('click',()=>{navTo('trips');});
+
+document.getElementById('trip-delete-btn').addEventListener('click',async()=>{
+  const trip=state.activeTrip;
+  const ok=await confirmDlg('Delete Trip?',`"${trip.name}" and all its data will be removed permanently.`,'Delete');
+  if(!ok) return;
+  state.trips=state.trips.filter(t=>t.tripId!==trip.tripId);
+  saveCache();
+  toast('Trip deleted','success');
+  navTo('trips');
+  api('deleteTrip',{tripId:trip.tripId,userId:state.user.userId});
+});
+
+document.getElementById('trip-edit-budget-btn').addEventListener('click',()=>{
+  document.getElementById('edit-trip-budget-input').value=state.activeTrip?.budget||'';
+  openModal('edit-trip-budget-modal');
+  setTimeout(()=>document.getElementById('edit-trip-budget-input').focus(),300);
+});
+document.getElementById('edit-trip-budget-backdrop').addEventListener('click',()=>closeModal('edit-trip-budget-modal'));
+document.getElementById('edit-trip-budget-close').addEventListener('click',()=>closeModal('edit-trip-budget-modal'));
+document.getElementById('save-trip-budget-btn').addEventListener('click',async()=>{
+  const budget=parseFloat(document.getElementById('edit-trip-budget-input').value)||0;
+  const trip=state.activeTrip;
+  trip.budget=budget;
+  const idx=state.trips.findIndex(t=>t.tripId===trip.tripId);
+  if(idx>-1) state.trips[idx].budget=budget;
+  saveCache();
+  closeModal('edit-trip-budget-modal');
+  toast('Budget updated ✓','success');
+  loadTripDetail(trip);
+  api('editTripBudget',{tripId:trip.tripId,userId:state.user.userId,budget});
+});
+
 document.getElementById('trip-end-btn').addEventListener('click',async()=>{
   const ok=await confirmDlg('End Trip?','This will mark the trip as ended. You can still view its transactions.','End Trip');
   if(!ok) return;
