@@ -59,6 +59,8 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{height:100%;touch-action:manipulation;-webkit-text-size-adjust:100%;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);height:100%;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+/* iOS: fill safe area below nav with app background, not white */
+body::after{content:'';position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:transparent;z-index:199;pointer-events:none;}
 button{font-family:var(--font);cursor:pointer;border:none;outline:none;background:none;}
 input,select,textarea{font-family:var(--font);outline:none;border:none;background:none;}
 ul,li{list-style:none;}a{text-decoration:none;color:inherit;}
@@ -146,8 +148,9 @@ select{appearance:none;-webkit-appearance:none;}
   position:fixed;
   bottom:0;left:0;right:0;
   z-index:200;
-  padding:8px 20px calc(env(safe-area-inset-bottom,0px) + 12px);
+  padding:8px 20px calc(env(safe-area-inset-bottom,0px) + 6px);
   pointer-events:none;
+  background:transparent;
 }
 .bottom-nav.hidden{display:none!important;}
 .nav-pills{
@@ -236,7 +239,7 @@ select.form-input{cursor:pointer;}
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 0 16px;}
 .numpad-btn{padding:16px;border-radius:var(--r);background:var(--bg3);font-size:20px;font-weight:500;color:var(--text);cursor:pointer;transition:all .1s;border:1px solid var(--border);}
 .numpad-btn:active{transform:scale(.92);background:var(--surface2);}
-.numpad-btn.delete{background:transparent;border-color:transparent;}
+.numpad-btn.delete{background:var(--bg3);border-color:var(--border);}
 .numpad-btn.delete svg{width:20px;height:20px;stroke:var(--text2);stroke-width:1.8;fill:none;}
 .numpad-btn.empty{background:transparent;border-color:transparent;pointer-events:none;}
 .type-toggle{display:flex;background:var(--bg3);border-radius:var(--r);padding:3px;gap:3px;margin-bottom:14px;}
@@ -585,32 +588,26 @@ select.form-input{cursor:pointer;}
       </div>
       <div class="logo logo-lg" style="justify-content:center"><span class="budget">budget</span><span class="bynan">Bynan</span></div>
     </div>
-    <div id="step-select">
-      <div class="user-list" id="user-list"></div>
+    <p style="text-align:center;font-size:14px;color:var(--text2);margin-bottom:4px">Enter your PIN</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
     </div>
-    <div id="step-pin" style="display:none">
-      <p style="text-align:center;font-size:14px;color:var(--text2);margin-bottom:4px">Enter PIN for</p>
-      <p style="text-align:center;font-size:18px;font-weight:700;margin-bottom:0" id="pin-user-name"></p>
-      <div class="pin-dots">
-        <div class="pin-dot" id="pd0"></div>
-        <div class="pin-dot" id="pd1"></div>
-        <div class="pin-dot" id="pd2"></div>
-        <div class="pin-dot" id="pd3"></div>
-      </div>
-      <div class="numpad">
-        <button class="numpad-btn" data-n="1">1</button>
-        <button class="numpad-btn" data-n="2">2</button>
-        <button class="numpad-btn" data-n="3">3</button>
-        <button class="numpad-btn" data-n="4">4</button>
-        <button class="numpad-btn" data-n="5">5</button>
-        <button class="numpad-btn" data-n="6">6</button>
-        <button class="numpad-btn" data-n="7">7</button>
-        <button class="numpad-btn" data-n="8">8</button>
-        <button class="numpad-btn" data-n="9">9</button>
-        <button class="numpad-btn pin-back-btn" id="pin-back">←</button>
-        <button class="numpad-btn" data-n="0">0</button>
-        <button class="numpad-btn delete" id="pin-delete"><svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
-      </div>
+    <div class="numpad">
+      <button class="numpad-btn" data-n="1">1</button>
+      <button class="numpad-btn" data-n="2">2</button>
+      <button class="numpad-btn" data-n="3">3</button>
+      <button class="numpad-btn" data-n="4">4</button>
+      <button class="numpad-btn" data-n="5">5</button>
+      <button class="numpad-btn" data-n="6">6</button>
+      <button class="numpad-btn" data-n="7">7</button>
+      <button class="numpad-btn" data-n="8">8</button>
+      <button class="numpad-btn" data-n="9">9</button>
+      <button class="numpad-btn empty"></button>
+      <button class="numpad-btn" data-n="0">0</button>
+      <button class="numpad-btn empty"></button>
     </div>
   </div>
 </div>
@@ -636,6 +633,8 @@ select.form-input{cursor:pointer;}
         <div class="hero-period">
           <button id="hero-period-btn">← prev</button>
           <span id="hero-period-label"></span>
+          <button id="hero-period-next">next →</button>
+          <button id="hero-period-today" style="display:none">today</button>
         </div>
         <div class="hero-label" id="cycle-label">Balance</div>
         <div class="hero-balance"><span class="currency">$</span><span id="hero-balance">0</span></div>
@@ -766,6 +765,7 @@ select.form-input{cursor:pointer;}
   <div class="main-layout">
     <div class="page-header">
       <h1>Trips</h1>
+      <button class="icon-btn" id="mobile-add-trip-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
       <button class="desktop-add-btn" id="desktop-add-trip-btn" style="display:flex">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Trip
       </button>
@@ -934,20 +934,9 @@ select.form-input{cursor:pointer;}
       <div class="amount-display">
         <span class="currency">$</span><span class="amount-val" id="txn-amount-display">0</span>
       </div>
-      <div class="numpad" id="txn-numpad">
-        <button class="numpad-btn" data-n="1">1</button>
-        <button class="numpad-btn" data-n="2">2</button>
-        <button class="numpad-btn" data-n="3">3</button>
-        <button class="numpad-btn" data-n="4">4</button>
-        <button class="numpad-btn" data-n="5">5</button>
-        <button class="numpad-btn" data-n="6">6</button>
-        <button class="numpad-btn" data-n="7">7</button>
-        <button class="numpad-btn" data-n="8">8</button>
-        <button class="numpad-btn" data-n="9">9</button>
-        <button class="numpad-btn" data-n=".">.</button>
-        <button class="numpad-btn" data-n="0">0</button>
-        <button class="numpad-btn delete" id="txn-delete-btn"><svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
-      </div>
+      <input id="txn-amount-input" type="number" inputmode="decimal" placeholder="0.00"
+        style="width:100%;padding:12px 14px;background:var(--bg3);border-radius:var(--r);font-size:18px;color:var(--text);border:1.5px solid transparent;margin-bottom:14px;font-family:var(--font);transition:border-color .15s;"
+        onfocus="this.style.borderColor='var(--text3)'" onblur="this.style.borderColor='transparent'">
       <div class="form-group">
         <label class="form-label">Category</label>
         <div class="cat-grid" id="txn-cat-grid"></div>
@@ -1058,7 +1047,7 @@ select.form-input{cursor:pointer;}
     <div class="sheet-body">
       <div class="form-group">
         <label class="form-label">Trip Name</label>
-        <input class="form-input" id="trip-name" type="text" placeholder="e.g. Bangkok 2025">
+        <input class="form-input" id="trip-name" type="text" placeholder="e.g. Siem Reap...">
       </div>
       <div class="form-group">
         <label class="form-label">Budget ($)</label>
@@ -1304,35 +1293,25 @@ document.querySelectorAll('.nav-pill').forEach(p=>p.addEventListener('click',()=
 document.querySelectorAll('.sidebar-item[data-screen]').forEach(p=>p.addEventListener('click',()=>navTo(p.dataset.screen)));
 
 /* ══════════════════════════════════════════
-   LOGIN
+   LOGIN — single user, direct PIN
 ══════════════════════════════════════════ */
-let pinBuffer='', selectedUser=null;
+let pinBuffer='';
 
+// Load the single user in background (for login API call)
 async function initLogin(){
-  const r=await api('getUsers');
-  if(r.success){state.users=r.users;renderUserList();}
-}
-
-function renderUserList(){
-  const el=document.getElementById('user-list');
-  if(!state.users.length){
-    el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><p>No users found.</p></div>';
-    return;
+  pinBuffer='';
+  updatePinDots();
+  // Try to get user from cache first for instant display
+  const cachedUsers=localStorage.getItem('bbn-users');
+  if(cachedUsers){
+    try{state.users=JSON.parse(cachedUsers);}catch(e){}
   }
-  el.innerHTML=state.users.map(u=>`
-    <div class="user-card" data-uid="${u.userId}">
-      <div class="uav">${u.photoUrl?`<img src="${u.photoUrl}" onerror="this.style.display='none'">`:'<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text2);stroke-width:1.8;fill:none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'}</div>
-      <div class="uname">${u.name}</div>
-    </div>
-  `).join('');
-  el.querySelectorAll('.user-card').forEach(c=>{
-    c.addEventListener('click',()=>{
-      selectedUser=state.users.find(u=>u.userId===c.dataset.uid);
-      document.getElementById('pin-user-name').textContent=selectedUser.name;
-      document.getElementById('step-select').style.display='none';
-      document.getElementById('step-pin').style.display='block';
-      pinBuffer=''; updatePinDots();
-    });
+  // Fetch fresh in background
+  api('getUsers').then(r=>{
+    if(r.success){
+      state.users=r.users;
+      localStorage.setItem('bbn-users',JSON.stringify(r.users));
+    }
   });
 }
 
@@ -1342,13 +1321,26 @@ function updatePinDots(){
   }
 }
 
-document.querySelectorAll('#step-pin .numpad-btn[data-n]').forEach(b=>{
+document.querySelectorAll('#login-screen .numpad-btn[data-n]').forEach(b=>{
   b.addEventListener('click',async()=>{
     if(pinBuffer.length>=4) return;
     pinBuffer+=b.dataset.n;
     updatePinDots();
     if(pinBuffer.length===4){
-      const r=await api('login',{userId:selectedUser.userId,pin:pinBuffer});
+      // Use first user (single-user mode)
+      const user=state.users[0];
+      if(!user){
+        // Users not loaded yet, wait and retry
+        const r=await api('getUsers');
+        if(r.success) state.users=r.users;
+      }
+      const targetUser=state.users[0];
+      if(!targetUser){
+        document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('error'));
+        setTimeout(()=>{document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('error','filled');});pinBuffer='';},800);
+        return;
+      }
+      const r=await api('login',{userId:targetUser.userId,pin:pinBuffer});
       if(r.success){
         state.user=r.user;
         localStorage.setItem('bbn-user',JSON.stringify(r.user));
@@ -1356,16 +1348,10 @@ document.querySelectorAll('#step-pin .numpad-btn[data-n]').forEach(b=>{
         afterLogin();
       } else {
         document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('error'));
-        setTimeout(()=>{document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('error');d.classList.remove('filled');});pinBuffer='';},800);
+        setTimeout(()=>{document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('error','filled');});pinBuffer='';},800);
       }
     }
   });
-});
-document.getElementById('pin-delete').addEventListener('click',()=>{pinBuffer=pinBuffer.slice(0,-1);updatePinDots();});
-document.getElementById('pin-back').addEventListener('click',()=>{
-  document.getElementById('step-select').style.display='block';
-  document.getElementById('step-pin').style.display='none';
-  pinBuffer='';
 });
 
 /* ══════════════════════════════════════════
@@ -1554,6 +1540,7 @@ function openAddTxnModal(type='expense',tripId=null){
   state.txnType=type; state.txnAmount=''; state.txnCat=''; state.txnSource='';
   state.currentTripId=tripId||null;
   document.getElementById('txn-amount-display').textContent='0';
+  document.getElementById('txn-amount-input').value='';
   document.getElementById('txn-desc').value='';
   document.getElementById('txn-date').value=todayStr();
   document.getElementById('add-txn-title').textContent=tripId?'Add Trip Expense':'Add Transaction';
@@ -1561,6 +1548,7 @@ function openAddTxnModal(type='expense',tripId=null){
   renderCatGrid();
   renderSourceSelect();
   openModal('add-txn-modal');
+  setTimeout(()=>document.getElementById('txn-amount-input').focus(),300);
 }
 
 function renderTypeToggle(){
@@ -1597,25 +1585,32 @@ function renderSourceSelect(){
   sel.innerHTML='<option value="">No source</option>'+state.sources.filter(s=>s.userId===state.user.userId||s.userId).map(s=>`<option value="${s.sourceId}">${s.name}</option>`).join('');
 }
 
-// Numpad
-document.getElementById('txn-numpad').querySelectorAll('.numpad-btn[data-n]').forEach(b=>{
-  b.addEventListener('click',()=>{
-    const n=b.dataset.n;
-    if(n==='.'&&state.txnAmount.includes('.')) return;
-    if(state.txnAmount.length>=10) return;
-    if(n==='0'&&state.txnAmount==='') return;
-    state.txnAmount+=n;
-    document.getElementById('txn-amount-display').textContent=state.txnAmount||'0';
-  });
+// Amount input — system keyboard
+const txnAmountInput=document.getElementById('txn-amount-input');
+txnAmountInput.addEventListener('input',()=>{
+  state.txnAmount=txnAmountInput.value;
+  document.getElementById('txn-amount-display').textContent=txnAmountInput.value||'0';
 });
-document.getElementById('txn-delete-btn').addEventListener('click',()=>{
-  state.txnAmount=state.txnAmount.slice(0,-1);
-  document.getElementById('txn-amount-display').textContent=state.txnAmount||'0';
+
+// Keyboard support for laptop — PIN entry
+document.addEventListener('keydown',(e)=>{
+  const loginActive=document.getElementById('login-screen').classList.contains('active');
+  if(loginActive){
+    if(e.key>='0'&&e.key<='9'){
+      const btn=document.querySelector(`#login-screen .numpad-btn[data-n="${e.key}"]`);
+      if(btn) btn.click();
+    }
+    return;
+  }
+  // Keyboard shortcut: press N to open add expense
+  if(e.key==='n'&&!e.target.closest('input,textarea,select')){
+    openAddTxnModal('expense');
+  }
 });
 
 document.getElementById('save-txn-btn').addEventListener('click',async()=>{
   if(state.isSaving) return;
-  const amount=parseFloat(state.txnAmount);
+  const amount=parseFloat(document.getElementById('txn-amount-input').value);
   if(!amount||amount<=0){toast('Enter an amount','error');return;}
   if(!state.txnCat){toast('Select a category','error');return;}
   state.isSaving=true;
@@ -1657,7 +1652,24 @@ document.getElementById('save-txn-btn').addEventListener('click',async()=>{
 /* ══════════════════════════════════════════
    MONTH NAV
 ══════════════════════════════════════════ */
-document.getElementById('hero-period-btn').addEventListener('click',()=>{state.currentMonth--;if(state.currentMonth<1){state.currentMonth=12;state.currentYear--;}refreshHome();});
+const REAL_NOW=new Date();
+function updateHeroPeriodBtns(){
+  const isCurrentMonth=state.currentMonth===REAL_NOW.getMonth()+1&&state.currentYear===REAL_NOW.getFullYear();
+  document.getElementById('hero-period-next').style.display=isCurrentMonth?'none':'';
+  document.getElementById('hero-period-today').style.display=isCurrentMonth?'none':'';
+}
+document.getElementById('hero-period-btn').addEventListener('click',()=>{
+  state.currentMonth--;if(state.currentMonth<1){state.currentMonth=12;state.currentYear--;}
+  updateHeroPeriodBtns();refreshHome();
+});
+document.getElementById('hero-period-next').addEventListener('click',()=>{
+  state.currentMonth++;if(state.currentMonth>12){state.currentMonth=1;state.currentYear++;}
+  updateHeroPeriodBtns();refreshHome();
+});
+document.getElementById('hero-period-today').addEventListener('click',()=>{
+  state.currentMonth=REAL_NOW.getMonth()+1;state.currentYear=REAL_NOW.getFullYear();
+  updateHeroPeriodBtns();refreshHome();
+});
 document.getElementById('txn-prev-month').addEventListener('click',()=>{state.txnMonth--;if(state.txnMonth<1){state.txnMonth=12;state.txnYear--;}loadTransactions();});
 document.getElementById('txn-next-month').addEventListener('click',()=>{state.txnMonth++;if(state.txnMonth>12){state.txnMonth=1;state.txnYear++;}loadTransactions();});
 document.getElementById('ana-prev-month').addEventListener('click',()=>{state.anaMonth--;if(state.anaMonth<1){state.anaMonth=12;state.anaYear--;}loadAnalytics();});
@@ -1781,17 +1793,21 @@ document.getElementById('save-budget-btn').addEventListener('click',async()=>{
 /* ══════════════════════════════════════════
    TRIPS
 ══════════════════════════════════════════ */
-function loadTrips(){
-  renderTrips();
+async function loadTrips(){
+  renderTrips(); // render cached immediately
+  // Always fetch fresh from API
+  const r=await api('getTrips',{userId:state.user.userId});
+  if(r.success){
+    state.trips=r.trips;
+    saveCache();
+    renderTrips();
+  }
 }
 
 function renderTrips(){
   const el=document.getElementById('trips-list');
   if(!state.trips.length){
-    el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><p>No trips yet.<br>Create your first trip!</p></div>';
-    // show fab for mobile
-    document.getElementById('fab').style.display='flex';
-    document.getElementById('fab').onclick=()=>openModal('add-trip-modal');
+    el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><p>No trips yet.<br>Tap + to create your first trip!</p></div>';
     return;
   }
   el.innerHTML=state.trips.map(t=>{
@@ -1820,9 +1836,6 @@ function renderTrips(){
       if(trip) openTripDetail(trip);
     });
   });
-  // fab for new trip
-  document.getElementById('fab').style.display='flex';
-  document.getElementById('fab').onclick=()=>openModal('add-trip-modal');
 }
 
 async function openTripDetail(trip){
@@ -1879,21 +1892,30 @@ document.getElementById('save-trip-btn').addEventListener('click',async()=>{
   const startDate=document.getElementById('trip-start').value||todayStr();
   const endDate=document.getElementById('trip-end').value||'';
   if(!name){toast('Enter a trip name','error');return;}
+  const btn=document.getElementById('save-trip-btn');
+  btn.disabled=true; btn.textContent='Creating…';
   closeModal('add-trip-modal');
-  const newTrip={tripId:'trip'+Date.now(),userId:state.user.userId,name,budget,startDate,endDate,isActive:true,spent:0};
+  const tmpId='trip'+Date.now();
+  const newTrip={tripId:tmpId,userId:state.user.userId,name,budget,startDate,endDate,isActive:true,spent:0};
   state.trips.unshift(newTrip);
   renderTrips();
-  toast('Trip created','success');
-  const r=await api('addTrip',{userId:state.user.userId,name,budget,startDate,endDate});
-  if(r.success){newTrip.tripId=r.tripId;}
+  toast('Trip created ✓','success');
   document.getElementById('trip-name').value='';
   document.getElementById('trip-budget').value='';
   document.getElementById('trip-start').value='';
   document.getElementById('trip-end').value='';
-  syncInBackground();
+  btn.disabled=false; btn.textContent='Create Trip';
+  const r=await api('addTrip',{userId:state.user.userId,name,budget,startDate,endDate});
+  if(r.success){
+    const idx=state.trips.findIndex(t=>t.tripId===tmpId);
+    if(idx>-1) state.trips[idx].tripId=r.tripId;
+    saveCache();
+    renderTrips();
+  }
 });
 
 document.getElementById('desktop-add-trip-btn').addEventListener('click',()=>openModal('add-trip-modal'));
+document.getElementById('mobile-add-trip-btn').addEventListener('click',()=>openModal('add-trip-modal'));
 document.getElementById('add-trip-backdrop').addEventListener('click',()=>closeModal('add-trip-modal'));
 document.getElementById('add-trip-close').addEventListener('click',()=>closeModal('add-trip-modal'));
 
@@ -2090,8 +2112,6 @@ function logout(){
   showNav(false);
   document.getElementById('fab').style.display='none';
   showScreen('login-screen');
-  document.getElementById('step-select').style.display='block';
-  document.getElementById('step-pin').style.display='none';
   initLogin();
 }
 
