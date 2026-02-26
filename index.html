@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="budgetBynan">
 <meta name="theme-color" content="#0c0c0e">
+<meta name="screen-orientation" content="portrait">
+<meta name="x5-orientation" content="portrait">
+<meta name="full-screen" content="yes">
 <title>budgetBynan</title>
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Nanthe27/Budget/02b41c9ee340c694bb67a8f4f8d27bfa08ad862b/logo.jpg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230c0c0e'/></svg>">
@@ -126,7 +129,7 @@ select{appearance:none;-webkit-appearance:none;}
 @media(min-width:960px){.page-content{padding-bottom:24px;}}
 
 /* ── Header ── */
-.page-header{display:flex;align-items:center;gap:12px;padding:clamp(12px, env(safe-area-inset-top, 12px), 44px) 16px 12px;position:sticky;top:0;z-index:50;background:var(--bg);transition:box-shadow .2s;}
+.page-header{display:flex;align-items:center;gap:12px;padding:calc(clamp(16px, env(safe-area-inset-top, 16px), 48px) + 4px) 16px 12px;position:sticky;top:0;z-index:50;background:var(--bg);transition:box-shadow .2s;}
 .page-header.scrolled{box-shadow:0 1px 0 var(--border);}
 .page-header h1{font-size:20px;font-weight:700;flex:1;letter-spacing:-.3px;}
 @media(min-width:960px){.page-header{padding:20px 32px 16px;}}
@@ -149,7 +152,8 @@ select{appearance:none;-webkit-appearance:none;}
   position:fixed;
   bottom:0;left:0;right:0;
   z-index:200;
-  padding:8px 20px calc(env(safe-area-inset-bottom,0px) + 6px);
+  padding:8px 20px;
+  padding-bottom:calc(var(--real-safe-b,env(safe-area-inset-bottom,20px)) + 8px);
   pointer-events:none;
   background:transparent;
 }
@@ -171,7 +175,7 @@ select{appearance:none;-webkit-appearance:none;}
 .nav-pill.active{background:var(--text);}
 .nav-pill.active svg{stroke:var(--bg);}
 /* page content needs enough bottom padding to clear the floating nav */
-.page-content{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 100px)!important;}
+.page-content{padding-bottom:calc(var(--real-safe-b,env(safe-area-inset-bottom,20px)) + 110px)!important;}
 @media(min-width:960px){
   .bottom-nav{display:none!important;}
   .page-content{padding-bottom:24px!important;}
@@ -711,8 +715,6 @@ select.form-input{cursor:pointer;}
         <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" id="home-username-display"></div>
       </div>
       <button class="icon-btn" id="sync-btn" title="Sync"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
-      <button class="icon-btn" id="theme-toggle-home"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
-      <button class="icon-btn" id="logout-btn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
       <button class="desktop-add-btn" id="desktop-add-btn">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Transaction
       </button>
@@ -939,6 +941,26 @@ select.form-input{cursor:pointer;}
   </div>
 </div>
 
+<!-- ══════ BUDGETS ══════ -->
+<div class="screen" id="budgets-screen">
+  <div class="main-layout">
+    <div class="page-header">
+      <button class="icon-btn" id="budgets-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <h1>Budgets</h1>
+      <button class="desktop-add-btn" id="add-budget-btn" style="display:flex;padding:6px 14px;font-size:12px">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Set Budget
+      </button>
+    </div>
+    <div class="page-content">
+      <div style="padding:0 16px 8px;font-size:12px;color:var(--text3)">Monthly spending limits per category. View actual vs budget in Analytics.</div>
+      <div id="budgets-list" style="padding:0 16px 12px"></div>
+      <div style="padding:0 16px 16px">
+        <button class="btn-secondary" id="add-budget-btn-2">+ Set New Budget</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════ SOURCES ══════ -->
 <div class="screen" id="sources-screen">
   <div class="main-layout">
@@ -994,9 +1016,6 @@ select.form-input{cursor:pointer;}
     </div>
     <div class="nav-pill" data-screen="analytics">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    </div>
-    <div class="nav-pill" data-screen="trips">
-      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
     </div>
     <div class="nav-pill" data-screen="more">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
@@ -1181,23 +1200,60 @@ select.form-input{cursor:pointer;}
   </div>
 </div>
 
-<!-- Edit Trip Budget Modal -->
+<!-- Export Report Modal -->
+<div class="modal-overlay" id="export-modal">
+  <div class="backdrop" id="export-backdrop"></div>
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h3>Export Report</h3>
+      <button class="sheet-close" id="export-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sheet-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Download your transactions as an Excel file.</p>
+      <div class="form-group">
+        <label class="form-label">Period</label>
+        <select class="form-input" id="export-period">
+          <option value="month">Current Month</option>
+          <option value="all">All Time</option>
+        </select>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn-primary" id="export-btn">⬇ Download Excel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Trip Modal -->
 <div class="modal-overlay" id="edit-trip-budget-modal">
   <div class="backdrop" id="edit-trip-budget-backdrop"></div>
   <div class="bottom-sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
-      <h3>Edit Trip Budget</h3>
+      <h3>Edit Trip</h3>
       <button class="sheet-close" id="edit-trip-budget-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="sheet-body">
       <div class="form-group">
+        <label class="form-label">Trip Name</label>
+        <input class="form-input" id="edit-trip-name" type="text" placeholder="e.g. Siem Reap...">
+      </div>
+      <div class="form-group">
         <label class="form-label">Budget ($)</label>
         <input class="form-input" id="edit-trip-budget-input" type="number" inputmode="decimal" placeholder="e.g. 1500">
       </div>
+      <div class="form-group">
+        <label class="form-label">Start Date</label>
+        <input class="form-input" id="edit-trip-start" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">End Date (optional)</label>
+        <input class="form-input" id="edit-trip-end" type="date">
+      </div>
     </div>
     <div class="sheet-footer">
-      <button class="btn-primary" id="save-trip-budget-btn">Save Budget</button>
+      <button class="btn-primary" id="save-trip-budget-btn">Save Changes</button>
     </div>
   </div>
 </div>
@@ -1297,7 +1353,7 @@ function toggleTheme(){
   applyTheme();
 }
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(state.theme==='auto')applyTheme();});
-document.getElementById('theme-toggle-home').addEventListener('click',toggleTheme);
+document.getElementById('theme-toggle-home')?.addEventListener('click',toggleTheme);
 document.getElementById('dark-mode-toggle').addEventListener('click',toggleTheme);
 document.getElementById('sidebar-theme')?.addEventListener('click',toggleTheme);
 
@@ -1378,6 +1434,7 @@ function mockAPI(action,data){
     }
     case 'addTrip':{const t={tripId:'trip'+Date.now(),...data,createdAt:new Date().toISOString(),isActive:true};mockDB.trips.push(t);return{success:true,tripId:t.tripId};}
     case 'endTrip':{const t=mockDB.trips.find(x=>x.tripId===data.tripId);if(t){t.isActive=false;t.endDate=data.endDate||todayStr();}return{success:true};}
+    case 'updateTrip':{const t=mockDB.trips.find(x=>x.tripId===data.tripId&&x.userId===data.userId);if(t){t.name=data.name||t.name;t.budget=parseFloat(data.budget)||0;t.startDate=data.startDate||t.startDate;t.endDate=data.endDate||'';}return{success:true};}
     case 'deleteTrip':{const i=mockDB.trips.findIndex(x=>x.tripId===data.tripId&&x.userId===data.userId);if(i>-1)mockDB.trips.splice(i,1);return{success:true};}
     case 'editTripBudget':{const t=mockDB.trips.find(x=>x.tripId===data.tripId&&x.userId===data.userId);if(t)t.budget=parseFloat(data.budget)||0;return{success:true};}
     case 'updateUserPhoto':{const u=mockDB.users.find(x=>x.userId===data.userId);if(u)u.photoUrl=data.photoUrl;return{success:true};}
@@ -2168,23 +2225,32 @@ document.getElementById('trip-delete-btn').addEventListener('click',async()=>{
 });
 
 document.getElementById('trip-edit-budget-btn').addEventListener('click',()=>{
-  document.getElementById('edit-trip-budget-input').value=state.activeTrip?.budget||'';
+  const trip=state.activeTrip;
+  document.getElementById('edit-trip-name').value=trip.name||'';
+  document.getElementById('edit-trip-budget-input').value=trip.budget||'';
+  document.getElementById('edit-trip-start').value=trip.startDate||'';
+  document.getElementById('edit-trip-end').value=trip.endDate||'';
   openModal('edit-trip-budget-modal');
-  setTimeout(()=>document.getElementById('edit-trip-budget-input').focus(),300);
+  setTimeout(()=>document.getElementById('edit-trip-name').focus(),300);
 });
 document.getElementById('edit-trip-budget-backdrop').addEventListener('click',()=>closeModal('edit-trip-budget-modal'));
 document.getElementById('edit-trip-budget-close').addEventListener('click',()=>closeModal('edit-trip-budget-modal'));
 document.getElementById('save-trip-budget-btn').addEventListener('click',async()=>{
+  const name=document.getElementById('edit-trip-name').value.trim();
   const budget=parseFloat(document.getElementById('edit-trip-budget-input').value)||0;
+  const startDate=document.getElementById('edit-trip-start').value||'';
+  const endDate=document.getElementById('edit-trip-end').value||'';
+  if(!name){toast('Enter a trip name','error');return;}
   const trip=state.activeTrip;
-  trip.budget=budget;
+  trip.name=name; trip.budget=budget; trip.startDate=startDate; trip.endDate=endDate;
   const idx=state.trips.findIndex(t=>t.tripId===trip.tripId);
-  if(idx>-1) state.trips[idx].budget=budget;
+  if(idx>-1) state.trips[idx]={...state.trips[idx],name,budget,startDate,endDate};
   saveCache();
   closeModal('edit-trip-budget-modal');
-  toast('Budget updated ✓','success');
+  document.getElementById('trip-detail-title').textContent=name;
+  toast('Trip updated ✓','success');
   loadTripDetail(trip);
-  api('editTripBudget',{tripId:trip.tripId,userId:state.user.userId,budget});
+  api('updateTrip',{tripId:trip.tripId,userId:state.user.userId,name,budget,startDate,endDate});
 });
 
 document.getElementById('trip-end-btn').addEventListener('click',async()=>{
@@ -2238,8 +2304,8 @@ document.getElementById('add-trip-close').addEventListener('click',()=>closeModa
    SETTINGS / MORE
 ══════════════════════════════════════════ */
 function renderMore(){
-  // profile area
   const u=state.user;
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
   const pa=document.getElementById('more-profile-area');
   pa.innerHTML=`
     <div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;cursor:pointer" id="profile-area-btn">
@@ -2263,9 +2329,18 @@ function renderMore(){
       <svg class="menu-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
     <div class="menu-item" id="ml-budgets-more">
-      <div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <div class="menu-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
       <div class="menu-label">Budgets</div>
       <svg class="menu-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="menu-item" id="ml-export">
+      <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+      <div class="menu-label">Export Report</div>
+      <svg class="menu-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="menu-item" id="ml-theme">
+      <div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
+      <div class="menu-label" id="ml-theme-label">${dark?'Light Mode':'Dark Mode'}</div>
     </div>
     <div class="menu-item" id="ml-logout" style="border-color:var(--red-bg)">
       <div class="menu-icon" style="background:var(--red-bg)"><svg viewBox="0 0 24 24" style="stroke:var(--red)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
@@ -2273,7 +2348,9 @@ function renderMore(){
     </div>`;
   document.getElementById('ml-categories').addEventListener('click',()=>{showScreen('categories-screen');renderCatList();});
   document.getElementById('ml-income-sources').addEventListener('click',()=>{showScreen('sources-screen');renderSourcesList();});
-  document.getElementById('ml-budgets-more').addEventListener('click',openBudgetModal);
+  document.getElementById('ml-budgets-more').addEventListener('click',()=>{showScreen('budgets-screen');renderBudgetsScreen();});
+  document.getElementById('ml-export').addEventListener('click',()=>openModal('export-modal'));
+  document.getElementById('ml-theme').addEventListener('click',()=>{toggleTheme();renderMore();});
   document.getElementById('ml-logout').addEventListener('click',logout);
 }
 
@@ -2402,11 +2479,11 @@ document.getElementById('desktop-add-btn-txn').addEventListener('click',()=>open
 document.getElementById('desktop-add-btn-ana').addEventListener('click',()=>openAddTxnModal('expense'));
 document.getElementById('qa-add-expense').addEventListener('click',()=>openAddTxnModal('expense'));
 document.getElementById('qa-add-income').addEventListener('click',()=>openAddTxnModal('income'));
-document.getElementById('qa-budgets').addEventListener('click',openBudgetModal);
+document.getElementById('qa-budgets').addEventListener('click',()=>{showScreen('budgets-screen');renderBudgetsScreen();});
 document.getElementById('qa-trip').addEventListener('click',()=>navTo('trips'));
 document.getElementById('see-all-link').addEventListener('click',()=>navTo('transactions'));
-document.getElementById('edit-budgets-link').addEventListener('click',openBudgetModal);
-document.getElementById('logout-btn').addEventListener('click',logout);
+document.getElementById('edit-budgets-link').addEventListener('click',()=>{showScreen('budgets-screen');renderBudgetsScreen();});
+document.getElementById('logout-btn')?.addEventListener('click',logout);
 document.getElementById('sidebar-logout')?.addEventListener('click',logout);
 
 document.getElementById('home-content').addEventListener('scroll',function(){
@@ -2429,6 +2506,95 @@ function logout(){
   showScreen('login-screen');
   initLogin();
 }
+
+/* ══════════════════════════════════════════
+   BUDGETS SCREEN
+══════════════════════════════════════════ */
+async function renderBudgetsScreen(){
+  const r=await api('getCategories',{userId:state.user.userId});
+  if(r.success) state.categories=r.categories;
+  const rb=await api('getBudgets',{userId:state.user.userId});
+  if(rb.success) state.budgets=rb.budgets;
+
+  // Get current month spending per category
+  const m=state.anaMonth||now.getMonth()+1;
+  const y=state.anaYear||now.getFullYear();
+  const expCat={};
+  state.transactions.filter(t=>{
+    const d=safeDate(t.date);
+    return !isNaN(d) && d.getMonth()+1===m && d.getFullYear()===y && t.type==='expense';
+  }).forEach(t=>{expCat[t.category]=(expCat[t.category]||0)+t.amount;});
+
+  const el=document.getElementById('budgets-list');
+  const myBudgets=state.budgets.filter(b=>b.userId===state.user.userId);
+
+  if(!myBudgets.length){
+    el.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><p>No budgets set.<br>Tap "Set New Budget" to add one.</p></div>`;
+    return;
+  }
+
+  el.innerHTML=myBudgets.map(b=>{
+    const spent=expCat[b.category]||0;
+    const pct=Math.min((spent/b.amount)*100,100);
+    const color=pct>=100?'var(--red)':pct>=75?'var(--amber)':'var(--green)';
+    const rem=b.amount-spent;
+    return`<div class="budget-item" style="margin-bottom:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+      <div class="budget-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:600">${b.category}</div>
+        <div style="font-size:12px;color:var(--text3);font-family:var(--mono)">${fmt(spent)} / ${fmt(b.amount)}</div>
+      </div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:6px">
+        <div style="width:${pct}%;height:100%;border-radius:3px;background:${color};transition:width .5s ease"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:11px;color:${color};font-weight:600">${pct.toFixed(0)}% used</div>
+        <div style="font-size:11px;color:var(--text3)">${rem>=0?fmt(rem)+' remaining':'$'+Math.abs(rem).toFixed(2)+' over'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('budgets-back').addEventListener('click',()=>{showScreen('more-screen');renderMore();});
+document.getElementById('add-budget-btn').addEventListener('click',openBudgetModal);
+document.getElementById('add-budget-btn-2').addEventListener('click',openBudgetModal);
+
+/* ══════════════════════════════════════════
+   EXPORT TO EXCEL (CSV download)
+══════════════════════════════════════════ */
+document.getElementById('export-backdrop').addEventListener('click',()=>closeModal('export-modal'));
+document.getElementById('export-close').addEventListener('click',()=>closeModal('export-modal'));
+document.getElementById('export-btn').addEventListener('click',()=>{
+  const period=document.getElementById('export-period').value;
+  let txns=state.transactions.slice();
+  if(period==='month'){
+    const m=state.txnMonth, y=state.txnYear;
+    txns=txns.filter(t=>{const d=safeDate(t.date);return !isNaN(d)&&d.getMonth()+1===m&&d.getFullYear()===y;});
+  }
+  txns.sort((a,b)=>a.date>b.date?-1:1);
+
+  // Build CSV (Excel opens CSV fine with .csv extension or use .xls trick)
+  const rows=[['Date','Type','Category','Description','Amount','Trip ID']];
+  txns.forEach(t=>rows.push([
+    t.date||'',
+    t.type||'',
+    t.category||'',
+    (t.description||'').replace(/,/g,';'),
+    t.type==='expense'?-Math.abs(t.amount):Math.abs(t.amount),
+    t.tripId||''
+  ]));
+
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const label=period==='month'
+    ?`${new Date(state.txnYear,state.txnMonth-1).toLocaleDateString('en-US',{month:'short',year:'numeric'})}`
+    :'AllTime';
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`budgetBynan_${label.replace(' ','_')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  closeModal('export-modal');
+  toast('Export downloaded ✓','success');
+});
 
 /* ══════════════════════════════════════════
    INIT
@@ -2463,6 +2629,47 @@ if(savedUser&&(Date.now()-savedTs<SESSION_TTL)){
 }
 
 document.getElementById('loading-overlay').classList.add('hidden');
+
+/* ══════════════════════════════════════════
+   ORIENTATION LOCK — portrait only on mobile
+══════════════════════════════════════════ */
+if(screen.orientation&&screen.orientation.lock){
+  screen.orientation.lock('portrait').catch(()=>{});
+}
+// Fallback: warn on landscape
+window.addEventListener('orientationchange',()=>{
+  if(Math.abs(window.orientation||0)===90){
+    toast('Please use portrait mode','error');
+  }
+});
+
+/* ══════════════════════════════════════════
+   NAV BAR — real safe area fix via visualViewport
+   Fixes the "needs rotate to drop nav" issue
+══════════════════════════════════════════ */
+function fixNavPosition(){
+  // Use visualViewport to get true bottom safe area after iOS toolbar
+  if(window.visualViewport){
+    const vvh=window.visualViewport.height;
+    const wh=window.innerHeight;
+    // iOS sometimes reports inaccurate env() until layout settles
+    // Compute real bottom gap
+    const bottomGap=Math.max(0, wh - vvh - (window.visualViewport.offsetTop||0));
+    const safeB=Math.max(bottomGap, 20);
+    document.documentElement.style.setProperty('--real-safe-b', safeB+'px');
+  } else {
+    document.documentElement.style.setProperty('--real-safe-b', 'env(safe-area-inset-bottom,20px)');
+  }
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', fixNavPosition);
+  window.visualViewport.addEventListener('scroll', fixNavPosition);
+}
+window.addEventListener('resize', fixNavPosition);
+// Run immediately and after small delay for iOS to settle
+fixNavPosition();
+setTimeout(fixNavPosition, 100);
+setTimeout(fixNavPosition, 500);
 
 /* ══════════════════════════════════════════
    SERVICE WORKER — cache app shell for instant loads
