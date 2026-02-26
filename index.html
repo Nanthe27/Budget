@@ -139,14 +139,13 @@ select{appearance:none;-webkit-appearance:none;}
 /* ══════════════════════════════════════════
    BOTTOM NAV
 ══════════════════════════════════════════ */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:8px 16px calc(var(--safe-b)+6px);}
+.bottom-nav{position:fixed;bottom:-10px;left:0;right:0;z-index:200;padding:8px 16px calc(var(--safe-b)+16px);}
+.bottom-nav.hidden{display:none!important;}
 .nav-pills{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:4px;gap:2px;box-shadow:0 4px 24px rgba(0,0,0,.14),0 1px 6px rgba(0,0,0,.08);max-width:480px;margin:0 auto;}
-.nav-pill{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border-radius:100px;cursor:pointer;transition:all .15s;}
+.nav-pill{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-radius:100px;cursor:pointer;transition:all .15s;}
 .nav-pill svg{width:20px;height:20px;stroke:var(--text3);stroke-width:1.8;fill:none;transition:stroke .15s;}
-.nav-pill span{font-size:10px;font-weight:500;color:var(--text3);transition:all .15s;max-width:0;overflow:hidden;white-space:nowrap;}
 .nav-pill.active{background:var(--text);}
 .nav-pill.active svg{stroke:var(--bg);}
-.nav-pill.active span{color:var(--bg);max-width:60px;padding:0 4px;}
 
 /* ══════════════════════════════════════════
    FAB
@@ -401,8 +400,8 @@ select.form-input{cursor:pointer;}
 .login-logo{text-align:center;margin-bottom:32px;}
 .login-logo .logo-mark{width:64px;height:64px;background:var(--text);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
 .login-logo .logo-mark svg{width:32px;height:32px;stroke:var(--bg);stroke-width:1.8;fill:none;}
-.user-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
-.user-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border-radius:var(--r-lg);cursor:pointer;border:2px solid var(--border);transition:all .15s;box-shadow:var(--shadow-sm);}
+.user-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;align-items:center;}
+.user-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border-radius:var(--r-lg);cursor:pointer;border:2px solid var(--border);transition:all .15s;box-shadow:var(--shadow-sm);width:100%;}
 .user-card:hover{border-color:var(--text3);box-shadow:var(--shadow);}
 .user-card:active{transform:scale(.97);}
 .uav{width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
@@ -477,6 +476,7 @@ select.form-input{cursor:pointer;}
 #loading-overlay.hidden{opacity:0;pointer-events:none;}
 .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
+.icon-btn.syncing svg{animation:spin .7s linear infinite;}
 </style>
 </head>
 <body>
@@ -584,6 +584,7 @@ select.form-input{cursor:pointer;}
         <div style="font-size:12px;color:var(--text3);font-weight:500" id="greeting-time">Good morning</div>
         <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" id="home-username-display"></div>
       </div>
+      <button class="icon-btn" id="sync-btn" title="Sync"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
       <button class="icon-btn" id="theme-toggle-home"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
       <button class="icon-btn" id="logout-btn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
       <button class="desktop-add-btn" id="desktop-add-btn">
@@ -624,11 +625,11 @@ select.form-input{cursor:pointer;}
       <!-- quick actions -->
       <div class="quick-actions">
         <div class="quick-action" id="qa-add-expense">
-          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
           <div class="qa-label">Expense</div>
         </div>
         <div class="quick-action" id="qa-add-income">
-          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
           <div class="qa-label">Income</div>
         </div>
         <div class="quick-action" id="qa-budgets">
@@ -843,7 +844,7 @@ select.form-input{cursor:pointer;}
 </div>
 
 <!-- ══════ FAB ══════ -->
-<button class="fab" id="fab">
+<button class="fab" id="fab" style="display:none">
   <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
 <button class="fab" id="fab-txn" style="display:none">
@@ -851,27 +852,22 @@ select.form-input{cursor:pointer;}
 </button>
 
 <!-- ══════ BOTTOM NAV ══════ -->
-<nav class="bottom-nav">
+<nav class="bottom-nav hidden" id="bottom-nav">
   <div class="nav-pills">
     <div class="nav-pill active" data-screen="home">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
     </div>
     <div class="nav-pill" data-screen="transactions">
       <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      <span>Txns</span>
     </div>
     <div class="nav-pill" data-screen="analytics">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span>Analytics</span>
     </div>
     <div class="nav-pill" data-screen="trips">
       <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span>Trips</span>
     </div>
     <div class="nav-pill" data-screen="more">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-      <span>More</span>
     </div>
   </div>
 </nav>
@@ -1241,7 +1237,12 @@ function showSidebar(show){
   const sb=document.getElementById('sidebar');
   sb.style.display=(show&&window.innerWidth>=960)?'flex':'none';
 }
-window.addEventListener('resize',()=>showSidebar(!!state.user));
+function showNav(show){
+  const nav=document.getElementById('bottom-nav');
+  if(show) nav.classList.remove('hidden');
+  else nav.classList.add('hidden');
+}
+window.addEventListener('resize',()=>{if(state.user){showSidebar(true);}});
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1276,7 +1277,7 @@ async function initLogin(){
 function renderUserList(){
   const el=document.getElementById('user-list');
   if(!state.users.length){
-    el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><p>No users found.<br>Add a user in your Google Sheet.</p></div>';
+    el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><p>No users found.</p></div>';
     return;
   }
   el.innerHTML=state.users.map(u=>`
@@ -1332,12 +1333,14 @@ document.getElementById('pin-back').addEventListener('click',()=>{
 ══════════════════════════════════════════ */
 function afterLogin(){
   showSidebar(true);
+  showNav(true);
+  document.getElementById('fab').style.display='flex';
   showScreen('home-screen');
   document.getElementById('greeting-time').textContent=greeting();
   document.getElementById('home-username-display').textContent=state.user.name;
   // Load from cache immediately
   const cached=localStorage.getItem('bbn-data-'+state.user.userId);
-  if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;}catch(e){}}
+  if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
   // Render home immediately with cached/mock data then sync
   refreshHome();
   syncInBackground();
@@ -1346,47 +1349,103 @@ function afterLogin(){
 async function syncInBackground(){
   if(!state.user) return;
   const uid=state.user.userId;
-  const [rc,rs,rb,rt]=await Promise.all([
+  const [rc,rs,rb,rt,rtxn]=await Promise.all([
     api('getCategories',{userId:uid}),
     api('getIncomeSources',{userId:uid}),
     api('getBudgets',{userId:uid}),
     api('getTrips',{userId:uid}),
+    api('getTransactions',{userId:uid}),
   ]);
   if(rc.success)state.categories=rc.categories;
   if(rs.success)state.sources=rs.sources;
   if(rb.success)state.budgets=rb.budgets;
   if(rt.success)state.trips=rt.trips;
-  localStorage.setItem('bbn-data-'+uid,JSON.stringify({categories:state.categories,sources:state.sources,budgets:state.budgets,trips:state.trips}));
+  if(rtxn.success)state.transactions=rtxn.transactions;
+  saveCache();
+  refreshCurrentScreen();
+}
+
+async function forceSync(){
+  const btn=document.getElementById('sync-btn');
+  if(btn) btn.classList.add('syncing');
+  await syncInBackground();
+  if(btn) btn.classList.remove('syncing');
+  toast('Synced ✓','success');
+}
+
+function refreshCurrentScreen(){
   const active=document.querySelector('.screen.active')?.id;
-  if(active==='home-screen') refreshHome();
+  if(active==='home-screen') renderHomeFromTransactions(state.transactions);
   else if(active==='analytics-screen') loadAnalytics();
   else if(active==='trips-screen') loadTrips();
+  else if(active==='transactions-screen') renderTxnList(state.transactions);
+}
+
+document.getElementById('sync-btn').addEventListener('click',forceSync);
+
+function saveCache(){
+  if(!state.user) return;
+  localStorage.setItem('bbn-data-'+state.user.userId,JSON.stringify({categories:state.categories,sources:state.sources,budgets:state.budgets,trips:state.trips,transactions:state.transactions.slice(0,200)}));
 }
 
 /* ══════════════════════════════════════════
    HOME
 ══════════════════════════════════════════ */
 async function refreshHome(){
+  // Render cached immediately
+  if(state.transactions.length) renderHomeFromTransactions(state.transactions);
+  // Background fetch summary
   const r=await api('getSummary',{userId:state.user.userId,month:state.currentMonth,year:state.currentYear});
   if(!r.success) return;
   const s=r.summary;
   state.summary=s;
-  document.getElementById('hero-period-label').textContent=monthName(state.currentMonth,state.currentYear);
-  document.getElementById('hero-balance').textContent=fmt(s.balance).replace('$','');
-  document.getElementById('hero-income').textContent=fmt(s.totalIncome);
-  document.getElementById('hero-expense').textContent=fmt(s.totalExpense);
-  // Cycle label
-  if(s.lastSalaryDate){
-    const d=new Date(s.lastSalaryDate);
+  renderHomeFromSummary(s);
+}
+
+function dateStr(v){return String(v).split('T')[0];}
+function safeDate(v){return new Date(dateStr(v)+'T00:00');}
+
+function renderHomeFromTransactions(txns){
+  // Compute cycle from last salary
+  const allSalaries=txns.filter(t=>t.isSalary||t.category==='Salary').sort((a,b)=>safeDate(b.date)-safeDate(a.date));
+  const lastSalary=allSalaries[0]||null;
+  if(lastSalary){
+    const cycleStart=safeDate(lastSalary.date);
+    const cycleTxns=txns.filter(t=>safeDate(t.date)>=cycleStart);
+    const inc=cycleTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const exp=cycleTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    document.getElementById('hero-balance').textContent=fmt(inc-exp).replace('$','');
+    document.getElementById('hero-income').textContent=fmt(inc);
+    document.getElementById('hero-expense').textContent=fmt(exp);
+    const d=safeDate(lastSalary.date);
     document.getElementById('cycle-label').textContent='Since '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     document.getElementById('cycle-badge').style.display='flex';
-    document.getElementById('cycle-badge-text').textContent='Cycle started '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+fmt(s.lastSalaryAmount);
+    document.getElementById('cycle-badge-text').textContent='Cycle '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+fmt(lastSalary.amount);
   } else {
+    const m=state.currentMonth, y=state.currentYear;
+    const cur=txns.filter(t=>{const d=new Date(t.date);return(d.getMonth()+1)===m&&d.getFullYear()===y;});
+    const inc=cur.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const exp=cur.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    document.getElementById('hero-balance').textContent=fmt(inc-exp).replace('$','');
+    document.getElementById('hero-income').textContent=fmt(inc);
+    document.getElementById('hero-expense').textContent=fmt(exp);
     document.getElementById('cycle-label').textContent='Balance';
     document.getElementById('cycle-badge').style.display='none';
   }
-  renderMiniChart(s.dailySpending);
-  renderRecentTxns(s.recentTransactions);
+  document.getElementById('hero-period-label').textContent=monthName(state.currentMonth,state.currentYear);
+  // mini chart from state
+  const daily={};const td=new Date();
+  for(let i=6;i>=0;i--){const d=new Date(td);d.setDate(d.getDate()-i);daily[d.toISOString().split('T')[0]]=0;}
+  txns.forEach(t=>{const k=dateStr(t.date);if(k in daily&&t.type==='expense')daily[k]+=t.amount;});
+  renderMiniChart(daily);
+  // recent
+  const recent=[...txns].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  renderRecentTxns(recent);
+}
+
+function renderHomeFromSummary(s){
+  // Recalculate cycle from full transaction list (use state.transactions which is now synced)
+  renderHomeFromTransactions(state.transactions.length ? state.transactions : s.recentTransactions);
 }
 
 function renderMiniChart(daily){
@@ -1417,15 +1476,15 @@ function txnHtml(t){
   const icon=t.type==='expense'
     ?`<svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`
     :`<svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`;
-  const d=new Date(t.date+'T00:00');
-  const dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const d=safeDate(t.date);
+  const dateStr2=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const salaryBadge=t.isSalary?'<span style="font-size:9px;background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px">SALARY</span>':'';
   const tripBadge=t.tripId?'<span style="font-size:9px;background:var(--purple-bg);color:var(--purple);padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px">TRIP</span>':'';
   return`<div class="txn-item" data-id="${t.txnId}">
     <div class="txn-icon" style="background:${cat.color}20">${icon.replace('svg ','svg style="stroke:'+cat.color+'" ')}</div>
     <div class="txn-info">
       <div class="txn-name">${t.description||t.category}${salaryBadge}${tripBadge}</div>
-      <div class="txn-meta">${t.category} · ${dateStr}</div>
+      <div class="txn-meta">${t.category} · ${dateStr2}</div>
     </div>
     <div class="txn-amount ${t.type}">${t.type==='expense'?'-':'+'}${fmt(t.amount)}</div>
   </div>`;
@@ -1437,17 +1496,15 @@ function txnHtml(t){
 async function handleDeleteTxn(txnId,el){
   const ok=await confirmDlg('Delete transaction','This will be removed permanently.');
   if(!ok) return;
-  // Optimistic: remove from UI immediately
-  if(el){el.classList.add('deleting');setTimeout(()=>el.remove(),200);}
+  // Optimistic: remove from UI & state immediately
+  if(el){el.style.transition='opacity .15s,transform .15s';el.style.opacity='0';el.style.transform='translateX(20px)';setTimeout(()=>el.remove(),150);}
   state.transactions=state.transactions.filter(t=>t.txnId!==txnId);
-  // Background delete
-  const r=await api('deleteTransaction',{txnId,userId:state.user.userId});
-  if(!r.success){toast('Delete failed','error');return;}
-  // Refresh current screen quietly
+  saveCache();
+  // Update home balance in background without reloading whole screen
   const active=document.querySelector('.screen.active')?.id;
-  if(active==='home-screen') refreshHome();
-  else if(active==='transactions-screen') loadTransactions();
-  else if(active==='trip-detail-screen') loadTripDetail(state.activeTrip);
+  if(active==='home-screen') renderHomeFromTransactions(state.transactions);
+  // Background delete
+  api('deleteTransaction',{txnId,userId:state.user.userId});
 }
 
 /* ══════════════════════════════════════════
@@ -1536,16 +1593,23 @@ document.getElementById('save-txn-btn').addEventListener('click',async()=>{
 
   // Optimistic: close modal & update UI immediately
   closeModal('add-txn-modal');
-  toast('Saved','success');
-  state.transactions.unshift({...txnData,txnId:'tmp'+Date.now(),createdAt:new Date().toISOString()});
+  toast('Saved ✓','success');
+  const tmpId='tmp'+Date.now();
+  const optimisticTxn={...txnData,txnId:tmpId,createdAt:new Date().toISOString()};
+  state.transactions.unshift(optimisticTxn);
+  saveCache();
   const active=document.querySelector('.screen.active')?.id;
-  if(active==='home-screen') refreshHome();
-  else if(active==='transactions-screen') loadTransactions();
+  if(active==='home-screen') renderHomeFromTransactions(state.transactions);
+  else if(active==='transactions-screen') renderTxnList(state.transactions);
   else if(active==='trip-detail-screen') loadTripDetail(state.activeTrip);
 
-  // Background save
-  await api('addTransaction',txnData);
-  syncInBackground();
+  // Background save - replace tmp id with real one
+  const r=await api('addTransaction',txnData);
+  if(r.success){
+    const idx=state.transactions.findIndex(t=>t.txnId===tmpId);
+    if(idx>-1) state.transactions[idx].txnId=r.txnId;
+    saveCache();
+  }
   state.isSaving=false;
   btn.disabled=false; btn.textContent='Add Transaction';
 });
@@ -1562,16 +1626,28 @@ document.getElementById('ana-next-month').addEventListener('click',()=>{state.an
 /* ══════════════════════════════════════════
    TRANSACTIONS SCREEN
 ══════════════════════════════════════════ */
-async function loadTransactions(){
+function renderTxnList(txns){
   document.getElementById('txn-month-label').textContent=monthName(state.txnMonth,state.txnYear);
+  let filtered=txns.filter(t=>{const d=new Date(t.date);return(d.getMonth()+1)===state.txnMonth&&d.getFullYear()===state.txnYear;});
+  if(state.txnFilter!=='all') filtered=filtered.filter(t=>t.type===state.txnFilter);
+  const el=document.getElementById('txn-list');
+  if(!filtered.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><p>No transactions</p></div>';return;}
+  el.innerHTML=filtered.map(t=>txnHtml(t)).join('');
+  el.querySelectorAll('.txn-item').forEach(item=>{item.addEventListener('click',()=>handleDeleteTxn(item.dataset.id,item));});
+}
+
+async function loadTransactions(){
+  // Render from cache immediately (instant)
+  renderTxnList(state.transactions);
+  // Fetch in background
   const r=await api('getTransactions',{userId:state.user.userId,month:state.txnMonth,year:state.txnYear});
   if(!r.success) return;
-  let txns=r.transactions;
-  if(state.txnFilter!=='all') txns=txns.filter(t=>t.type===state.txnFilter);
-  const el=document.getElementById('txn-list');
-  if(!txns.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><p>No transactions</p></div>';return;}
-  el.innerHTML=txns.map(t=>txnHtml(t)).join('');
-  el.querySelectorAll('.txn-item').forEach(item=>{item.addEventListener('click',()=>handleDeleteTxn(item.dataset.id,item));});
+  // Merge fetched into state (replace same month+year)
+  const fetched=r.transactions;
+  const others=state.transactions.filter(t=>{const d=new Date(t.date);return!((d.getMonth()+1)===state.txnMonth&&d.getFullYear()===state.txnYear);});
+  state.transactions=[...fetched,...others];
+  saveCache();
+  renderTxnList(state.transactions);
 }
 
 document.getElementById('txn-filter-row').querySelectorAll('.filter-chip').forEach(c=>{
@@ -1585,9 +1661,15 @@ document.getElementById('txn-filter-row').querySelectorAll('.filter-chip').forEa
    ANALYTICS
 ══════════════════════════════════════════ */
 async function loadAnalytics(){
+  // Render from cached summary first if available
+  if(state.summary) renderAnalytics(state.summary);
   const r=await api('getSummary',{userId:state.user.userId,month:state.anaMonth,year:state.anaYear});
   if(!r.success) return;
-  const s=r.summary;
+  state.summary=r.summary;
+  renderAnalytics(r.summary);
+}
+
+function renderAnalytics(s){
   document.getElementById('ana-month-label').textContent=monthName(state.anaMonth,state.anaYear);
   document.getElementById('ana-income').textContent=fmt(s.totalIncome);
   document.getElementById('ana-expense').textContent=fmt(s.totalExpense);
@@ -1674,8 +1756,8 @@ function renderTrips(){
   }
   el.innerHTML=state.trips.map(t=>{
     const spent=t.spent||0; const pct=t.budget?Math.min((spent/t.budget)*100,100):0;
-    const start=t.startDate?new Date(t.startDate+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
-    const end=t.endDate?new Date(t.endDate+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'ongoing';
+    const start=t.startDate?safeDate(t.startDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+    const end=t.endDate?safeDate(t.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'ongoing';
     return`<div class="trip-card" data-tid="${t.tripId}">
       <div class="trip-card-header">
         <div class="trip-card-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
@@ -1713,8 +1795,8 @@ async function openTripDetail(trip){
 
 async function loadTripDetail(trip){
   document.getElementById('tdh-name').textContent=trip.name;
-  const s=trip.startDate?new Date(trip.startDate+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
-  const e=trip.endDate?new Date(trip.endDate+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'ongoing';
+  const s=trip.startDate?safeDate(trip.startDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+  const e=trip.endDate?safeDate(trip.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'ongoing';
   document.getElementById('tdh-dates').textContent=`${s} → ${e}`;
   const r=await api('getTransactions',{userId:state.user.userId,tripId:trip.tripId});
   let spent=0;
@@ -1964,6 +2046,8 @@ function logout(){
   state.user=null; state.transactions=[]; state.summary=null; state.trips=[];
   localStorage.removeItem('bbn-user');
   showSidebar(false);
+  showNav(false);
+  document.getElementById('fab').style.display='none';
   showScreen('login-screen');
   document.getElementById('step-select').style.display='block';
   document.getElementById('step-pin').style.display='none';
@@ -1981,11 +2065,13 @@ if(savedUser){
   try{
     state.user=JSON.parse(savedUser);
     showSidebar(true);
+    showNav(true);
+    document.getElementById('fab').style.display='flex';
     document.getElementById('greeting-time').textContent=greeting();
     document.getElementById('home-username-display').textContent=state.user.name;
     showScreen('home-screen');
     const cached=localStorage.getItem('bbn-data-'+state.user.userId);
-    if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;}catch(e){}}
+    if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
     refreshHome();
     syncInBackground();
   }catch(e){localStorage.removeItem('bbn-user');initLogin();}
