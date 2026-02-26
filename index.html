@@ -149,11 +149,12 @@ select{appearance:none;-webkit-appearance:none;}
    BOTTOM NAV
 ══════════════════════════════════════════ */
 .bottom-nav{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  z-index:200;
+  position:fixed !important;
+  bottom:0 !important;
+  left:0;right:0;
+  z-index:9999;
   padding:8px 20px;
-  padding-bottom:calc(var(--real-safe-b,env(safe-area-inset-bottom,20px)) + 8px);
+  padding-bottom:max(env(safe-area-inset-bottom,0px),8px);
   pointer-events:none;
   background:transparent;
 }
@@ -175,7 +176,7 @@ select{appearance:none;-webkit-appearance:none;}
 .nav-pill.active{background:var(--text);}
 .nav-pill.active svg{stroke:var(--bg);}
 /* page content needs enough bottom padding to clear the floating nav */
-.page-content{padding-bottom:calc(var(--real-safe-b,env(safe-area-inset-bottom,20px)) + 110px)!important;}
+.page-content{padding-bottom:calc(max(env(safe-area-inset-bottom,0px),8px) + 80px + 16px)!important;}
 @media(min-width:960px){
   .bottom-nav{display:none!important;}
   .page-content{padding-bottom:24px!important;}
@@ -207,10 +208,10 @@ select{appearance:none;-webkit-appearance:none;}
 /* ══════════════════════════════════════════
    MODALS
 ══════════════════════════════════════════ */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:flex-end;}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:flex-end;overscroll-behavior:contain;touch-action:none;}
 .modal-overlay.open{display:flex;}
 .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);}
-.bottom-sheet{position:relative;width:100%;max-width:520px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:0 0 calc(env(safe-area-inset-bottom,0px)+8px);max-height:92dvh;display:flex;flex-direction:column;animation:sheetUp .22s cubic-bezier(.34,1.1,.64,1);}
+.bottom-sheet{position:relative;width:100%;max-width:520px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:0 0 calc(env(safe-area-inset-bottom,0px)+8px);max-height:92dvh;display:flex;flex-direction:column;animation:sheetUp .22s cubic-bezier(.34,1.1,.64,1);overscroll-behavior:contain;touch-action:pan-y;}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
 .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 4px;}
 .sheet-header{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 12px;}
@@ -483,17 +484,17 @@ select.form-input{cursor:pointer;}
 .trip-bar-fill{height:100%;border-radius:3px;background:var(--amber);transition:width .5s ease;}
 
 /* trip detail */
-.trip-detail-hero{margin:10px 16px 14px;background:var(--amber);border-radius:var(--r-xl);padding:22px;color:#fff;position:relative;overflow:hidden;}
+.trip-detail-hero{margin:10px 16px 14px;background:var(--amber);border-radius:var(--r-xl);padding:22px;color:#000;position:relative;overflow:hidden;}
 @media(min-width:960px){.trip-detail-hero{margin:16px 32px 14px;}}
-.trip-detail-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,.05);border-radius:50%;}
-.tdh-name{font-size:20px;font-weight:800;margin-bottom:3px;}
-.tdh-dates{font-size:12px;opacity:.6;margin-bottom:16px;}
+.trip-detail-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(0,0,0,.04);border-radius:50%;}
+.tdh-name{font-size:20px;font-weight:800;margin-bottom:3px;color:#000;}
+.tdh-dates{font-size:12px;opacity:.55;margin-bottom:16px;color:#000;}
 .tdh-balance{font-size:32px;font-weight:800;font-family:var(--mono);letter-spacing:-1px;}
-.tdh-label{font-size:11px;opacity:.5;margin-bottom:4px;}
+.tdh-label{font-size:11px;opacity:.5;margin-bottom:4px;color:#000;}
 .tdh-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
-.tdh-stat{background:rgba(255,255,255,.12);border-radius:var(--r);padding:10px;}
-.tdh-stat-label{font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
-.tdh-stat-value{font-size:15px;font-weight:700;font-family:var(--mono);}
+.tdh-stat{background:rgba(0,0,0,.08);border-radius:var(--r);padding:10px;}
+.tdh-stat-label{font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#000;}
+.tdh-stat-value{font-size:15px;font-weight:700;font-family:var(--mono);color:#000;}
 
 /* ══════════════════════════════════════════
    CONFIRM DIALOG
@@ -888,7 +889,6 @@ select.form-input{cursor:pointer;}
           <div class="tdh-stats">
             <div class="tdh-stat"><div class="tdh-stat-label">Spent</div><div class="tdh-stat-value" id="tdh-spent">$0</div></div>
             <div class="tdh-stat"><div class="tdh-stat-label">Budget</div><div class="tdh-stat-value" id="tdh-budget">$0</div></div>
-            <div class="tdh-stat" style="grid-column:1/-1"><div class="tdh-stat-label">After Trip (from your income)</div><div class="tdh-stat-value" id="tdh-from-income">$0</div></div>
           </div>
         </div>
       </div>
@@ -1616,6 +1616,7 @@ function refreshCurrentScreen(){
   else if(active==='analytics-screen') loadAnalytics();
   else if(active==='trips-screen') loadTrips();
   else if(active==='transactions-screen') renderTxnList(state.transactions);
+  else if(active==='trip-detail-screen' && state.activeTrip) loadTripDetail(state.activeTrip);
 }
 
 document.getElementById('sync-btn').addEventListener('click',forceSync);
@@ -2166,48 +2167,44 @@ async function loadTripDetail(trip){
   const e=trip.endDate?safeDate(trip.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'ongoing';
   document.getElementById('tdh-dates').textContent=`${s} → ${e}`;
 
-  // Fetch trip transactions fresh
+  // Show cached trip txns immediately while fetching
+  const cachedTripTxns=state.transactions.filter(t=>t.tripId===trip.tripId);
+  const renderTripTxns=(txns)=>{
+    const el=document.getElementById('trip-txn-list');
+    if(!txns.length){
+      el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><p>No spending yet</p></div>';
+    } else {
+      el.innerHTML=txns.map(t=>txnHtml(t)).join('');
+      el.querySelectorAll('.txn-item').forEach(item=>{
+        item.addEventListener('click',()=>openTxnActionSheet(item.dataset.id));
+      });
+    }
+    const spent=txns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const rem=trip.budget?trip.budget-spent:null;
+    const balEl=document.getElementById('tdh-balance');
+    balEl.textContent=rem!==null?fmt(rem):'—';
+    // Color: positive = green, zero/negative = red
+    balEl.style.color=rem===null?'#000':rem>0?'#1a7a3c':rem===0?'#888':'#c0392b';
+    document.getElementById('tdh-spent').textContent=fmt(spent);
+    document.getElementById('tdh-budget').textContent=trip.budget?fmt(trip.budget):'No limit';
+    const idx=state.trips.findIndex(t=>t.tripId===trip.tripId);
+    if(idx>-1) state.trips[idx].spent=spent;
+    return spent;
+  };
+
+  // Render from cache immediately
+  if(cachedTripTxns.length) renderTripTxns(cachedTripTxns);
+
+  // Fetch fresh from server
   const r=await api('getTransactions',{userId:state.user.userId,tripId:trip.tripId});
-  let spent=0, tripTxns=[];
   if(r.success){
-    tripTxns=r.transactions;
-    // Also sync into state.transactions
+    // Merge into state.transactions
     r.transactions.forEach(t=>{
       const idx=state.transactions.findIndex(x=>x.txnId===t.txnId);
       if(idx>-1) state.transactions[idx]=t; else state.transactions.push(t);
     });
     saveCache();
-    spent=tripTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-    const el=document.getElementById('trip-txn-list');
-    if(!tripTxns.length){
-      el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><p>No spending yet</p></div>';
-    } else {
-      el.innerHTML=tripTxns.map(t=>txnHtml(t)).join('');
-      el.querySelectorAll('.txn-item').forEach(item=>{
-        item.addEventListener('click',()=>openTxnActionSheet(item.dataset.id));
-      });
-    }
-  }
-
-  // Update trip spent in state
-  const idx=state.trips.findIndex(t=>t.tripId===trip.tripId);
-  if(idx>-1) state.trips[idx].spent=spent;
-
-  // Calculation 1: vs trip budget (expected spend)
-  const rem=trip.budget?trip.budget-spent:null;
-  document.getElementById('tdh-balance').textContent=rem!==null?fmt(rem):'—';
-  document.getElementById('tdh-label')&&(document.getElementById('tdh-label').textContent='Budget Remaining');
-  document.getElementById('tdh-spent').textContent=fmt(spent);
-  document.getElementById('tdh-budget').textContent=trip.budget?fmt(trip.budget):'No limit';
-
-  // Calculation 2: real income impact
-  // Total income from all transactions up to now
-  const totalIncome=state.transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const afterTrip=totalIncome-spent;
-  const fromIncomeEl=document.getElementById('tdh-from-income');
-  if(fromIncomeEl){
-    fromIncomeEl.textContent=fmt(afterTrip);
-    fromIncomeEl.style.color=afterTrip>=0?'#6ee7b7':'#fca5a5';
+    renderTripTxns(r.transactions);
   }
 }
 
