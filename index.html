@@ -12,7 +12,8 @@
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Nanthe27/Budget/02b41c9ee340c694bb67a8f4f8d27bfa08ad862b/logo.jpg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230c0c0e'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap&font-display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
    TOKENS
@@ -497,15 +498,29 @@ select.form-input{cursor:pointer;}
 /* ══════════════════════════════════════════
    LOADING OVERLAY
 ══════════════════════════════════════════ */
-#loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;align-items:center;justify-content:center;transition:opacity .3s;}
+#loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .4s ease;}
 #loading-overlay.hidden{opacity:0;pointer-events:none;}
-.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;}
+.load-logo{width:64px;height:64px;border-radius:18px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.15);}
+.load-logo img{width:100%;height:100%;object-fit:cover;}
+.load-title{font-size:22px;font-weight:800;letter-spacing:-.5px;}
+.load-title .budget{color:var(--text);}
+.load-title .bynan{font-weight:300;color:var(--text2);}
+.load-bar-wrap{width:120px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.load-bar{height:100%;background:var(--text);border-radius:2px;animation:loadBar 1.2s ease-in-out infinite;}
+@keyframes loadBar{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+.spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .icon-btn.syncing svg{animation:spin .7s linear infinite;}
+/* red back btn on pin pad */
+.numpad-btn.pin-back-btn{background:var(--red-bg);color:var(--red);font-size:18px;font-weight:700;border-color:transparent;}
 </style>
 </head>
 <body>
-<div id="loading-overlay"><div class="spinner"></div></div>
+<div id="loading-overlay">
+  <div class="load-logo"><img src="https://raw.githubusercontent.com/Nanthe27/Budget/02b41c9ee340c694bb67a8f4f8d27bfa08ad862b/logo.jpg" alt=""></div>
+  <div class="load-title"><span class="budget">budget</span><span class="bynan">Bynan</span></div>
+  <div class="load-bar-wrap"><div class="load-bar"></div></div>
+</div>
 <div id="toast-container"></div>
 
 <!-- ══════════════════════════════════════════
@@ -592,11 +607,10 @@ select.form-input{cursor:pointer;}
         <button class="numpad-btn" data-n="7">7</button>
         <button class="numpad-btn" data-n="8">8</button>
         <button class="numpad-btn" data-n="9">9</button>
-        <button class="numpad-btn empty"></button>
+        <button class="numpad-btn pin-back-btn" id="pin-back">←</button>
         <button class="numpad-btn" data-n="0">0</button>
         <button class="numpad-btn delete" id="pin-delete"><svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
       </div>
-      <button class="btn-secondary" id="pin-back" style="margin-top:4px">← Back</button>
     </div>
   </div>
 </div>
@@ -1338,6 +1352,7 @@ document.querySelectorAll('#step-pin .numpad-btn[data-n]').forEach(b=>{
       if(r.success){
         state.user=r.user;
         localStorage.setItem('bbn-user',JSON.stringify(r.user));
+        localStorage.setItem('bbn-user-ts',Date.now().toString());
         afterLogin();
       } else {
         document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('error'));
@@ -2070,6 +2085,7 @@ document.getElementById('txn-content').addEventListener('scroll',function(){
 function logout(){
   state.user=null; state.transactions=[]; state.summary=null; state.trips=[];
   localStorage.removeItem('bbn-user');
+  localStorage.removeItem('bbn-user-ts');
   showSidebar(false);
   showNav(false);
   document.getElementById('fab').style.display='none';
@@ -2086,9 +2102,13 @@ applyTheme();
 document.getElementById('txn-date').value=todayStr();
 
 const savedUser=localStorage.getItem('bbn-user');
-if(savedUser){
+const savedTs=parseInt(localStorage.getItem('bbn-user-ts')||'0');
+const SESSION_TTL=90*24*60*60*1000; // 90 days
+if(savedUser&&(Date.now()-savedTs<SESSION_TTL)){
   try{
     state.user=JSON.parse(savedUser);
+    // Refresh session timestamp on each visit
+    localStorage.setItem('bbn-user-ts',Date.now().toString());
     showSidebar(true);
     showNav(true);
     document.getElementById('fab').style.display='flex';
@@ -2097,14 +2117,41 @@ if(savedUser){
     showScreen('home-screen');
     const cached=localStorage.getItem('bbn-data-'+state.user.userId);
     if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
-    refreshHome();
+    // Render immediately from cache — no spinner wait
+    if(state.transactions.length) renderHomeFromTransactions(state.transactions);
+    // Then sync in background
     syncInBackground();
   }catch(e){localStorage.removeItem('bbn-user');initLogin();}
 } else {
+  if(savedUser) localStorage.removeItem('bbn-user'); // clear only if truly expired
   initLogin();
 }
 
 document.getElementById('loading-overlay').classList.add('hidden');
+
+/* ══════════════════════════════════════════
+   SERVICE WORKER — cache app shell for instant loads
+══════════════════════════════════════════ */
+if('serviceWorker' in navigator){
+  const swCode=`
+const CACHE='bbn-v3';
+const SHELL=[location.href];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET') return;
+  const url=new URL(e.request.url);
+  // Always network-first for GAS API calls
+  if(url.hostname.includes('script.google.com')||url.hostname.includes('googleapis.com')){e.respondWith(fetch(e.request).catch(()=>new Response(JSON.stringify({success:false,error:'offline'}),{headers:{'Content-Type':'application/json'}})));return;}
+  // Cache-first for everything else (fonts, app shell)
+  e.respondWith(caches.match(e.request).then(cached=>{
+    const fresh=fetch(e.request).then(r=>{if(r.ok){const clone=r.clone();caches.open(CACHE).then(c=>c.put(e.request,clone));}return r;}).catch(()=>cached);
+    return cached||fresh;
+  }));
+});`;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
 </script>
 </body>
 </html>
