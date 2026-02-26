@@ -499,7 +499,81 @@ select.form-input{cursor:pointer;}
 .month-nav span{font-size:13px;font-weight:600;min-width:80px;text-align:center;}
 
 /* ══════════════════════════════════════════
-   LOADING OVERLAY
+   SMALL SCREEN — iPhone SE / 7 / 8 (≤390px)
+══════════════════════════════════════════ */
+@media(max-width:390px){
+  /* tighter header */
+  .page-header{gap:8px;padding-left:12px;padding-right:12px;}
+  .icon-btn{width:34px;height:34px;}
+  .icon-btn svg{width:14px;height:14px;}
+
+  /* hero card */
+  .home-hero{margin:8px 12px 12px;padding:18px 16px 16px;}
+  .hero-balance{font-size:30px;}
+  .hero-stat-value{font-size:15px;}
+  .hero-stat{padding:10px;}
+
+  /* quick actions */
+  .quick-actions{padding:0 12px 12px;gap:6px;}
+  .quick-action{padding:10px 4px;}
+  .quick-action-icon{width:34px;height:34px;}
+  .quick-action-icon svg{width:14px;height:14px;}
+  .quick-action span{font-size:10px;}
+
+  /* mini chart */
+  .card{border-radius:var(--r);}
+  #home-content .card{margin:0 12px 12px;}
+
+  /* transactions */
+  .txn-list{padding:0 12px;}
+  .txn-icon{width:36px;height:36px;}
+  .txn-name{font-size:13px;}
+  .txn-amount{font-size:13px;}
+
+  /* section titles */
+  .section-title{padding:0 12px 6px;}
+  .filter-row{padding:0 12px 10px;}
+  .section-header{padding:0 12px 8px;}
+
+  /* modals */
+  .sheet-body{padding:0 14px;}
+  .sheet-footer{padding:12px 14px 4px;}
+  .sheet-header{padding:8px 14px 10px;}
+  .cat-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
+  .cat-item-btn{padding:8px 4px;}
+  .cat-item-btn span{font-size:9px;}
+  .cat-dot-lg{width:22px;height:22px;}
+
+  /* hero period buttons */
+  .hero-period button{padding:2px 8px;font-size:9px;}
+
+  /* nav */
+  .nav-pill{padding:9px 4px;}
+  .nav-pill svg{width:20px;height:20px;}
+
+  /* cycle badge */
+  .cycle-badge{margin:0 12px 12px;padding:10px 14px;}
+
+  /* analytics */
+  .ana-stat-card{padding:12px;}
+
+  /* login */
+  .login-inner{padding:32px 20px 40px;}
+  .logo-lg{font-size:24px;}
+  .numpad{gap:6px;}
+  .numpad-btn{padding:13px;}
+  .pin-dots{gap:12px;margin:16px 0 20px;}
+  .pin-dot{width:13px;height:13px;}
+}
+
+/* iPhone SE 1st gen (320px) */
+@media(max-width:320px){
+  .home-hero{padding:14px 12px 14px;}
+  .hero-balance{font-size:26px;}
+  .quick-actions{grid-template-columns:repeat(4,1fr);}
+  .cat-grid{grid-template-columns:repeat(3,1fr);}
+  .numpad-btn{padding:11px;}
+}
 ══════════════════════════════════════════ */
 #loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .4s ease;}
 #loading-overlay.hidden{opacity:0;pointer-events:none;}
@@ -1374,19 +1448,14 @@ function afterLogin(){
 
 async function syncInBackground(){
   if(!state.user) return;
-  const uid=state.user.userId;
-  const [rc,rs,rb,rt,rtxn]=await Promise.all([
-    api('getCategories',{userId:uid}),
-    api('getIncomeSources',{userId:uid}),
-    api('getBudgets',{userId:uid}),
-    api('getTrips',{userId:uid}),
-    api('getTransactions',{userId:uid}),
-  ]);
-  if(rc.success)state.categories=rc.categories;
-  if(rs.success)state.sources=rs.sources;
-  if(rb.success)state.budgets=rb.budgets;
-  if(rt.success)state.trips=rt.trips;
-  if(rtxn.success)state.transactions=rtxn.transactions;
+  // ONE request instead of 5 — ~5x faster
+  const r=await api('getAll',{userId:state.user.userId});
+  if(!r.success) return;
+  if(r.categories) state.categories=r.categories;
+  if(r.sources)    state.sources=r.sources;
+  if(r.budgets)    state.budgets=r.budgets;
+  if(r.trips)      state.trips=r.trips;
+  if(r.transactions) state.transactions=r.transactions;
   saveCache();
   refreshCurrentScreen();
 }
