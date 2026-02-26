@@ -181,9 +181,7 @@ position:relative;
 border-radius:0;
 }
 .nav-pill svg{width:22px;height:22px;stroke:var(–text3);stroke-width:1.8;fill:none;transition:all .15s;}
-.nav-pill .nav-label{font-size:10px;font-weight:500;color:var(–text3);transition:color .15s;letter-spacing:.2px;}
 .nav-pill.active svg{stroke:var(–text);}
-.nav-pill.active .nav-label{color:var(–text);font-weight:700;}
 .nav-pill.active::after{content:’’;position:absolute;top:0;left:20%;right:20%;height:2px;background:var(–text);border-radius:0 0 2px 2px;}
 /* page content padding to clear the tab bar */
 .page-content{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 68px)!important;}
@@ -1037,19 +1035,15 @@ LOADING OVERLAY
   <div class="nav-pills">
     <div class="nav-pill active" data-screen="home">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span class="nav-label">Home</span>
     </div>
     <div class="nav-pill" data-screen="transactions">
       <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      <span class="nav-label">Records</span>
     </div>
     <div class="nav-pill" data-screen="analytics">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span class="nav-label">Analytics</span>
     </div>
     <div class="nav-pill" data-screen="more">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-      <span class="nav-label">Settings</span>
     </div>
   </div>
 </nav>
