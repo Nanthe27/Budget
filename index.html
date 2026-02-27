@@ -164,7 +164,7 @@ backdrop-filter:blur(20px);
 .nav-pills{
 display:flex;align-items:stretch;
 max-width:600px;margin:0 auto;
-padding:0;gap:0;
+padding:0 0 env(safe-area-inset-bottom,0px) 0;gap:0;
 border-radius:0;
 background:none;
 border:none;
@@ -183,7 +183,7 @@ border-radius:0;
 .nav-pill.active svg{stroke:var(--text);}
 .nav-pill.active::after{content:’’;position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--text);border-radius:0 0 2px 2px;}
 /* page content padding to clear the tab bar */
-.page-content{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 68px)!important;}
+.page-content{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 43px)!important;}
 @media(min-width:960px){
 .bottom-nav{display:none!important;}
 .page-content{padding-bottom:24px!important;}
@@ -316,8 +316,11 @@ HOME SCREEN
 @media(min-width:960px){.home-hero{margin:16px 32px 18px;}}
 .hero-period{font-size:11px;font-weight:500;opacity:.5;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .hero-period button{background:rgba(255,255,255,.14);color:inherit;border:none;border-radius:20px;padding:3px 10px;font-size:10px;cursor:pointer;font-family:var(--font);font-weight:500;}
-.hero-balance{font-size:36px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-bottom:4px;font-family:var(--mono);}
-.hero-balance .currency{font-size:18px;font-weight:400;opacity:.6;margin-right:2px;vertical-align:3px;font-family:var(--font);}
+.balance-bar-wrap{margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
+.balance-bar-track{height:28px;border-radius:14px;background:rgba(255,255,255,.15);overflow:hidden;width:100%;}
+.balance-bar-fill{height:100%;border-radius:14px;width:0%;transition:width .6s cubic-bezier(.4,0,.2,1),background-color .5s ease;}
+.balance-bar-amount{font-size:30px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-top:8px;font-family:var(--mono);opacity:0;transition:opacity .3s ease;}
+.balance-bar-amount.bb-visible{opacity:1;}
 .hero-label{font-size:11px;opacity:.45;margin-bottom:18px;}
 .hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;z-index:1;width:100%;}
 .hero-stat{background:rgba(255,255,255,.1);border-radius:var(--r);padding:12px;min-width:0;}
@@ -536,7 +539,7 @@ SMALL SCREEN — iPhone SE / 7 / 8 (≤390px)
 
 /* hero card */
 .home-hero{margin:8px 12px 12px;padding:18px 16px 16px;}
-.hero-balance{font-size:30px;}
+.balance-bar-track{height:24px;border-radius:12px;}.balance-bar-amount{font-size:26px;}
 .hero-stat-value{font-size:15px;}
 .hero-stat{padding:10px;}
 
@@ -596,7 +599,7 @@ SMALL SCREEN — iPhone SE / 7 / 8 (≤390px)
 /* iPhone SE 1st gen (320px) */
 @media(max-width:320px){
 .home-hero{padding:14px 12px 14px;}
-.hero-balance{font-size:26px;}
+.balance-bar-amount{font-size:22px;}
 .quick-actions{grid-template-columns:repeat(4,1fr);}
 .cat-grid{grid-template-columns:repeat(3,1fr);}
 .numpad-btn{padding:11px;}
@@ -745,7 +748,10 @@ LOADING OVERLAY
           <button id="hero-period-today" style="display:none">today</button>
         </div>
         <div class="hero-label" id="cycle-label">Balance</div>
-        <div class="hero-balance"><span class="currency">$</span><span id="hero-balance">0</span></div>
+        <div class="balance-bar-wrap" id="balance-bar-wrap">
+          <div class="balance-bar-track"><div class="balance-bar-fill" id="balance-bar-fill"></div></div>
+          <div class="balance-bar-amount" id="balance-bar-amount"></div>
+        </div>
         <div class="hero-stats" style="margin-top:16px">
           <div class="hero-stat">
             <div class="hero-stat-label">
@@ -1737,7 +1743,7 @@ function renderHomeFromTransactions(txns){
     const cycleTxns=txns.filter(t=>safeDate(t.date)>=cycleStart);
     const inc=cycleTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
     const exp=cycleTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-    document.getElementById('hero-balance').textContent=fmt(inc-exp).replace('$','');
+    _updateBalanceBar(inc-exp,inc);
     document.getElementById('hero-income').textContent=fmt(inc);
     document.getElementById('hero-expense').textContent=fmt(exp);
     const d=safeDate(lastSalary.date);
@@ -1749,7 +1755,7 @@ function renderHomeFromTransactions(txns){
     const cur=txns.filter(t=>{const d=safeDate(t.date);return !isNaN(d)&&(d.getMonth()+1)===m&&d.getFullYear()===y;});
     const inc=cur.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
     const exp=cur.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-    document.getElementById('hero-balance').textContent=fmt(inc-exp).replace('$','');
+    _updateBalanceBar(inc-exp,inc);
     document.getElementById('hero-income').textContent=fmt(inc);
     document.getElementById('hero-expense').textContent=fmt(exp);
     document.getElementById('cycle-label').textContent='Balance';
@@ -2030,6 +2036,27 @@ function _startIncomeReveal(){
 _incomeEl.addEventListener('click',()=>{
   if(_incomeEl.classList.contains('income-blur')){_startIncomeReveal();}
   else{clearTimeout(_incomeBlurTimer);_incomeBlurTimer=setTimeout(_applyIncomeBlur,5000);}
+});
+
+/* ── Balance bar ── */
+let _bbTimer=null;
+const _bbFill=document.getElementById('balance-bar-fill');
+const _bbAmount=document.getElementById('balance-bar-amount');
+function _updateBalanceBar(balance,income){
+  const pct=income>0?Math.max(0,Math.min(100,(balance/income)*100)):(balance>0?100:0);
+  const color=balance<0||pct<20?'#f87171':pct<50?'#fbbf24':'#4ade80';
+  _bbFill.style.width=pct+'%';
+  _bbFill.style.backgroundColor=color;
+  _bbAmount.textContent=fmt(balance);
+}
+function _showBalanceAmount(){
+  _bbAmount.classList.add('bb-visible');
+  clearTimeout(_bbTimer);
+  _bbTimer=setTimeout(()=>_bbAmount.classList.remove('bb-visible'),5000);
+}
+document.getElementById('balance-bar-wrap').addEventListener('click',()=>{
+  if(_bbAmount.classList.contains('bb-visible')){clearTimeout(_bbTimer);_bbTimer=setTimeout(()=>_bbAmount.classList.remove('bb-visible'),5000);}
+  else{_showBalanceAmount();}
 });
 
 document.getElementById('hero-period-btn').addEventListener('click',()=>{
