@@ -2744,42 +2744,14 @@ window.addEventListener('orientationchange',()=>{
 });
 
 /* ══════════════════════════════════════════
-   NAV BAR — safe area fix for full-screen on all devices
-   Probes the real env(safe-area-inset-bottom) and caps at 34px
-   (the max iPhone home indicator height). In Safari browser mode,
-   env() can leak the browser toolbar height (~83px), which would
-   create a huge blank gap below the nav icons.
-   In PWA/standalone mode the full env() value is the home indicator.
+   STANDALONE DETECTION
+   CSS already handles safe areas via env(safe-area-inset-bottom)
+   in --safe-b. Just mark standalone mode for any CSS that needs it.
 ══════════════════════════════════════════ */
-function fixNavPosition(){
-  // Detect PWA standalone mode (iOS or Android)
+(function(){
   const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode: standalone)').matches;
-  // Probe the actual CSS env() value via a throwaway element
-  const probe=document.createElement('div');
-  probe.style.cssText='position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;';
-  document.body.appendChild(probe);
-  const envVal=parseFloat(getComputedStyle(probe).height)||0;
-  probe.remove();
-  // Cap at 34px — iPhone home indicator is ≤34px on every model.
-  // In browser mode this prevents the toolbar height from leaking in.
-  // In standalone mode env() is already correct (home indicator only).
-  const safeB=isStandalone?Math.min(envVal,34):Math.min(envVal,34);
-  document.documentElement.style.setProperty('--safe-b',safeB+'px');
-  document.documentElement.style.setProperty('--real-safe-b',safeB+'px');
-  // Mark standalone so CSS can react if needed
   document.documentElement.toggleAttribute('data-standalone',isStandalone);
-}
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', fixNavPosition);
-  window.visualViewport.addEventListener('scroll', fixNavPosition);
-}
-window.addEventListener('resize', fixNavPosition);
-// pageshow fires when returning from bfcache (iOS back-swipe)
-window.addEventListener('pageshow', fixNavPosition);
-// Run immediately and after short delays for iOS layout to settle
-fixNavPosition();
-setTimeout(fixNavPosition, 100);
-setTimeout(fixNavPosition, 500);
+})();
 
 /* ══════════════════════════════════════════
    SERVICE WORKER — cache app shell for instant loads
