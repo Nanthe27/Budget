@@ -604,8 +604,8 @@ SMALL SCREEN — iPhone SE / 7 / 8 (≤390px)
 /* ══════════════════════════════════════════
 LOADING OVERLAY
 ══════════════════════════════════════════ */
-#loading-overlay{position:fixed;inset:0;background:var(–bg);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .4s ease;}
-#loading-overlay.hidden{opacity:0;pointer-events:none;}
+#loading-overlay{position:fixed;inset:0;background:var(–bg);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .3s ease;}
+#loading-overlay.hidden{opacity:0;pointer-events:none;display:none!important;}
 .load-logo{width:64px;height:64px;border-radius:18px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.15);}
 .load-logo img{width:100%;height:100%;object-fit:cover;}
 .load-title{font-size:22px;font-weight:800;letter-spacing:-.5px;}
@@ -1536,6 +1536,15 @@ let pinBuffer='';
 async function initLogin(){
   pinBuffer='';
   updatePinDots();
+  // Always ensure nav and sidebar are hidden on login screen
+  showNav(false);
+  showSidebar(false);
+  document.getElementById('fab').style.display='none';
+  document.getElementById('fab-txn').style.display='none';
+  document.body.style.overflow='';
+  // Restore pin dots to clean state
+  document.querySelectorAll('.pin-dot').forEach(d=>d.className='pin-dot');
+  document.querySelector('#login-screen .numpad')?.classList.remove('pin-loading');
   // Try to get user from cache first for instant display
   const cachedUsers=localStorage.getItem('bbn-users');
   if(cachedUsers){
@@ -2633,33 +2642,35 @@ document.getElementById('export-btn').addEventListener('click',()=>{
 applyTheme();
 document.getElementById('txn-date').value=todayStr();
 
-const savedUser=localStorage.getItem('bbn-user');
-const savedTs=parseInt(localStorage.getItem('bbn-user-ts')||'0');
-const SESSION_TTL=90*24*60*60*1000; // 90 days
-if(savedUser&&(Date.now()-savedTs<SESSION_TTL)){
-  try{
-    state.user=JSON.parse(savedUser);
-    // Refresh session timestamp on each visit
-    localStorage.setItem('bbn-user-ts',Date.now().toString());
-    showSidebar(true);
-    showNav(true);
-    document.getElementById('fab').style.display='flex';
-    document.getElementById('greeting-time').textContent=greeting();
-    document.getElementById('home-username-display').textContent=state.user.name;
-    showScreen('home-screen');
-    const cached=localStorage.getItem('bbn-data-'+state.user.userId);
-    if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
-    // Render immediately from cache — no spinner wait
-    if(state.transactions.length) renderHomeFromTransactions(state.transactions);
-    // Then sync in background
-    syncInBackground();
-  }catch(e){localStorage.removeItem('bbn-user');initLogin();}
-} else {
-  if(savedUser) localStorage.removeItem('bbn-user'); // clear only if truly expired
+// Always hide loading overlay first — before anything else
+document.getElementById('loading-overlay').classList.add('hidden');
+
+try{
+  const savedUser=localStorage.getItem('bbn-user');
+  const savedTs=parseInt(localStorage.getItem('bbn-user-ts')||'0');
+  const SESSION_TTL=90*24*60*60*1000;
+  if(savedUser&&(Date.now()-savedTs<SESSION_TTL)){
+    try{
+      state.user=JSON.parse(savedUser);
+      localStorage.setItem('bbn-user-ts',Date.now().toString());
+      showSidebar(true);
+      showNav(true);
+      document.getElementById('fab').style.display='flex';
+      document.getElementById('greeting-time').textContent=greeting();
+      document.getElementById('home-username-display').textContent=state.user.name;
+      showScreen('home-screen');
+      const cached=localStorage.getItem('bbn-data-'+state.user.userId);
+      if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
+      if(state.transactions.length) renderHomeFromTransactions(state.transactions);
+      syncInBackground();
+    }catch(e){localStorage.removeItem('bbn-user');initLogin();}
+  } else {
+    if(savedUser) localStorage.removeItem('bbn-user');
+    initLogin();
+  }
+}catch(e){
   initLogin();
 }
-
-document.getElementById('loading-overlay').classList.add('hidden');
 
 /* ══════════════════════════════════════════
    ORIENTATION LOCK — portrait only on mobile
@@ -2707,7 +2718,7 @@ setTimeout(fixNavPosition, 500);
 ══════════════════════════════════════════ */
 if('serviceWorker' in navigator){
   const swCode=`
-const CACHE='bbn-v3';
+const CACHE='bbn-v5';
 const SHELL=[location.href];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
