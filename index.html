@@ -64,7 +64,7 @@ RESET
 html{height:100%;touch-action:manipulation;-webkit-text-size-adjust:100%;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);height:100%;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;}
 /* iOS: fill safe area below nav — match nav surface so no colour band shows */
-body::after{content:’’;position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:var(--surface);z-index:10000;pointer-events:none;}
+body::after{content:’’;position:fixed;bottom:0;left:0;right:0;height:var(--safe-b);background:var(--surface);z-index:10000;pointer-events:none;}
 button{font-family:var(--font);cursor:pointer;border:none;outline:none;background:none;}
 input,select,textarea{font-family:var(--font);outline:none;border:none;background:none;}
 ul,li{list-style:none;}a{text-decoration:none;color:inherit;}
@@ -164,7 +164,7 @@ backdrop-filter:blur(20px);
 .nav-pills{
 display:flex;align-items:stretch;
 max-width:600px;margin:0 auto;
-padding:0 0 env(safe-area-inset-bottom,0px) 0;gap:0;
+padding:0 0 var(--safe-b) 0;gap:0;
 border-radius:0;
 background:none;
 border:none;
@@ -183,7 +183,7 @@ border-radius:0;
 .nav-pill.active svg{stroke:var(--text);}
 .nav-pill.active::after{content:’’;position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--text);border-radius:0 0 2px 2px;}
 /* page content padding to clear the tab bar */
-.page-content{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 43px)!important;}
+.page-content{padding-bottom:calc(var(--safe-b) + 43px)!important;}
 @media(min-width:960px){
 .bottom-nav{display:none!important;}
 .page-content{padding-bottom:24px!important;}
@@ -192,7 +192,7 @@ border-radius:0;
 /* ══════════════════════════════════════════
 FAB
 ══════════════════════════════════════════ */
-.fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 68px + 12px);right:20px;z-index:199;width:52px;height:52px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;transition:all .15s;}
+.fab{position:fixed;bottom:calc(var(--safe-b) + 68px + 12px);right:20px;z-index:199;width:52px;height:52px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;transition:all .15s;}
 .fab:active{transform:scale(.92);}
 .fab svg{width:22px;height:22px;stroke:var(--bg);stroke-width:2.2;fill:none;}
 
@@ -218,7 +218,7 @@ MODALS
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:flex-end;overscroll-behavior:contain;touch-action:none;}
 .modal-overlay.open{display:flex;}
 .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);}
-.bottom-sheet{position:relative;width:100%;max-width:520px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:0 0 calc(env(safe-area-inset-bottom,0px)+8px);max-height:92dvh;display:flex;flex-direction:column;animation:sheetUp .22s cubic-bezier(.34,1.1,.64,1);overscroll-behavior:contain;touch-action:pan-y;}
+.bottom-sheet{position:relative;width:100%;max-width:520px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:0 0 calc(var(--safe-b)+8px);max-height:92dvh;display:flex;flex-direction:column;animation:sheetUp .22s cubic-bezier(.34,1.1,.64,1);overscroll-behavior:contain;touch-action:pan-y;}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
 .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 4px;}
 .sheet-header{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 12px;}
@@ -2742,29 +2742,31 @@ window.addEventListener('orientationchange',()=>{
 });
 
 /* ══════════════════════════════════════════
-   NAV BAR — real safe area fix via visualViewport
-   Fixes the "needs rotate to drop nav" issue
+   NAV BAR — safe area fix for iPhone
+   Probes the real env(safe-area-inset-bottom) and caps at 40px.
+   On some iPhone/Safari configs the env() value can include the
+   browser toolbar height (~83px), which causes a huge blank gap
+   below the nav icons. Home indicator is max 34px on any iPhone.
 ══════════════════════════════════════════ */
 function fixNavPosition(){
-  // Use visualViewport to get true bottom safe area after iOS toolbar
-  if(window.visualViewport){
-    const vvh=window.visualViewport.height;
-    const wh=window.innerHeight;
-    // iOS sometimes reports inaccurate env() until layout settles
-    // Compute real bottom gap
-    const bottomGap=Math.max(0, wh - vvh - (window.visualViewport.offsetTop||0));
-    const safeB=Math.max(bottomGap, 20);
-    document.documentElement.style.setProperty('--real-safe-b', safeB+'px');
-  } else {
-    document.documentElement.style.setProperty('--real-safe-b', 'env(safe-area-inset-bottom,20px)');
-  }
+  // Probe the actual CSS env() value via a throwaway element
+  const probe=document.createElement('div');
+  probe.style.cssText='position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;';
+  document.body.appendChild(probe);
+  const envVal=parseFloat(getComputedStyle(probe).height)||0;
+  probe.remove();
+  // Cap at 40px — iPhone home indicator is ≤34px on every model.
+  // This prevents the browser toolbar height from leaking in.
+  const safeB=Math.min(envVal,40);
+  document.documentElement.style.setProperty('--safe-b',safeB+'px');
+  document.documentElement.style.setProperty('--real-safe-b',safeB+'px');
 }
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize', fixNavPosition);
   window.visualViewport.addEventListener('scroll', fixNavPosition);
 }
 window.addEventListener('resize', fixNavPosition);
-// Run immediately and after small delay for iOS to settle
+// Run immediately and after short delays for iOS layout to settle
 fixNavPosition();
 setTimeout(fixNavPosition, 100);
 setTimeout(fixNavPosition, 500);
