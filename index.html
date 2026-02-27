@@ -62,8 +62,8 @@
 RESET
 ══════════════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{height:100%;overflow:hidden;touch-action:manipulation;-webkit-text-size-adjust:100%;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);height:100%;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+html{height:100%;overflow:hidden;touch-action:pan-y;overscroll-behavior-x:none;-webkit-text-size-adjust:100%;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100%;min-height:100dvh;overflow:hidden;overscroll-behavior-x:none;-webkit-font-smoothing:antialiased;}
 /* safe area is handled by padding-top on .bottom-nav (top nav) itself */
 button{font-family:var(--font);cursor:pointer;border:none;outline:none;background:none;}
 input,select,textarea{font-family:var(--font);outline:none;border:none;background:none;}
@@ -81,7 +81,7 @@ LOGO
 /* ══════════════════════════════════════════
 APP SHELL
 ══════════════════════════════════════════ */
-#app{width:100%;height:100dvh;display:flex;overflow:hidden;}
+#app{width:100%;height:100dvh;display:flex;overflow:hidden;touch-action:pan-y;overscroll-behavior-x:none;}
 .screen{display:none;flex-direction:column;width:100%;height:100%;overflow:hidden;}
 .screen.active{display:flex;animation:sIn .18s ease;}
 @keyframes sIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -111,7 +111,6 @@ DESKTOP
 .screen{position:absolute;top:0;left:0;right:0;bottom:0;display:none;}
 .screen.active{display:flex;}
 .bottom-nav{display:none!important;}
-.fab{display:none!important;}
 .desktop-add-btn{display:flex!important;}
 #mobile-add-trip-btn{display:none!important;}
 }
@@ -194,12 +193,7 @@ border-radius:0;
 .page-content{padding-bottom:24px!important;}
 }
 
-/* ══════════════════════════════════════════
-FAB
-══════════════════════════════════════════ */
-.fab{position:fixed;bottom:calc(var(--safe-b) + 24px);right:20px;z-index:199;width:52px;height:52px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;transition:opacity .15s;}
-.fab:active{opacity:.8;}
-.fab svg{width:22px;height:22px;stroke:var(--bg);stroke-width:2.2;fill:none;}
+/* FAB removed */
 
 /* ══════════════════════════════════════════
 CARDS / SECTION
@@ -627,8 +621,6 @@ LOADING OVERLAY
 @keyframes spin{to{transform:rotate(360deg)}}
 .icon-btn.syncing svg{animation:spin .7s linear infinite;}
 /* red back btn on pin pad */
-.numpad-btn.pin-back-btn{background:var(--red-bg);color:var(--red);font-size:18px;font-weight:700;border-color:transparent;}
-.numpad-btn.pin-back-btn svg{width:22px;height:22px;stroke:var(--red);stroke-width:2;fill:none;}
 </style>
 
 </head>
@@ -725,7 +717,7 @@ LOADING OVERLAY
       <button class="numpad-btn" data-n="9">9</button>
       <button class="numpad-btn empty"></button>
       <button class="numpad-btn" data-n="0">0</button>
-      <button class="numpad-btn pin-back-btn" id="pin-delete"><svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
+      <button class="numpad-btn empty"></button>
     </div>
   </div>
 </div>
@@ -1033,14 +1025,7 @@ LOADING OVERLAY
   </div>
 </div>
 
-<!-- ══════ FAB ══════ -->
-
-<button class="fab" id="fab" style="display:none">
-  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-</button>
-<button class="fab" id="fab-txn" style="display:none">
-  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-</button>
+<!-- FAB removed -->
 
 <!-- ══════ TOP TAB BAR (mobile) ══════ -->
 
@@ -1556,8 +1541,6 @@ async function initLogin(){
   // Always ensure nav and sidebar are hidden on login screen
   showNav(false);
   showSidebar(false);
-  document.getElementById('fab').style.display='none';
-  document.getElementById('fab-txn').style.display='none';
   document.body.style.overflow='';
   // Restore pin dots to clean state
   document.querySelectorAll('.pin-dot').forEach(d=>d.className='pin-dot');
@@ -1621,11 +1604,6 @@ document.querySelectorAll('#login-screen .numpad-btn[data-n]').forEach(b=>{
   });
 });
 
-document.getElementById('pin-delete').addEventListener('click',()=>{
-  if(pinBuffer.length===0) return;
-  pinBuffer=pinBuffer.slice(0,-1);
-  updatePinDots();
-});
 
 /* ══════════════════════════════════════════
    AFTER LOGIN
@@ -1633,7 +1611,6 @@ document.getElementById('pin-delete').addEventListener('click',()=>{
 function afterLogin(){
   showSidebar(true);
   showNav(true);
-  document.getElementById('fab').style.display='flex';
   showScreen('home-screen');
   document.getElementById('greeting-time').textContent=greeting();
   document.getElementById('home-username-display').textContent=state.user.name;
@@ -2579,7 +2556,6 @@ document.getElementById('save-cat-btn').addEventListener('click',async()=>{
 /* ══════════════════════════════════════════
    QUICK ACTIONS
 ══════════════════════════════════════════ */
-document.getElementById('fab').addEventListener('click',()=>openAddTxnModal('expense'));
 document.getElementById('desktop-add-btn').addEventListener('click',()=>openAddTxnModal('expense'));
 document.getElementById('desktop-add-btn-txn').addEventListener('click',()=>openAddTxnModal('expense'));
 document.getElementById('desktop-add-btn-ana').addEventListener('click',()=>openAddTxnModal('expense'));
@@ -2608,7 +2584,6 @@ function logout(){
   localStorage.removeItem('bbn-user-ts');
   showSidebar(false);
   showNav(false);
-  document.getElementById('fab').style.display='none';
   showScreen('login-screen');
   initLogin();
 }
@@ -2721,7 +2696,6 @@ try{
       localStorage.setItem('bbn-user-ts',Date.now().toString());
       showSidebar(true);
       showNav(true);
-      document.getElementById('fab').style.display='flex';
       document.getElementById('greeting-time').textContent=greeting();
       document.getElementById('home-username-display').textContent=state.user.name;
       showScreen('home-screen');
