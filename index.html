@@ -338,6 +338,18 @@ HOME SCREEN
 .quick-action:active{transform:scale(.94);}
 .qa-icon{width:34px;height:34px;border-radius:var(--r-sm);background:var(--bg3);margin:0 auto 7px;display:flex;align-items:center;justify-content:center;}
 .qa-icon svg{width:16px;height:16px;stroke:var(--text2);stroke-width:1.8;fill:none;}
+#qa-add-expense .qa-icon{background:var(--red-bg);}
+#qa-add-expense .qa-icon svg{stroke:var(--red);}
+#qa-add-expense .qa-label{color:var(--red);}
+#qa-add-income .qa-icon{background:var(--green-bg);}
+#qa-add-income .qa-icon svg{stroke:var(--green);}
+#qa-add-income .qa-label{color:var(--green);}
+#qa-budgets .qa-icon{background:rgba(59,130,246,.12);}
+#qa-budgets .qa-icon svg{stroke:#3b82f6;}
+#qa-budgets .qa-label{color:#3b82f6;}
+#qa-trip .qa-icon{background:var(--amber-bg);}
+#qa-trip .qa-icon svg{stroke:var(--amber);}
+#qa-trip .qa-label{color:var(--amber);}
 .qa-label{font-size:11px;font-weight:600;color:var(--text2);}
 
 /* spending chart */
@@ -753,14 +765,14 @@ LOADING OVERLAY
         <div class="hero-stats" style="margin-top:10px">
           <div class="hero-stat">
             <div class="hero-stat-label">
-              <svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+              <svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
               EXPENSES
             </div>
             <div class="hero-stat-value expense" id="hero-expense">$0</div>
           </div>
           <div class="hero-stat">
             <div class="hero-stat-label">
-              <svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+              <svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
               INCOME
             </div>
             <div class="hero-stat-value income" id="hero-income">$0</div>
@@ -775,11 +787,11 @@ LOADING OVERLAY
       <!-- quick actions -->
       <div class="quick-actions">
         <div class="quick-action" id="qa-add-expense">
-          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
           <div class="qa-label">Expense</div>
         </div>
         <div class="quick-action" id="qa-add-income">
-          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
           <div class="qa-label">Income</div>
         </div>
         <div class="quick-action" id="qa-budgets">
@@ -1458,6 +1470,7 @@ function mockAPI(action,data){
     case 'deleteCategory':{const i=mockDB.categories.findIndex(c=>c.catId===data.catId);if(i>-1)mockDB.categories.splice(i,1);return{success:true};}
     case 'getBudgets':return{success:true,budgets:mockDB.budgets.filter(b=>b.userId===data.userId)};
     case 'setBudget':{const i=mockDB.budgets.findIndex(b=>b.userId===data.userId&&b.category===data.category);if(i>-1)mockDB.budgets[i]={...mockDB.budgets[i],amount:data.amount};else mockDB.budgets.push({budgetId:'b'+Date.now(),...data,updatedAt:todayStr()});return{success:true};}
+    case 'deleteBudget':{const i=mockDB.budgets.findIndex(b=>b.budgetId===data.budgetId&&b.userId===data.userId);if(i>-1)mockDB.budgets.splice(i,1);return{success:true};}
     case 'getIncomeSources':return{success:true,sources:mockDB.sources.filter(s=>s.userId===data.userId&&s.isActive)};
     case 'addIncomeSource':{const s={sourceId:'src'+Date.now(),...data,isActive:true};mockDB.sources.push(s);return{success:true,sourceId:s.sourceId};}
     case 'deleteIncomeSource':{const s=mockDB.sources.find(x=>x.sourceId===data.sourceId&&x.userId===data.userId);if(s)s.isActive=false;return{success:true};}
@@ -1792,10 +1805,10 @@ function renderRecentTxns(txns){
 ══════════════════════════════════════════ */
 function txnHtml(t){
   const cat=getCat(t.category,t.type);
-  // expense = arrow up (↑), income = arrow down (↓)
+  // expense = arrow down (↓ money out), income = arrow up (↑ money in)
   const icon=t.type==='expense'
-    ?`<svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`
-    :`<svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`;
+    ?`<svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`
+    :`<svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`;
   const d=safeDate(t.date);
   const dateStr2=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const salaryBadge=t.isSalary?'<span style="font-size:9px;background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px">SALARY</span>':'';
@@ -2622,7 +2635,11 @@ async function renderBudgetsScreen(){
     return`<div class="budget-item" style="margin-bottom:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px">
       <div class="budget-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div style="font-size:14px;font-weight:600">${b.category}</div>
-        <div style="font-size:12px;color:var(--text3);font-family:var(--mono)">${fmt(spent)} / ${fmt(b.amount)}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:12px;color:var(--text3);font-family:var(--mono)">${fmt(spent)} / ${fmt(b.amount)}</div>
+          <button onclick="editBudget('${b.budgetId}')" style="background:var(--bg3);border:none;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--text2);stroke-width:2;fill:none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button onclick="deleteBudget('${b.budgetId}','${b.category}')" style="background:var(--red-bg);border:none;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--red);stroke-width:2;fill:none"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        </div>
       </div>
       <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:6px">
         <div style="width:${pct}%;height:100%;border-radius:3px;background:${color};transition:width .5s ease"></div>
@@ -2633,6 +2650,23 @@ async function renderBudgetsScreen(){
       </div>
     </div>`;
   }).join('');
+}
+
+function editBudget(budgetId){
+  const b=state.budgets.find(x=>x.budgetId===budgetId);
+  if(!b) return;
+  const sel=document.getElementById('budget-cat');
+  sel.innerHTML=state.categories.filter(c=>c.type==='expense').map(c=>`<option value="${c.name}"${c.name===b.category?' selected':''}>${c.name}</option>`).join('');
+  document.getElementById('budget-amount').value=b.amount;
+  openModal('budget-modal');
+}
+
+async function deleteBudget(budgetId,category){
+  if(!confirm(`Delete budget for "${category}"?`)) return;
+  state.budgets=state.budgets.filter(b=>b.budgetId!==budgetId);
+  toast('Budget deleted','success');
+  renderBudgetsScreen();
+  await api('deleteBudget',{budgetId,userId:state.user.userId});
 }
 
 document.getElementById('budgets-back').addEventListener('click',()=>{showScreen('more-screen');renderMore();});
