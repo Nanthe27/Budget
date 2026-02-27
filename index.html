@@ -164,7 +164,7 @@ backdrop-filter:blur(20px);
 .nav-pills{
 display:flex;align-items:stretch;
 max-width:600px;margin:0 auto;
-padding:0 0 var(--safe-b) 0;gap:0;
+padding:0 0 max(40px,var(--safe-b)) 0;gap:0;
 border-radius:0;
 background:none;
 border:none;
@@ -182,8 +182,8 @@ border-radius:0;
 .nav-pill svg{width:22px;height:22px;stroke:var(--text3);stroke-width:1.8;fill:none;transition:all .15s;}
 .nav-pill.active svg{stroke:var(--text);}
 .nav-pill.active::after{content:’’;position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--text);border-radius:0 0 2px 2px;}
-/* page content padding to clear the tab bar */
-.page-content{padding-bottom:calc(var(--safe-b) + 43px)!important;}
+/* page content padding to clear the tab bar (nav is 43px tall + 40px safe-tap zone below) */
+.page-content{padding-bottom:calc(max(40px,var(--safe-b)) + 43px)!important;}
 @media(min-width:960px){
 .bottom-nav{display:none!important;}
 .page-content{padding-bottom:24px!important;}
