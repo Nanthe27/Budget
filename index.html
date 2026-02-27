@@ -765,14 +765,14 @@ LOADING OVERLAY
         <div class="hero-stats" style="margin-top:10px">
           <div class="hero-stat">
             <div class="hero-stat-label">
-              <svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+              <svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
               EXPENSES
             </div>
             <div class="hero-stat-value expense" id="hero-expense">$0</div>
           </div>
           <div class="hero-stat">
             <div class="hero-stat-label">
-              <svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+              <svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
               INCOME
             </div>
             <div class="hero-stat-value income" id="hero-income">$0</div>
@@ -787,11 +787,11 @@ LOADING OVERLAY
       <!-- quick actions -->
       <div class="quick-actions">
         <div class="quick-action" id="qa-add-expense">
-          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
           <div class="qa-label">Expense</div>
         </div>
         <div class="quick-action" id="qa-add-income">
-          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
           <div class="qa-label">Income</div>
         </div>
         <div class="quick-action" id="qa-budgets">
@@ -1805,21 +1805,24 @@ function renderRecentTxns(txns){
 ══════════════════════════════════════════ */
 function txnHtml(t){
   const cat=getCat(t.category,t.type);
-  // expense = arrow down (↓ money out), income = arrow up (↑ money in)
-  const icon=t.type==='expense'
-    ?`<svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`
-    :`<svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`;
+  const isExp=t.type==='expense';
+  // expense (money out) = arrow UP + red, income (money in) = arrow DOWN + green
+  const icon=isExp
+    ?`<svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`
+    :`<svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`;
+  const iconColor=isExp?'var(--red)':'var(--green)';
+  const iconBg=isExp?'var(--red-bg)':'var(--green-bg)';
   const d=safeDate(t.date);
   const dateStr2=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const salaryBadge=t.isSalary?'<span style="font-size:9px;background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px">SALARY</span>':'';
   const tripBadge=t.tripId?'<span style="font-size:9px;background:var(--amber-bg);color:var(--amber);padding:1px 5px;border-radius:8px;font-weight:700;margin-left:4px">TRIP</span>':'';
   return`<div class="txn-item" data-id="${t.txnId}">
-    <div class="txn-icon" style="background:${cat.color}20">${icon.replace('svg ','svg style="stroke:'+cat.color+'" ')}</div>
+    <div class="txn-icon" style="background:${iconBg}">${icon.replace('svg ','svg style="stroke:'+iconColor+'" ')}</div>
     <div class="txn-info">
       <div class="txn-name">${t.description||t.category}${salaryBadge}${tripBadge}</div>
       <div class="txn-meta">${t.category} · ${dateStr2}</div>
     </div>
-    <div class="txn-amount ${t.type}">${t.type==='expense'?'-':'+'}${fmt(t.amount)}</div>
+    <div class="txn-amount ${t.type}">${isExp?'-':'+'}${fmt(t.amount)}</div>
   </div>`;
 }
 
