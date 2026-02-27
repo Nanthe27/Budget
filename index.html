@@ -12,6 +12,7 @@
 <meta name="screen-orientation" content="portrait">
 <meta name="x5-orientation" content="portrait">
 <meta name="full-screen" content="yes">
+<link rel="manifest" href="manifest.json">
 <title>budgetBynan</title>
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Nanthe27/Budget/02b41c9ee340c694bb67a8f4f8d27bfa08ad862b/logo.jpg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230c0c0e'/></svg>">
@@ -61,7 +62,7 @@
 RESET
 ══════════════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{height:100%;touch-action:manipulation;-webkit-text-size-adjust:100%;}
+html{height:100%;overflow:hidden;touch-action:manipulation;-webkit-text-size-adjust:100%;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);height:100%;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;}
 /* safe area is handled by padding-bottom on .bottom-nav itself — no spacer needed */
 button{font-family:var(--font);cursor:pointer;border:none;outline:none;background:none;}
@@ -156,7 +157,7 @@ z-index:9999;
 background:var(--surface);
 border-top:1px solid var(--border);
 pointer-events:all;
-padding-bottom:env(safe-area-inset-bottom,0px);
+padding-bottom:var(--safe-b);
 backdrop-filter:blur(20px);
 -webkit-backdrop-filter:blur(20px);
 }
@@ -184,7 +185,7 @@ border-radius:0;
 .nav-pill.active svg{stroke:var(--text);}
 .nav-pill.active::after{content:’’;position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--text);border-radius:0 0 2px 2px;}
 /* page content padding: icon area (43px) + home-indicator safe area */
-.page-content{padding-bottom:calc(43px + env(safe-area-inset-bottom,0px))!important;}
+.page-content{padding-bottom:calc(43px + var(--safe-b))!important;}
 @media(min-width:960px){
 .bottom-nav{display:none!important;}
 .page-content{padding-bottom:24px!important;}
@@ -2743,30 +2744,38 @@ window.addEventListener('orientationchange',()=>{
 });
 
 /* ══════════════════════════════════════════
-   NAV BAR — safe area fix for iPhone
-   Probes the real env(safe-area-inset-bottom) and caps at 40px.
-   On some iPhone/Safari configs the env() value can include the
-   browser toolbar height (~83px), which causes a huge blank gap
-   below the nav icons. Home indicator is max 34px on any iPhone.
+   NAV BAR — safe area fix for full-screen on all devices
+   Probes the real env(safe-area-inset-bottom) and caps at 34px
+   (the max iPhone home indicator height). In Safari browser mode,
+   env() can leak the browser toolbar height (~83px), which would
+   create a huge blank gap below the nav icons.
+   In PWA/standalone mode the full env() value is the home indicator.
 ══════════════════════════════════════════ */
 function fixNavPosition(){
+  // Detect PWA standalone mode (iOS or Android)
+  const isStandalone=window.navigator.standalone||window.matchMedia('(display-mode: standalone)').matches;
   // Probe the actual CSS env() value via a throwaway element
   const probe=document.createElement('div');
   probe.style.cssText='position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;';
   document.body.appendChild(probe);
   const envVal=parseFloat(getComputedStyle(probe).height)||0;
   probe.remove();
-  // Cap at 40px — iPhone home indicator is ≤34px on every model.
-  // This prevents the browser toolbar height from leaking in.
-  const safeB=Math.min(envVal,40);
+  // Cap at 34px — iPhone home indicator is ≤34px on every model.
+  // In browser mode this prevents the toolbar height from leaking in.
+  // In standalone mode env() is already correct (home indicator only).
+  const safeB=isStandalone?Math.min(envVal,34):Math.min(envVal,34);
   document.documentElement.style.setProperty('--safe-b',safeB+'px');
   document.documentElement.style.setProperty('--real-safe-b',safeB+'px');
+  // Mark standalone so CSS can react if needed
+  document.documentElement.toggleAttribute('data-standalone',isStandalone);
 }
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize', fixNavPosition);
   window.visualViewport.addEventListener('scroll', fixNavPosition);
 }
 window.addEventListener('resize', fixNavPosition);
+// pageshow fires when returning from bfcache (iOS back-swipe)
+window.addEventListener('pageshow', fixNavPosition);
 // Run immediately and after short delays for iOS layout to settle
 fixNavPosition();
 setTimeout(fixNavPosition, 100);
