@@ -310,7 +310,7 @@ FILTER CHIPS
 /* ══════════════════════════════════════════
 HOME SCREEN
 ══════════════════════════════════════════ */
-#home-screen .page-content{padding-top:0;}
+#home-screen .page-content{padding-top:0;display:flex;flex-direction:column;}
 .home-hero{margin:10px 16px 16px;background:var(--text);border-radius:var(--r-xl);padding:24px 22px 20px;color:var(--bg);position:relative;overflow:hidden;box-sizing:border-box;}
 .home-hero::before{content:’’;position:absolute;top:-50px;right:-50px;width:180px;height:180px;background:rgba(255,255,255,.03);border-radius:50%;}
 @media(min-width:960px){.home-hero{margin:16px 32px 18px;}}
@@ -324,7 +324,7 @@ HOME SCREEN
 .hero-stat-label{font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
 .hero-stat-label svg{width:10px;height:10px;stroke:currentColor;stroke-width:2.2;fill:none;flex-shrink:0;}
 .hero-stat-value{font-size:17px;font-weight:700;letter-spacing:-.5px;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hero-stat-value.income{color:#6ee7b7;}
+.hero-stat-value.income{color:#6ee7b7;transition:filter .35s ease;cursor:pointer;user-select:none;}.hero-stat-value.income.income-blur{filter:blur(7px);}
 .hero-stat-value.expense{color:#fca5a5;}
 
 /* quick actions */
@@ -354,6 +354,7 @@ HOME SCREEN
 .section-header{display:flex;align-items:center;justify-content:space-between;padding:0 16px 8px;}
 @media(min-width:960px){.section-header{padding:0 32px 8px;}}
 .section-link{font-size:12px;color:var(--blue);font-weight:600;cursor:pointer;}
+#recent-txn-list{flex-grow:1;}
 
 /* cycle badge */
 .cycle-badge{margin:0 16px 12px;padding:10px 14px;background:var(--green-bg);border-radius:var(--r);display:flex;align-items:center;gap:8px;}
@@ -1725,10 +1726,13 @@ function safeDate(v){
 }
 
 function renderHomeFromTransactions(txns){
+  // Only show salary cycle when viewing the current month
+  const _rNow=new Date();
+  const isCurrentPeriod=state.currentMonth===(_rNow.getMonth()+1)&&state.currentYear===_rNow.getFullYear();
   // Compute cycle from last salary
   const allSalaries=txns.filter(t=>t.isSalary||t.category==='Salary').sort((a,b)=>safeDate(b.date)-safeDate(a.date));
   const lastSalary=allSalaries[0]||null;
-  if(lastSalary){
+  if(lastSalary&&isCurrentPeriod){
     const cycleStart=safeDate(lastSalary.date);
     const cycleTxns=txns.filter(t=>safeDate(t.date)>=cycleStart);
     const inc=cycleTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
@@ -1739,7 +1743,7 @@ function renderHomeFromTransactions(txns){
     const d=safeDate(lastSalary.date);
     document.getElementById('cycle-label').textContent='Since '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     document.getElementById('cycle-badge').style.display='flex';
-    document.getElementById('cycle-badge-text').textContent='Cycle '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+fmt(lastSalary.amount);
+    document.getElementById('cycle-badge-text').textContent='Cycle '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   } else {
     const m=state.currentMonth, y=state.currentYear;
     const cur=txns.filter(t=>{const d=safeDate(t.date);return !isNaN(d)&&(d.getMonth()+1)===m&&d.getFullYear()===y;});
@@ -1751,6 +1755,8 @@ function renderHomeFromTransactions(txns){
     document.getElementById('cycle-label').textContent='Balance';
     document.getElementById('cycle-badge').style.display='none';
   }
+  // Start income blur timer after each render
+  if(typeof _startIncomeReveal==='function') _startIncomeReveal();
   document.getElementById('hero-period-label').textContent=monthName(state.currentMonth,state.currentYear);
   // mini chart from state
   const daily={};const td=new Date();
@@ -2012,6 +2018,20 @@ function updateHeroPeriodBtns(){
   document.getElementById('hero-period-next').style.display=isCurrentMonth?'none':'';
   document.getElementById('hero-period-today').style.display=isCurrentMonth?'none':'';
 }
+/* ── Income blur ── */
+let _incomeBlurTimer=null;
+const _incomeEl=document.getElementById('hero-income');
+function _applyIncomeBlur(){_incomeEl.classList.add('income-blur');}
+function _startIncomeReveal(){
+  _incomeEl.classList.remove('income-blur');
+  clearTimeout(_incomeBlurTimer);
+  _incomeBlurTimer=setTimeout(_applyIncomeBlur,5000);
+}
+_incomeEl.addEventListener('click',()=>{
+  if(_incomeEl.classList.contains('income-blur')){_startIncomeReveal();}
+  else{clearTimeout(_incomeBlurTimer);_incomeBlurTimer=setTimeout(_applyIncomeBlur,5000);}
+});
+
 document.getElementById('hero-period-btn').addEventListener('click',()=>{
   state.currentMonth--;if(state.currentMonth<1){state.currentMonth=12;state.currentYear--;}
   updateHeroPeriodBtns();refreshHome();
