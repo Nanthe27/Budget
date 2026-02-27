@@ -63,8 +63,8 @@ RESET
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{height:100%;touch-action:manipulation;-webkit-text-size-adjust:100%;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);height:100%;min-height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;}
-/* iOS: fill safe area below nav with app background, not white */
-body::after{content:’’;position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:transparent;z-index:199;pointer-events:none;}
+/* iOS: fill safe area below nav — match nav surface so no colour band shows */
+body::after{content:’’;position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:var(--surface);z-index:10000;pointer-events:none;}
 button{font-family:var(--font);cursor:pointer;border:none;outline:none;background:none;}
 input,select,textarea{font-family:var(--font);outline:none;border:none;background:none;}
 ul,li{list-style:none;}a{text-decoration:none;color:inherit;}
@@ -317,7 +317,8 @@ HOME SCREEN
 .hero-period{font-size:11px;font-weight:500;opacity:.5;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .hero-period button{background:rgba(255,255,255,.14);color:inherit;border:none;border-radius:20px;padding:3px 10px;font-size:10px;cursor:pointer;font-family:var(--font);font-weight:500;}
 .balance-bar-wrap{margin-bottom:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
-.balance-bar-track{height:28px;border-radius:14px;background:rgba(255,255,255,.15);overflow:hidden;width:100%;}
+.balance-bar-track{height:28px;border-radius:14px;background:rgba(255,255,255,.15);overflow:hidden;width:100%;position:relative;}
+.balance-bar-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;opacity:.2;pointer-events:none;letter-spacing:.4px;white-space:nowrap;}
 .balance-bar-fill{height:100%;border-radius:14px;width:0%;transition:width .6s cubic-bezier(.4,0,.2,1),background-color .5s ease;}
 .balance-bar-amount{font-size:30px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-top:8px;font-family:var(--mono);opacity:0;transition:opacity .3s ease;}
 .balance-bar-amount.bb-visible{opacity:1;}
@@ -749,7 +750,7 @@ LOADING OVERLAY
         </div>
         <div class="hero-label" id="cycle-label">Balance</div>
         <div class="balance-bar-wrap" id="balance-bar-wrap">
-          <div class="balance-bar-track"><div class="balance-bar-fill" id="balance-bar-fill"></div></div>
+          <div class="balance-bar-track"><div class="balance-bar-fill" id="balance-bar-fill"></div><div class="balance-bar-hint">Tab to see actual amount</div></div>
           <div class="balance-bar-amount" id="balance-bar-amount"></div>
         </div>
         <div class="hero-stats" style="margin-top:16px">
