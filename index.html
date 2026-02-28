@@ -212,20 +212,44 @@ TOAST
 @keyframes toastIn{from{opacity:0;transform:translateY(-8px) scale(.95)}to{opacity:1;transform:none}}
 
 /* ══════════════════════════════════════════
-MODALS
+MODALS — centered popup with blur
 ══════════════════════════════════════════ */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:flex-end;overscroll-behavior:contain;touch-action:none;}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;overscroll-behavior:contain;touch-action:none;}
 .modal-overlay.open{display:flex;}
-.backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);}
-.bottom-sheet{position:relative;width:100%;max-width:520px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:0 0 calc(var(--safe-b)+8px);max-height:92dvh;display:flex;flex-direction:column;animation:sheetUp .22s cubic-bezier(.34,1.1,.64,1);overscroll-behavior:contain;touch-action:pan-y;}
-@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
-.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:8px auto 2px;}
-.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 8px;}
+.modal-overlay .backdrop{opacity:0;transition:opacity .3s ease;}
+.modal-overlay.open .backdrop{opacity:1;}
+.backdrop{position:absolute;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+.bottom-sheet{position:relative;width:calc(100% - 32px);max-width:420px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl);padding:0 0 8px;max-height:88dvh;display:flex;flex-direction:column;animation:popupIn .32s cubic-bezier(.16,1,.3,1);overscroll-behavior:contain;touch-action:pan-y;box-shadow:0 24px 80px rgba(0,0,0,.25),0 0 0 1px var(--border);}
+.modal-overlay.closing .bottom-sheet{animation:popupOut .22s cubic-bezier(.4,0,1,1) forwards;}
+.modal-overlay.closing .backdrop{opacity:0;transition:opacity .22s ease;}
+@keyframes popupIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:none}}
+@keyframes popupOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.92) translateY(12px)}}
+.sheet-handle{display:none;}
+.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;}
 .sheet-header h3{font-size:17px;font-weight:700;}
 .sheet-close{width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;}
 .sheet-close svg{width:14px;height:14px;stroke:var(--text2);stroke-width:2;fill:none;}
 .sheet-body{padding:0 20px;overflow-y:auto;flex:1;}
 .sheet-footer{padding:10px 20px 4px;border-top:1px solid var(--border);margin-top:4px;}
+
+/* ── Slide to confirm ── */
+.slide-confirm{position:relative;width:100%;height:48px;border-radius:var(--r);background:var(--green-bg);overflow:hidden;user-select:none;touch-action:none;cursor:grab;}
+.slide-confirm-track{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--green);letter-spacing:.3px;pointer-events:none;opacity:.7;}
+.slide-confirm-thumb{position:absolute;top:3px;left:3px;width:42px;height:42px;border-radius:10px;background:var(--green);display:flex;align-items:center;justify-content:center;transition:none;z-index:1;cursor:grab;}
+.slide-confirm-thumb.animating{transition:left .3s cubic-bezier(.4,0,.2,1);}
+.slide-confirm-thumb svg{width:18px;height:18px;stroke:#fff;stroke-width:2.2;fill:none;}
+.slide-confirm.confirmed{background:var(--green);}
+.slide-confirm.confirmed .slide-confirm-track{color:#fff;opacity:1;}
+.slide-confirm.confirmed .slide-confirm-thumb{background:#fff;}
+.slide-confirm.confirmed .slide-confirm-thumb svg{stroke:var(--green);}
+
+/* ── New cycle checkbox ── */
+.cycle-check-row{display:flex;align-items:center;gap:10px;padding:10px 0;margin-top:2px;}
+.cycle-checkbox{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.cycle-checkbox.checked{background:var(--green);border-color:var(--green);}
+.cycle-checkbox svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;opacity:0;transition:opacity .15s;}
+.cycle-checkbox.checked svg{opacity:1;}
+.cycle-check-label{font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;}
 
 /* ══════════════════════════════════════════
 FORMS
@@ -576,7 +600,7 @@ SMALL SCREEN — iPhone SE / 7 / 8 (≤390px)
 /* modals */
 .sheet-body{padding:0 14px;}
 .sheet-footer{padding:12px 14px 4px;}
-.sheet-header{padding:8px 14px 10px;}
+.sheet-header{padding:12px 14px 10px;}
 .cat-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
 .cat-item-btn{padding:8px 4px;}
 .cat-item-btn span{font-size:9px;}
@@ -1084,9 +1108,19 @@ LOADING OVERLAY
         <label class="form-label">Income Source</label>
         <select class="form-input" id="txn-source"></select>
       </div>
+      <div id="cycle-check-group" style="display:none">
+        <div class="cycle-check-row">
+          <div class="cycle-checkbox" id="cycle-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="cycle-check-label" id="cycle-check-label">Start a new cycle from this income</span>
+        </div>
+      </div>
     </div>
     <div class="sheet-footer">
       <button class="btn-primary" id="save-txn-btn">Add Transaction</button>
+      <div class="slide-confirm" id="slide-confirm" style="display:none">
+        <div class="slide-confirm-track">Slide to start new cycle →</div>
+        <div class="slide-confirm-thumb" id="slide-thumb"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1345,8 +1379,21 @@ function confirmDlg(title,msg,okLabel='Delete'){
 /* ══════════════════════════════════════════
    MODALS
 ══════════════════════════════════════════ */
-function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
-function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+function openModal(id){
+  const el=document.getElementById(id);
+  el.classList.remove('closing');
+  el.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  const el=document.getElementById(id);
+  if(!el.classList.contains('open')) return;
+  el.classList.add('closing');
+  setTimeout(()=>{
+    el.classList.remove('open','closing');
+    document.body.style.overflow='';
+  },220);
+}
 ['add-txn','add-source','add-cat','add-trip'].forEach(id=>{
   document.getElementById(id+'-backdrop')?.addEventListener('click',()=>closeModal(id+'-modal'));
   document.getElementById(id+'-close')?.addEventListener('click',()=>closeModal(id+'-modal'));
@@ -1396,7 +1443,7 @@ const mockDB={
   transactions:[
     {txnId:'t1',userId:'u1',type:'expense',amount:42.5,category:'Food',description:'Lunch',date:todayStr(),incomeSourceId:'',createdAt:todayStr()},
     {txnId:'t2',userId:'u1',type:'expense',amount:25,category:'Transport',description:'Ride',date:todayStr(),incomeSourceId:'',createdAt:todayStr()},
-    {txnId:'t3',userId:'u1',type:'income',amount:3200,category:'Salary',description:'Monthly salary',date:todayStr(),incomeSourceId:'src1',createdAt:todayStr(),isSalary:true},
+    {txnId:'t3',userId:'u1',type:'income',amount:3200,category:'Salary',description:'Monthly salary',date:todayStr(),incomeSourceId:'src1',createdAt:todayStr()},
   ],
   categories:[
     {catId:'cat1',userId:'default',type:'expense',name:'Food',color:'#ef4444'},
@@ -1468,8 +1515,8 @@ function mockAPI(action,data){
       all.forEach(t=>{const k=new Date(t.date).toISOString().split('T')[0];if(k in daily&&t.type==='expense')daily[k]+=t.amount;});
       const pm=m===1?12:m-1;const py=m===1?y-1:y;
       let prevExp=0;all.forEach(t=>{const d=new Date(t.date);if(d.getMonth()+1===pm&&d.getFullYear()===py&&t.type==='expense')prevExp+=t.amount;});
-      // find last salary for cycle
-      const salaries=all.filter(t=>t.isSalary||t.category==='Salary').sort((a,b)=>new Date(b.date)-new Date(a.date));
+      // find last user-confirmed cycle start
+      const salaries=all.filter(t=>t.isSalary===true).sort((a,b)=>new Date(b.date)-new Date(a.date));
       const lastSalary=salaries[0]||null;
       return{success:true,summary:{month:m,year:y,totalIncome:inc,totalExpense:exp,balance:inc-exp,expenseByCategory:ec,incomeByCategory:ic,dailySpending:daily,prevMonthExpense:prevExp,recentTransactions:all.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5),lastSalaryDate:lastSalary?.date||null,lastSalaryAmount:lastSalary?.amount||0}};
     }
@@ -1713,8 +1760,8 @@ function renderHomeFromTransactions(txns){
   // Only show salary cycle when viewing the current month
   const _rNow=new Date();
   const isCurrentPeriod=state.currentMonth===(_rNow.getMonth()+1)&&state.currentYear===_rNow.getFullYear();
-  // Compute cycle from last salary
-  const allSalaries=txns.filter(t=>t.isSalary||t.category==='Salary').sort((a,b)=>safeDate(b.date)-safeDate(a.date));
+  // Compute cycle from last user-confirmed cycle start (isSalary flag only)
+  const allSalaries=txns.filter(t=>t.isSalary===true).sort((a,b)=>safeDate(b.date)-safeDate(a.date));
   const lastSalary=allSalaries[0]||null;
   if(lastSalary&&isCurrentPeriod){
     const cycleStart=safeDate(lastSalary.date);
@@ -1844,6 +1891,7 @@ function openAddTxnModal(type='expense',tripId=null){
   state.txnType=type; state.txnAmount=''; state.txnCat=''; state.txnSource='';
   state.currentTripId=tripId||null;
   state.editingTxn=null;
+  _setCycleCheck(false);
   document.getElementById('txn-amount-display').textContent='0';
   document.getElementById('txn-amount-input').value='';
   document.getElementById('txn-desc').value='';
@@ -1863,12 +1911,15 @@ function openEditTxnModal(t){
   state.txnCat=t.category;
   state.txnSource=t.incomeSourceId||'';
   state.currentTripId=null;
+  _setCycleCheck(false);
   document.getElementById('txn-amount-display').textContent=t.amount;
   document.getElementById('txn-amount-input').value=t.amount;
   document.getElementById('txn-desc').value=t.description||'';
   document.getElementById('txn-date').value=t.date||todayStr();
   document.getElementById('add-txn-title').textContent='Edit Transaction';
   document.getElementById('save-txn-btn').textContent='Save Changes';
+  // Hide cycle checkbox on edit mode
+  document.getElementById('cycle-check-group').style.display='none';
   renderTypeToggle();
   renderCatGrid();
   renderSourceSelect();
@@ -1887,9 +1938,13 @@ function renderTypeToggle(){
   exp.classList.toggle('active',isExp);
   inc.classList.toggle('active',!isExp);
   document.getElementById('source-group').style.display=isExp?'none':'block';
+  document.getElementById('cycle-check-group').style.display=isExp?'none':'block';
   // if tripId, lock to expense
   if(state.currentTripId){exp.classList.add('active');inc.classList.remove('active');inc.style.opacity='.3';inc.style.pointerEvents='none';}
   else{inc.style.opacity='';inc.style.pointerEvents='';}
+  // Reset cycle checkbox when switching types
+  if(isExp) _setCycleCheck(false);
+  _updateTxnFooter();
   renderCatGrid();
 }
 
@@ -1921,6 +1976,87 @@ txnAmountInput.addEventListener('input',()=>{
   document.getElementById('txn-amount-display').textContent=txnAmountInput.value||'0';
 });
 
+/* ── New Cycle checkbox + Slide to confirm ── */
+let _startNewCycle=false;
+function _setCycleCheck(val){
+  _startNewCycle=val;
+  const cb=document.getElementById('cycle-checkbox');
+  cb.classList.toggle('checked',val);
+  _updateTxnFooter();
+}
+function _updateTxnFooter(){
+  const btn=document.getElementById('save-txn-btn');
+  const slider=document.getElementById('slide-confirm');
+  if(_startNewCycle && state.txnType==='income'){
+    btn.style.display='none';
+    slider.style.display='block';
+    _resetSlider();
+  } else {
+    btn.style.display='';
+    slider.style.display='none';
+  }
+}
+document.getElementById('cycle-checkbox').addEventListener('click',()=>_setCycleCheck(!_startNewCycle));
+document.getElementById('cycle-check-label').addEventListener('click',()=>_setCycleCheck(!_startNewCycle));
+
+/* ── Slide-to-confirm widget ── */
+(function(){
+  const track=document.getElementById('slide-confirm');
+  const thumb=document.getElementById('slide-thumb');
+  let dragging=false, startX=0, thumbLeft=0, maxLeft=0;
+
+  function getMaxLeft(){return track.offsetWidth-thumb.offsetWidth-6;}
+
+  function onStart(e){
+    if(track.classList.contains('confirmed')) return;
+    dragging=true;
+    thumb.classList.remove('animating');
+    startX=(e.touches?e.touches[0].clientX:e.clientX);
+    thumbLeft=thumb.offsetLeft;
+    maxLeft=getMaxLeft();
+  }
+  function onMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    const x=(e.touches?e.touches[0].clientX:e.clientX);
+    const dx=x-startX;
+    const newLeft=Math.max(3,Math.min(thumbLeft+dx,maxLeft));
+    thumb.style.left=newLeft+'px';
+  }
+  function onEnd(){
+    if(!dragging) return;
+    dragging=false;
+    maxLeft=getMaxLeft();
+    const current=parseInt(thumb.style.left)||3;
+    if(current>=maxLeft*0.85){
+      thumb.classList.add('animating');
+      thumb.style.left=maxLeft+'px';
+      track.classList.add('confirmed');
+      track.querySelector('.slide-confirm-track').textContent='New cycle confirmed ✓';
+      setTimeout(()=>_doSaveTxn(),400);
+    } else {
+      thumb.classList.add('animating');
+      thumb.style.left='3px';
+    }
+  }
+
+  thumb.addEventListener('mousedown',onStart);
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onEnd);
+  thumb.addEventListener('touchstart',onStart,{passive:false});
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onEnd);
+})();
+
+function _resetSlider(){
+  const track=document.getElementById('slide-confirm');
+  const thumb=document.getElementById('slide-thumb');
+  track.classList.remove('confirmed');
+  track.querySelector('.slide-confirm-track').textContent='Slide to start new cycle →';
+  thumb.classList.add('animating');
+  thumb.style.left='3px';
+}
+
 // Keyboard support for laptop — PIN entry
 document.addEventListener('keydown',(e)=>{
   const loginActive=document.getElementById('login-screen').classList.contains('active');
@@ -1939,7 +2075,7 @@ document.addEventListener('keydown',(e)=>{
   }
 });
 
-document.getElementById('save-txn-btn').addEventListener('click',async()=>{
+async function _doSaveTxn(){
   if(state.isSaving) return;
   const amount=parseFloat(document.getElementById('txn-amount-input').value);
   if(!amount||amount<=0){toast('Enter an amount','error');return;}
@@ -1948,12 +2084,14 @@ document.getElementById('save-txn-btn').addEventListener('click',async()=>{
   const btn=document.getElementById('save-txn-btn');
   btn.disabled=true; btn.textContent='Saving…';
 
+  const startCycle=_startNewCycle && state.txnType==='income';
+
   const txnData={
     userId:state.user.userId, type:state.txnType, amount, category:state.txnCat,
     description:document.getElementById('txn-desc').value.trim(),
     date:document.getElementById('txn-date').value||todayStr(),
     incomeSourceId:document.getElementById('txn-source').value||'',
-    isSalary:state.txnType==='income'&&state.txnCat==='Salary',
+    isSalary:startCycle,
     tripId:state.currentTripId||'',
   };
 
@@ -1976,7 +2114,7 @@ document.getElementById('save-txn-btn').addEventListener('click',async()=>{
     }
   } else {
     // ADD mode: optimistic
-    toast('Saved ✓','success');
+    toast(startCycle?'New cycle started ✓':'Saved ✓','success');
     const tmpId='tmp'+Date.now();
     const optimisticTxn={...txnData,txnId:tmpId,createdAt:new Date().toISOString()};
     state.transactions.unshift(optimisticTxn);
@@ -1994,7 +2132,9 @@ document.getElementById('save-txn-btn').addEventListener('click',async()=>{
   btn.disabled=false;
   btn.textContent='Add Transaction';
   state.editingTxn=null;
-});
+  _setCycleCheck(false);
+}
+document.getElementById('save-txn-btn').addEventListener('click',_doSaveTxn);
 
 /* ══════════════════════════════════════════
    MONTH NAV
