@@ -251,6 +251,13 @@ MODALS — centered popup with blur
 .cycle-checkbox.checked svg{opacity:1;}
 .cycle-check-label{font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;}
 
+/* ── Add Transaction full-page ── */
+#add-txn-screen .page-content{-webkit-overflow-scrolling:touch;}
+#add-txn-screen .page-header{background:var(--bg);}
+@media(min-width:960px){
+  #add-txn-screen .page-content{max-width:480px;margin:0 auto;width:100%;}
+}
+
 /* ══════════════════════════════════════════
 FORMS
 ══════════════════════════════════════════ */
@@ -1039,6 +1046,63 @@ LOADING OVERLAY
   </div>
 </div>
 
+<!-- ══════ ADD TRANSACTION (full page) ══════ -->
+
+<div class="screen" id="add-txn-screen">
+  <div class="main-layout">
+    <div class="page-header" id="add-txn-header">
+      <button class="icon-btn" id="add-txn-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <h1 id="add-txn-title">Add Expense</h1>
+    </div>
+    <div class="page-content" id="add-txn-content" style="display:flex;flex-direction:column;padding:0 20px calc(var(--safe-b) + 16px)">
+      <!-- Amount input -->
+      <div style="padding:8px 0 12px">
+        <input id="txn-amount-input" type="number" inputmode="decimal" placeholder="$0.00"
+          style="width:100%;padding:14px 16px;background:var(--bg3);border-radius:var(--r);font-size:28px;font-weight:700;color:var(--text);border:1.5px solid transparent;font-family:var(--mono);letter-spacing:-1px;text-align:center;transition:border-color .15s;"
+          onfocus="this.style.borderColor='var(--text3)'" onblur="this.style.borderColor='transparent'">
+      </div>
+      <!-- Category -->
+      <div class="form-group" style="flex-shrink:0">
+        <label class="form-label">Category</label>
+        <div class="cat-grid" id="txn-cat-grid"></div>
+      </div>
+      <!-- Description + Date row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0">
+        <div class="form-group">
+          <label class="form-label">Note</label>
+          <input class="form-input" id="txn-desc" type="text" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-input" id="txn-date" type="date">
+        </div>
+      </div>
+      <!-- Income source (only for income) -->
+      <div class="form-group" id="source-group" style="flex-shrink:0">
+        <label class="form-label">Income Source <span style="color:var(--red);font-size:10px">REQUIRED</span></label>
+        <select class="form-input" id="txn-source" style="border:1.5px solid transparent;transition:border-color .15s"></select>
+      </div>
+      <!-- Start new cycle checkbox (only for income) -->
+      <div id="cycle-check-group" style="display:none;flex-shrink:0">
+        <div class="cycle-check-row">
+          <div class="cycle-checkbox" id="cycle-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="cycle-check-label" id="cycle-check-label">Start a new cycle from this income</span>
+        </div>
+      </div>
+      <!-- Spacer -->
+      <div style="flex:1"></div>
+      <!-- Footer -->
+      <div style="padding:8px 0 0;flex-shrink:0">
+        <button class="btn-primary" id="save-txn-btn">Add Expense</button>
+        <div class="slide-confirm" id="slide-confirm" style="display:none">
+          <div class="slide-confirm-track">Slide to start new cycle →</div>
+          <div class="slide-confirm-thumb" id="slide-thumb"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FAB removed -->
 
 <!-- ══════ TOP TAB BAR (mobile) ══════ -->
@@ -1070,60 +1134,6 @@ LOADING OVERLAY
 <!-- ══════════════════════════════════════════
      MODALS
 ══════════════════════════════════════════ -->
-
-<!-- Add Transaction -->
-
-<div class="modal-overlay" id="add-txn-modal">
-  <div class="backdrop" id="add-txn-backdrop"></div>
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header">
-      <h3 id="add-txn-title">Add Transaction</h3>
-      <button class="sheet-close" id="add-txn-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="sheet-body">
-      <div class="type-toggle">
-        <div class="type-btn active expense" id="type-expense">↑ Expense</div>
-        <div class="type-btn income" id="type-income">↓ Income</div>
-      </div>
-      <div class="amount-display">
-        <span class="currency">$</span><span class="amount-val" id="txn-amount-display">0</span>
-      </div>
-      <input id="txn-amount-input" type="number" inputmode="decimal" placeholder="0.00"
-        style="width:100%;padding:10px 12px;background:var(--bg3);border-radius:var(--r);font-size:15px;color:var(--text);border:1.5px solid transparent;margin-bottom:10px;font-family:var(--font);transition:border-color .15s;"
-        onfocus="this.style.borderColor='var(--text3)'" onblur="this.style.borderColor='transparent'">
-      <div class="form-group">
-        <label class="form-label">Category</label>
-        <div class="cat-grid" id="txn-cat-grid"></div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Description</label>
-        <input class="form-input" id="txn-desc" type="text" placeholder="Optional note">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Date</label>
-        <input class="form-input" id="txn-date" type="date">
-      </div>
-      <div class="form-group" id="source-group">
-        <label class="form-label">Income Source</label>
-        <select class="form-input" id="txn-source"></select>
-      </div>
-      <div id="cycle-check-group" style="display:none">
-        <div class="cycle-check-row">
-          <div class="cycle-checkbox" id="cycle-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <span class="cycle-check-label" id="cycle-check-label">Start a new cycle from this income</span>
-        </div>
-      </div>
-    </div>
-    <div class="sheet-footer">
-      <button class="btn-primary" id="save-txn-btn">Add Transaction</button>
-      <div class="slide-confirm" id="slide-confirm" style="display:none">
-        <div class="slide-confirm-track">Slide to start new cycle →</div>
-        <div class="slide-confirm-thumb" id="slide-thumb"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Add Source Modal -->
 
@@ -1394,7 +1404,7 @@ function closeModal(id){
     document.body.style.overflow='';
   },220);
 }
-['add-txn','add-source','add-cat','add-trip'].forEach(id=>{
+['add-source','add-cat','add-trip'].forEach(id=>{
   document.getElementById(id+'-backdrop')?.addEventListener('click',()=>closeModal(id+'-modal'));
   document.getElementById(id+'-close')?.addEventListener('click',()=>closeModal(id+'-modal'));
 });
@@ -1887,22 +1897,26 @@ async function handleDeleteTxn(txnId){
 /* ══════════════════════════════════════════
    ADD TRANSACTION — optimistic
 ══════════════════════════════════════════ */
+let _prevScreenId='home-screen';
 function openAddTxnModal(type='expense',tripId=null){
   state.txnType=type; state.txnAmount=''; state.txnCat=''; state.txnSource='';
   state.currentTripId=tripId||null;
   state.editingTxn=null;
   _setCycleCheck(false);
-  document.getElementById('txn-amount-display').textContent='0';
   document.getElementById('txn-amount-input').value='';
   document.getElementById('txn-desc').value='';
   document.getElementById('txn-date').value=todayStr();
-  document.getElementById('add-txn-title').textContent=tripId?'Add Trip Expense':'Add Transaction';
-  document.getElementById('save-txn-btn').textContent='Add Transaction';
-  renderTypeToggle();
+  const isIncome=type==='income';
+  document.getElementById('add-txn-title').textContent=tripId?'Add Trip Expense':isIncome?'Add Income':'Add Expense';
+  document.getElementById('save-txn-btn').textContent=isIncome?'Add Income':'Add Expense';
+  document.getElementById('source-group').style.display=isIncome?'block':'none';
+  document.getElementById('cycle-check-group').style.display=isIncome&&!state.editingTxn?'block':'none';
   renderCatGrid();
   renderSourceSelect();
-  openModal('add-txn-modal');
-  setTimeout(()=>document.getElementById('txn-amount-input').focus(),300);
+  _updateTxnFooter();
+  _prevScreenId=document.querySelector('.screen.active')?.id||'home-screen';
+  showScreen('add-txn-screen');
+  setTimeout(()=>document.getElementById('txn-amount-input').focus(),200);
 }
 
 function openEditTxnModal(t){
@@ -1912,44 +1926,31 @@ function openEditTxnModal(t){
   state.txnSource=t.incomeSourceId||'';
   state.currentTripId=null;
   _setCycleCheck(false);
-  document.getElementById('txn-amount-display').textContent=t.amount;
   document.getElementById('txn-amount-input').value=t.amount;
   document.getElementById('txn-desc').value=t.description||'';
   document.getElementById('txn-date').value=t.date||todayStr();
+  const isIncome=t.type==='income';
   document.getElementById('add-txn-title').textContent='Edit Transaction';
   document.getElementById('save-txn-btn').textContent='Save Changes';
+  document.getElementById('source-group').style.display=isIncome?'block':'none';
   // Hide cycle checkbox on edit mode
   document.getElementById('cycle-check-group').style.display='none';
-  renderTypeToggle();
   renderCatGrid();
   renderSourceSelect();
+  _updateTxnFooter();
   // Set source value after render
   setTimeout(()=>{
     if(t.incomeSourceId) document.getElementById('txn-source').value=t.incomeSourceId;
     document.getElementById('txn-amount-input').focus();
-  },300);
-  openModal('add-txn-modal');
+  },200);
+  _prevScreenId=document.querySelector('.screen.active')?.id||'home-screen';
+  showScreen('add-txn-screen');
 }
 
-function renderTypeToggle(){
-  const exp=document.getElementById('type-expense');
-  const inc=document.getElementById('type-income');
-  const isExp=state.txnType==='expense';
-  exp.classList.toggle('active',isExp);
-  inc.classList.toggle('active',!isExp);
-  document.getElementById('source-group').style.display=isExp?'none':'block';
-  document.getElementById('cycle-check-group').style.display=isExp?'none':'block';
-  // if tripId, lock to expense
-  if(state.currentTripId){exp.classList.add('active');inc.classList.remove('active');inc.style.opacity='.3';inc.style.pointerEvents='none';}
-  else{inc.style.opacity='';inc.style.pointerEvents='';}
-  // Reset cycle checkbox when switching types
-  if(isExp) _setCycleCheck(false);
-  _updateTxnFooter();
-  renderCatGrid();
-}
-
-document.getElementById('type-expense').addEventListener('click',()=>{state.txnType='expense';renderTypeToggle();});
-document.getElementById('type-income').addEventListener('click',()=>{if(!state.currentTripId){state.txnType='income';renderTypeToggle();}});
+// Back button for add-txn screen
+document.getElementById('add-txn-back').addEventListener('click',()=>{
+  showScreen(_prevScreenId);
+});
 
 function renderCatGrid(){
   const cats=state.categories.filter(c=>c.type===state.txnType);
@@ -1966,14 +1967,13 @@ function renderCatGrid(){
 
 function renderSourceSelect(){
   const sel=document.getElementById('txn-source');
-  sel.innerHTML='<option value="">No source</option>'+state.sources.filter(s=>s.userId===state.user.userId||s.userId).map(s=>`<option value="${s.sourceId}">${s.name}</option>`).join('');
+  sel.innerHTML='<option value="">Select source…</option>'+state.sources.filter(s=>s.userId===state.user.userId||s.userId).map(s=>`<option value="${s.sourceId}">${s.name}</option>`).join('');
 }
 
 // Amount input — system keyboard
 const txnAmountInput=document.getElementById('txn-amount-input');
 txnAmountInput.addEventListener('input',()=>{
   state.txnAmount=txnAmountInput.value;
-  document.getElementById('txn-amount-display').textContent=txnAmountInput.value||'0';
 });
 
 /* ── New Cycle checkbox + Slide to confirm ── */
@@ -2080,8 +2080,16 @@ async function _doSaveTxn(){
   const amount=parseFloat(document.getElementById('txn-amount-input').value);
   if(!amount||amount<=0){toast('Enter an amount','error');return;}
   if(!state.txnCat){toast('Select a category','error');return;}
+  // Income source is required for income transactions
+  if(state.txnType==='income'&&!document.getElementById('txn-source').value){
+    toast('Select an income source','error');
+    document.getElementById('txn-source').style.borderColor='var(--red)';
+    setTimeout(()=>{document.getElementById('txn-source').style.borderColor='transparent';},2000);
+    return;
+  }
   state.isSaving=true;
   const btn=document.getElementById('save-txn-btn');
+  const origText=btn.textContent;
   btn.disabled=true; btn.textContent='Saving…';
 
   const startCycle=_startNewCycle && state.txnType==='income';
@@ -2095,7 +2103,7 @@ async function _doSaveTxn(){
     tripId:state.currentTripId||'',
   };
 
-  closeModal('add-txn-modal');
+  showScreen(_prevScreenId);
 
   if(state.editingTxn){
     // EDIT mode: update in-place
@@ -2130,7 +2138,7 @@ async function _doSaveTxn(){
 
   state.isSaving=false;
   btn.disabled=false;
-  btn.textContent='Add Transaction';
+  btn.textContent=origText;
   state.editingTxn=null;
   _setCycleCheck(false);
 }
