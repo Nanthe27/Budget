@@ -12,7 +12,7 @@
 <meta name="screen-orientation" content="portrait">
 <meta name="x5-orientation" content="portrait">
 <meta name="full-screen" content="yes">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href='data:application/manifest+json,{"name":"budgetBynan","short_name":"Budget","description":"Personal budget tracker","start_url":"./","scope":"./","display":"standalone","orientation":"portrait","theme_color":"#0c0c0e","background_color":"#f7f7f5","icons":[{"src":"https://raw.githubusercontent.com/Nanthe27/Budget/02b41c9ee340c694bb67a8f4f8d27bfa08ad862b/logo.jpg","sizes":"any","type":"image/jpeg","purpose":"any maskable"}]}'>
 <title>budgetBynan</title>
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Nanthe27/Budget/02b41c9ee340c694bb67a8f4f8d27bfa08ad862b/logo.jpg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230c0c0e'/></svg>">
@@ -345,9 +345,6 @@ HOME SCREEN
 #qa-add-income .qa-icon{background:var(--green-bg);}
 #qa-add-income .qa-icon svg{stroke:var(--green);}
 #qa-add-income .qa-label{color:var(--green);}
-#qa-budgets .qa-icon{background:rgba(59,130,246,.12);}
-#qa-budgets .qa-icon svg{stroke:#3b82f6;}
-#qa-budgets .qa-label{color:#3b82f6;}
 #qa-trip .qa-icon{background:var(--amber-bg);}
 #qa-trip .qa-icon svg{stroke:var(--amber);}
 #qa-trip .qa-label{color:var(--amber);}
@@ -397,14 +394,12 @@ ANALYTICS
 .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .legend-name{flex:1;color:var(--text2);}
 .legend-pct{font-weight:700;font-family:var(--mono);color:var(--text);}
-.budget-list{padding:0 16px 16px;}
-@media(min-width:960px){.budget-list{padding:0 32px 16px;}}
-.budget-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;box-shadow:var(--shadow-sm);}
-.budget-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
-.budget-name{font-size:13px;font-weight:600;}
-.budget-amounts{font-size:12px;color:var(--text2);font-family:var(--mono);}
-.budget-bar-bg{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
-.budget-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.cat-spend-list{padding:0 16px 16px;}
+@media(min-width:960px){.cat-spend-list{padding:0 32px 16px;}}
+.cat-spend-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;box-shadow:var(--shadow-sm);}
+.cat-spend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.cat-spend-name{flex:1;font-size:13px;font-weight:600;}
+.cat-spend-amt{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--text);}
 
 /* ══════════════════════════════════════════
 SETTINGS / MORE
@@ -632,8 +627,8 @@ LOADING OVERLAY
 @keyframes loadBar{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
 .spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.sync-btn{position:relative;}
-.sync-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--text3);border:1.5px solid var(--surface);transition:background .4s;}
+.sync-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;}
+.sync-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);transition:background .4s;}
 .sync-dot.sync-ok{background:#22c55e;}
 .sync-dot.sync-syncing{background:#f59e0b;}
 .sync-dot.sync-error{background:#ef4444;}
@@ -749,7 +744,7 @@ LOADING OVERLAY
         <div style="font-size:12px;color:var(--text3);font-weight:500" id="greeting-time">Good morning</div>
         <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" id="home-username-display"></div>
       </div>
-      <button class="icon-btn sync-btn" id="sync-btn" title="Sync"><span class="sync-dot sync-ok"></span><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+      <div class="sync-wrap"><button class="icon-btn sync-btn" id="sync-btn" title="Sync"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button><span class="sync-dot sync-ok"></span></div>
       <button class="desktop-add-btn" id="desktop-add-btn">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Transaction
       </button>
@@ -800,11 +795,7 @@ LOADING OVERLAY
           <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
           <div class="qa-label">Income</div>
         </div>
-        <div class="quick-action" id="qa-budgets">
-          <div class="qa-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-          <div class="qa-label">Budgets</div>
-        </div>
-        <div class="quick-action" id="qa-trip">
+<div class="quick-action" id="qa-trip">
           <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
           <div class="qa-label">Trips</div>
         </div>
@@ -840,7 +831,7 @@ LOADING OVERLAY
         <span id="txn-month-label"></span>
         <button id="txn-next-month"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <button class="icon-btn sync-btn" id="sync-btn-txn" title="Sync"><span class="sync-dot sync-ok"></span><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+      <div class="sync-wrap"><button class="icon-btn sync-btn" id="sync-btn-txn" title="Sync"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button><span class="sync-dot sync-ok"></span></div>
       <button class="desktop-add-btn" id="desktop-add-btn-txn">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add
       </button>
@@ -867,7 +858,7 @@ LOADING OVERLAY
         <span id="ana-month-label"></span>
         <button id="ana-next-month"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <button class="icon-btn sync-btn" id="sync-btn-ana" title="Sync"><span class="sync-dot sync-ok"></span><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+      <div class="sync-wrap"><button class="icon-btn sync-btn" id="sync-btn-ana" title="Sync"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button><span class="sync-dot sync-ok"></span></div>
       <button class="desktop-add-btn" id="desktop-add-btn-ana">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add
       </button>
@@ -886,10 +877,9 @@ LOADING OVERLAY
         </div>
       </div>
       <div class="section-header">
-        <div class="section-title" style="padding:0">Budgets</div>
-        <div class="section-link" id="edit-budgets-link">Edit</div>
+        <div class="section-title" style="padding:0">Spending by Category</div>
       </div>
-      <div class="budget-list" id="budget-list"></div>
+      <div class="cat-spend-list" id="cat-spend-list"></div>
     </div>
   </div>
 </div>
@@ -952,7 +942,7 @@ LOADING OVERLAY
   <div class="main-layout">
     <div class="page-header">
       <h1>Settings</h1>
-      <button class="icon-btn sync-btn" id="sync-btn-more" title="Sync"><span class="sync-dot sync-ok"></span><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+      <div class="sync-wrap"><button class="icon-btn sync-btn" id="sync-btn-more" title="Sync"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button><span class="sync-dot sync-ok"></span></div>
       <button class="icon-btn" id="dark-mode-toggle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
     </div>
     <div class="page-content">
@@ -982,27 +972,6 @@ LOADING OVERLAY
           <input class="form-input" id="profile-img-url" type="url" placeholder="https://...image.jpg">
         </div>
         <button class="btn-primary" id="save-profile-img">Save Photo</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ BUDGETS ══════ -->
-
-<div class="screen" id="budgets-screen">
-  <div class="main-layout">
-    <div class="page-header">
-      <button class="icon-btn" id="budgets-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <h1>Budgets</h1>
-      <button class="desktop-add-btn" id="add-budget-btn" style="display:flex;padding:6px 14px;font-size:12px">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Set Budget
-      </button>
-    </div>
-    <div class="page-content">
-      <div style="padding:0 16px 8px;font-size:12px;color:var(--text3)">Monthly spending limits per category. View actual vs budget in Analytics.</div>
-      <div id="budgets-list" style="padding:0 16px 12px"></div>
-      <div style="padding:0 16px 16px">
-        <button class="btn-secondary" id="add-budget-btn-2">+ Set New Budget</button>
       </div>
     </div>
   </div>
@@ -1118,32 +1087,6 @@ LOADING OVERLAY
     </div>
     <div class="sheet-footer">
       <button class="btn-primary" id="save-txn-btn">Add Transaction</button>
-    </div>
-  </div>
-</div>
-
-<!-- Budget Modal -->
-
-<div class="modal-overlay" id="budget-modal">
-  <div class="backdrop" id="budget-backdrop"></div>
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header">
-      <h3>Set Budget</h3>
-      <button class="sheet-close" id="budget-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="sheet-body">
-      <div class="form-group">
-        <label class="form-label">Category</label>
-        <select class="form-input" id="budget-cat"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Monthly Limit ($)</label>
-        <input class="form-input" id="budget-amount" type="number" placeholder="e.g. 500" inputmode="decimal">
-      </div>
-    </div>
-    <div class="sheet-footer">
-      <button class="btn-primary" id="save-budget-btn">Save Budget</button>
     </div>
   </div>
 </div>
@@ -1329,7 +1272,7 @@ const COLORS=['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5c
 const now=new Date();
 const state={
   user:null, users:[], theme:localStorage.getItem('bbn-theme')||'auto',
-  transactions:[], categories:[], budgets:[], sources:[], summary:null,
+  transactions:[], categories:[], sources:[], summary:null,
   trips:[], activeTrip:null,
   txnType:'expense', txnAmount:'', txnCat:'', txnSource:'',
   catFilter:'expense', selectedColor:COLORS[0],
@@ -1387,7 +1330,7 @@ function confirmDlg(title,msg,okLabel='Delete'){
 ══════════════════════════════════════════ */
 function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
-['add-txn','add-source','budget','add-cat','add-trip'].forEach(id=>{
+['add-txn','add-source','add-cat','add-trip'].forEach(id=>{
   document.getElementById(id+'-backdrop')?.addEventListener('click',()=>closeModal(id+'-modal'));
   document.getElementById(id+'-close')?.addEventListener('click',()=>closeModal(id+'-modal'));
 });
@@ -1643,7 +1586,6 @@ function afterLogin(){
       const d=JSON.parse(cached);
       if(d.categories) state.categories=d.categories;
       if(d.sources)    state.sources=d.sources;
-      if(d.budgets)    state.budgets=d.budgets;
       if(d.trips)      state.trips=d.trips;
       if(d.transactions) state.transactions=d.transactions;
     }catch(e){}
@@ -1674,7 +1616,6 @@ async function syncInBackground(){
   if(!r.success){ setSyncStatus('error'); return; }
   if(r.categories) state.categories=r.categories;
   if(r.sources)    state.sources=r.sources;
-  if(r.budgets)    state.budgets=r.budgets;
   if(r.trips)      state.trips=r.trips;
   if(r.transactions) state.transactions=r.transactions;
   saveCache();
@@ -1704,14 +1645,13 @@ function saveCache(){
     localStorage.setItem('bbn-data-'+state.user.userId, JSON.stringify({
       categories: state.categories,
       sources: state.sources,
-      budgets: state.budgets,
       trips: state.trips,
       transactions: state.transactions.slice(0,500), // keep last 500
       cachedAt: Date.now(),
     }));
   }catch(e){
     // Storage full — try with fewer transactions
-    try{localStorage.setItem('bbn-data-'+state.user.userId,JSON.stringify({categories:state.categories,sources:state.sources,budgets:state.budgets,trips:state.trips,transactions:state.transactions.slice(0,100),cachedAt:Date.now()}));}catch(e2){}
+    try{localStorage.setItem('bbn-data-'+state.user.userId,JSON.stringify({categories:state.categories,sources:state.sources,trips:state.trips,transactions:state.transactions.slice(0,100),cachedAt:Date.now()}));}catch(e2){}
   }
 }
 
@@ -2165,7 +2105,7 @@ function renderAnalytics(s){
     document.getElementById('ana-vsmonth-label').textContent=`${diff>0?'+':''}${diff}% vs last month`;
   }
   renderDonut(s.expenseByCategory);
-  renderBudgets(s.expenseByCategory);
+  renderCatSpend(s.expenseByCategory);
 }
 
 function renderDonut(expCat){
@@ -2187,40 +2127,17 @@ function renderDonut(expCat){
   svg.innerHTML=arcs;
 }
 
-function renderBudgets(expCat){
-  const el=document.getElementById('budget-list');
-  if(!state.budgets.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>No budgets set</p></div>';return;}
-  el.innerHTML=state.budgets.filter(b=>b.userId===state.user.userId).map(b=>{
-    const spent=expCat[b.category]||0; const pct=Math.min((spent/b.amount)*100,100);
-    const color=pct>=100?'var(--red)':pct>=75?'var(--amber)':'var(--green)';
-    return`<div class="budget-item">
-      <div class="budget-row"><div class="budget-name">${b.category}</div><div class="budget-amounts">${fmt(spent)} / ${fmt(b.amount)}</div></div>
-      <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-    </div>`;
+function renderCatSpend(expCat){
+  const el=document.getElementById('cat-spend-list');
+  if(!el) return;
+  const entries=Object.entries(expCat||{}).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  if(!entries.length){el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>No expense data</p></div>';return;}
+  el.innerHTML=entries.map(([name,val])=>{
+    const cat=getCat(name,'expense');
+    return`<div class="cat-spend-item"><div class="cat-spend-dot" style="background:${cat.color}"></div><div class="cat-spend-name">${name}</div><div class="cat-spend-amt">${fmt(val)}</div></div>`;
   }).join('');
 }
 
-/* ══════════════════════════════════════════
-   BUDGET MODAL
-══════════════════════════════════════════ */
-function openBudgetModal(){
-  const sel=document.getElementById('budget-cat');
-  sel.innerHTML=state.categories.filter(c=>c.type==='expense').map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
-  document.getElementById('budget-amount').value='';
-  openModal('budget-modal');
-}
-document.getElementById('save-budget-btn').addEventListener('click',async()=>{
-  const cat=document.getElementById('budget-cat').value;
-  const amount=parseFloat(document.getElementById('budget-amount').value);
-  if(!amount||amount<=0){toast('Enter a valid amount','error');return;}
-  closeModal('budget-modal');
-  const i=state.budgets.findIndex(b=>b.userId===state.user.userId&&b.category===cat);
-  if(i>-1) state.budgets[i].amount=amount;
-  else state.budgets.push({budgetId:'tmp'+Date.now(),userId:state.user.userId,category:cat,amount,period:'monthly'});
-  toast('Budget saved','success');
-  await api('setBudget',{userId:state.user.userId,category:cat,amount,period:'monthly'});
-  renderBudgetsScreen();
-});
 
 /* ══════════════════════════════════════════
    TRIPS
@@ -2448,11 +2365,6 @@ function renderMore(){
       <div class="menu-label">Income Sources</div>
       <svg class="menu-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
-    <div class="menu-item" id="ml-budgets-more">
-      <div class="menu-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
-      <div class="menu-label">Budgets</div>
-      <svg class="menu-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
     <div class="menu-item" id="ml-export">
       <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
       <div class="menu-label">Export Report</div>
@@ -2468,7 +2380,6 @@ function renderMore(){
     </div>`;
   document.getElementById('ml-categories').addEventListener('click',()=>{showScreen('categories-screen');renderCatList();});
   document.getElementById('ml-income-sources').addEventListener('click',()=>{showScreen('sources-screen');renderSourcesList();});
-  document.getElementById('ml-budgets-more').addEventListener('click',()=>{showScreen('budgets-screen');renderBudgetsScreen();});
   document.getElementById('ml-export').addEventListener('click',()=>openModal('export-modal'));
   document.getElementById('ml-theme').addEventListener('click',()=>{toggleTheme();renderMore();});
   document.getElementById('ml-logout').addEventListener('click',logout);
@@ -2598,10 +2509,8 @@ document.getElementById('desktop-add-btn-txn').addEventListener('click',()=>open
 document.getElementById('desktop-add-btn-ana').addEventListener('click',()=>openAddTxnModal('expense'));
 document.getElementById('qa-add-expense').addEventListener('click',()=>openAddTxnModal('expense'));
 document.getElementById('qa-add-income').addEventListener('click',()=>openAddTxnModal('income'));
-document.getElementById('qa-budgets').addEventListener('click',()=>{showScreen('budgets-screen');renderBudgetsScreen();});
 document.getElementById('qa-trip').addEventListener('click',()=>navTo('trips'));
 document.getElementById('see-all-link').addEventListener('click',()=>navTo('transactions'));
-document.getElementById('edit-budgets-link').addEventListener('click',()=>{showScreen('budgets-screen');renderBudgetsScreen();});
 document.getElementById('logout-btn')?.addEventListener('click',logout);
 document.getElementById('sidebar-logout')?.addEventListener('click',logout);
 
@@ -2625,78 +2534,6 @@ function logout(){
   initLogin();
 }
 
-/* ══════════════════════════════════════════
-   BUDGETS SCREEN
-══════════════════════════════════════════ */
-async function renderBudgetsScreen(){
-  const r=await api('getCategories',{userId:state.user.userId});
-  if(r.success) state.categories=r.categories;
-  const rb=await api('getBudgets',{userId:state.user.userId});
-  if(rb.success) state.budgets=rb.budgets;
-
-  // Get current month spending per category
-  const m=state.anaMonth||now.getMonth()+1;
-  const y=state.anaYear||now.getFullYear();
-  const expCat={};
-  state.transactions.filter(t=>{
-    const d=safeDate(t.date);
-    return !isNaN(d) && d.getMonth()+1===m && d.getFullYear()===y && t.type==='expense';
-  }).forEach(t=>{expCat[t.category]=(expCat[t.category]||0)+t.amount;});
-
-  const el=document.getElementById('budgets-list');
-  const myBudgets=state.budgets.filter(b=>b.userId===state.user.userId);
-
-  if(!myBudgets.length){
-    el.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><p>No budgets set.<br>Tap "Set New Budget" to add one.</p></div>`;
-    return;
-  }
-
-  el.innerHTML=myBudgets.map(b=>{
-    const spent=expCat[b.category]||0;
-    const pct=Math.min((spent/b.amount)*100,100);
-    const color=pct>=100?'var(--red)':pct>=75?'var(--amber)':'var(--green)';
-    const rem=b.amount-spent;
-    return`<div class="budget-item" style="margin-bottom:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px">
-      <div class="budget-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div style="font-size:14px;font-weight:600">${b.category}</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-size:12px;color:var(--text3);font-family:var(--mono)">${fmt(spent)} / ${fmt(b.amount)}</div>
-          <button onclick="editBudget('${b.budgetId}')" style="background:var(--bg3);border:none;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--text2);stroke-width:2;fill:none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-          <button onclick="deleteBudget('${b.budgetId}','${b.category}')" style="background:var(--red-bg);border:none;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--red);stroke-width:2;fill:none"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-        </div>
-      </div>
-      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:6px">
-        <div style="width:${pct}%;height:100%;border-radius:3px;background:${color};transition:width .5s ease"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:11px;color:${color};font-weight:600">${pct.toFixed(0)}% used</div>
-        <div style="font-size:11px;color:var(--text3)">${rem>=0?fmt(rem)+' remaining':'$'+Math.abs(rem).toFixed(2)+' over'}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function editBudget(budgetId){
-  const b=state.budgets.find(x=>x.budgetId===budgetId);
-  if(!b) return;
-  const sel=document.getElementById('budget-cat');
-  sel.innerHTML=state.categories.filter(c=>c.type==='expense').map(c=>`<option value="${c.name}"${c.name===b.category?' selected':''}>${c.name}</option>`).join('');
-  document.getElementById('budget-amount').value=b.amount;
-  openModal('budget-modal');
-}
-
-async function deleteBudget(budgetId,category){
-  if(!await confirmDlg(`Delete budget for "${category}"?`,'This budget will be removed permanently.')) return;
-  state.budgets=state.budgets.filter(b=>b.budgetId!==budgetId);
-  saveCache();
-  toast('Budget deleted','success');
-  renderBudgetsScreen();
-  await api('deleteBudget',{budgetId,userId:state.user.userId});
-}
-
-document.getElementById('budgets-back').addEventListener('click',()=>{showScreen('more-screen');renderMore();});
-document.getElementById('add-budget-btn').addEventListener('click',openBudgetModal);
-document.getElementById('add-budget-btn-2').addEventListener('click',openBudgetModal);
 
 /* ══════════════════════════════════════════
    EXPORT TO EXCEL (CSV download)
@@ -2759,7 +2596,7 @@ try{
       document.getElementById('home-username-display').textContent=state.user.name;
       showScreen('home-screen');
       const cached=localStorage.getItem('bbn-data-'+state.user.userId);
-      if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.budgets)state.budgets=d.budgets;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
+      if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
       if(state.transactions.length) renderHomeFromTransactions(state.transactions);
       syncInBackground();
     }catch(e){localStorage.removeItem('bbn-user');initLogin();}
