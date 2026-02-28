@@ -632,7 +632,12 @@ LOADING OVERLAY
 @keyframes loadBar{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
 .spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.icon-btn.syncing svg{animation:spin .7s linear infinite;}
+.sync-btn{position:relative;}
+.sync-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--text3);border:1.5px solid var(--surface);transition:background .4s;}
+.sync-dot.sync-ok{background:#22c55e;}
+.sync-dot.sync-syncing{background:#f59e0b;}
+.sync-dot.sync-error{background:#ef4444;}
+.sync-btn.syncing svg{animation:spin .7s linear infinite;}
 /* red back btn on pin pad */
 </style>
 
@@ -744,7 +749,7 @@ LOADING OVERLAY
         <div style="font-size:12px;color:var(--text3);font-weight:500" id="greeting-time">Good morning</div>
         <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" id="home-username-display"></div>
       </div>
-      <button class="icon-btn" id="sync-btn" title="Sync"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+      <button class="icon-btn sync-btn" id="sync-btn" title="Sync"><span class="sync-dot sync-ok"></span><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
       <button class="desktop-add-btn" id="desktop-add-btn">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Transaction
       </button>
@@ -835,6 +840,7 @@ LOADING OVERLAY
         <span id="txn-month-label"></span>
         <button id="txn-next-month"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
+      <button class="icon-btn sync-btn" id="sync-btn-txn" title="Sync"><span class="sync-dot sync-ok"></span><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
       <button class="desktop-add-btn" id="desktop-add-btn-txn">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add
       </button>
@@ -861,6 +867,7 @@ LOADING OVERLAY
         <span id="ana-month-label"></span>
         <button id="ana-next-month"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
+      <button class="icon-btn sync-btn" id="sync-btn-ana" title="Sync"><span class="sync-dot sync-ok"></span><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
       <button class="desktop-add-btn" id="desktop-add-btn-ana">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add
       </button>
@@ -945,6 +952,7 @@ LOADING OVERLAY
   <div class="main-layout">
     <div class="page-header">
       <h1>Settings</h1>
+      <button class="icon-btn sync-btn" id="sync-btn-more" title="Sync"><span class="sync-dot sync-ok"></span><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
       <button class="icon-btn" id="dark-mode-toggle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
     </div>
     <div class="page-content">
@@ -1645,25 +1653,37 @@ function afterLogin(){
   syncInBackground();
 }
 
+function setSyncStatus(status){
+  // status: 'syncing' | 'ok' | 'error'
+  document.querySelectorAll('.sync-dot').forEach(d=>{
+    d.className='sync-dot';
+    if(status==='ok') d.classList.add('sync-ok');
+    else if(status==='syncing') d.classList.add('sync-syncing');
+    else if(status==='error') d.classList.add('sync-error');
+  });
+  document.querySelectorAll('.sync-btn').forEach(b=>{
+    b.classList.toggle('syncing',status==='syncing');
+  });
+}
+
 async function syncInBackground(){
   if(!state.user) return;
+  setSyncStatus('syncing');
   // ONE request instead of 5 — ~5x faster
   const r=await api('getAll',{userId:state.user.userId});
-  if(!r.success) return;
+  if(!r.success){ setSyncStatus('error'); return; }
   if(r.categories) state.categories=r.categories;
   if(r.sources)    state.sources=r.sources;
   if(r.budgets)    state.budgets=r.budgets;
   if(r.trips)      state.trips=r.trips;
   if(r.transactions) state.transactions=r.transactions;
   saveCache();
+  setSyncStatus('ok');
   refreshCurrentScreen();
 }
 
 async function forceSync(){
-  const btn=document.getElementById('sync-btn');
-  if(btn) btn.classList.add('syncing');
   await syncInBackground();
-  if(btn) btn.classList.remove('syncing');
   toast('Synced ✓','success');
 }
 
@@ -1676,7 +1696,7 @@ function refreshCurrentScreen(){
   else if(active==='trip-detail-screen' && state.activeTrip) loadTripDetail(state.activeTrip);
 }
 
-document.getElementById('sync-btn').addEventListener('click',forceSync);
+document.querySelectorAll('.sync-btn').forEach(b=>b.addEventListener('click',forceSync));
 
 function saveCache(){
   if(!state.user) return;
@@ -2666,8 +2686,9 @@ function editBudget(budgetId){
 }
 
 async function deleteBudget(budgetId,category){
-  if(!confirm(`Delete budget for "${category}"?`)) return;
+  if(!await confirmDlg(`Delete budget for "${category}"?`,'This budget will be removed permanently.')) return;
   state.budgets=state.budgets.filter(b=>b.budgetId!==budgetId);
+  saveCache();
   toast('Budget deleted','success');
   renderBudgetsScreen();
   await api('deleteBudget',{budgetId,userId:state.user.userId});
