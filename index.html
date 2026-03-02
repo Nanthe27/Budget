@@ -884,17 +884,17 @@ LOADING OVERLAY
   <div class="main-layout">
     <div class="page-header">
       <h1>Analytics</h1>
-      <div class="month-nav">
-        <button id="ana-prev-month"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <span id="ana-month-label"></span>
-        <button id="ana-next-month"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      </div>
       <div class="sync-wrap"><button class="icon-btn sync-btn" id="sync-btn-ana" title="Sync"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button></div>
       <button class="desktop-add-btn" id="desktop-add-btn-ana">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add
       </button>
     </div>
     <div class="page-content">
+      <!-- Cycle/Period label -->
+      <div id="ana-period-banner" style="padding:0 16px 10px;display:flex;align-items:center;gap:8px">
+        <div id="ana-period-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
+        <span id="ana-period-label" style="font-size:13px;font-weight:600;color:var(--text2)">Current Cycle</span>
+      </div>
       <div class="ana-cards">
         <div class="ac"><div class="ac-label">Income</div><div class="ac-value green" id="ana-income">$0</div></div>
         <div class="ac"><div class="ac-label">Expenses</div><div class="ac-value red" id="ana-expense">$0</div></div>
@@ -2202,8 +2202,7 @@ document.getElementById('hero-period-today').addEventListener('click',()=>{
 });
 document.getElementById('txn-prev-month').addEventListener('click',()=>{state.txnMonth--;if(state.txnMonth<1){state.txnMonth=12;state.txnYear--;}loadTransactions();});
 document.getElementById('txn-next-month').addEventListener('click',()=>{state.txnMonth++;if(state.txnMonth>12){state.txnMonth=1;state.txnYear++;}loadTransactions();});
-document.getElementById('ana-prev-month').addEventListener('click',()=>{state.anaMonth--;if(state.anaMonth<1){state.anaMonth=12;state.anaYear--;}loadAnalytics();});
-document.getElementById('ana-next-month').addEventListener('click',()=>{state.anaMonth++;if(state.anaMonth>12){state.anaMonth=1;state.anaYear++;}loadAnalytics();});
+// Analytics month nav removed — analytics now follows cycle
 
 /* ══════════════════════════════════════════
    TRANSACTIONS SCREEN
@@ -2246,31 +2245,73 @@ document.getElementById('txn-filter-row').querySelectorAll('.filter-chip').forEa
 });
 
 /* ══════════════════════════════════════════
-   ANALYTICS
+   ANALYTICS — cycle-based
 ══════════════════════════════════════════ */
-async function loadAnalytics(){
-  // Render from cached summary first if available
-  if(state.summary) renderAnalytics(state.summary);
-  const r=await api('getSummary',{userId:state.user.userId,month:state.anaMonth,year:state.anaYear});
-  if(!r.success) return;
-  state.summary=r.summary;
-  renderAnalytics(r.summary);
+function loadAnalytics(){
+  renderAnalyticsFromCycle(state.transactions);
 }
 
-function renderAnalytics(s){
-  document.getElementById('ana-month-label').textContent=monthName(state.anaMonth,state.anaYear);
-  document.getElementById('ana-income').textContent=fmt(s.totalIncome);
-  document.getElementById('ana-expense').textContent=fmt(s.totalExpense);
-  document.getElementById('ana-balance').textContent=fmt(s.balance);
-  document.getElementById('ana-balance').className='ac-value '+(s.balance>=0?'green':'red');
-  if(s.prevMonthExpense){
-    const diff=((s.totalExpense-s.prevMonthExpense)/s.prevMonthExpense*100).toFixed(1);
-    document.getElementById('ana-vsmonth').textContent=fmt(s.totalExpense-s.prevMonthExpense,true);
-    document.getElementById('ana-vsmonth').className='ac-value '+(+diff<=0?'green':'red');
-    document.getElementById('ana-vsmonth-label').textContent=`${diff>0?'+':''}${diff}% vs last month`;
+function _getCycleTxns(txns){
+  const allSalaries=txns.filter(t=>t.isSalary===true).sort((a,b)=>safeDate(b.date)-safeDate(a.date));
+  const lastSalary=allSalaries[0]||null;
+  if(lastSalary){
+    const cycleStart=safeDate(lastSalary.date);
+    return {txns:txns.filter(t=>safeDate(t.date)>=cycleStart),cycleStart,hasCycle:true};
   }
-  renderDonut(s.expenseByCategory);
-  renderCatSpend(s.expenseByCategory);
+  // Fallback: current month
+  const now=new Date();
+  const m=now.getMonth()+1, y=now.getFullYear();
+  return {txns:txns.filter(t=>{const d=safeDate(t.date);return !isNaN(d)&&(d.getMonth()+1)===m&&d.getFullYear()===y;}),cycleStart:null,hasCycle:false};
+}
+
+function renderAnalyticsFromCycle(txns){
+  const {txns:cycleTxns,cycleStart,hasCycle}=_getCycleTxns(txns);
+
+  // Period label
+  const periodLabel=document.getElementById('ana-period-label');
+  const periodDot=document.getElementById('ana-period-dot');
+  if(hasCycle){
+    const d=cycleStart;
+    const startStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const todayStr2=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    periodLabel.textContent='Cycle: '+startStr+' → '+todayStr2;
+    periodDot.style.background='var(--green)';
+  } else {
+    periodLabel.textContent=monthName(new Date().getMonth()+1,new Date().getFullYear())+' (no active cycle)';
+    periodDot.style.background='var(--text3)';
+  }
+
+  const inc=cycleTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const exp=cycleTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const bal=inc-exp;
+
+  document.getElementById('ana-income').textContent=fmt(inc);
+  document.getElementById('ana-expense').textContent=fmt(exp);
+  document.getElementById('ana-balance').textContent=fmt(bal);
+  document.getElementById('ana-balance').className='ac-value '+(bal>=0?'green':'red');
+
+  // Spending rate: daily average
+  if(hasCycle){
+    const days=Math.max(1,Math.ceil((Date.now()-cycleStart.getTime())/(1000*60*60*24)));
+    const daily=exp/days;
+    document.getElementById('ana-vsmonth').textContent=fmt(daily)+'/day';
+    document.getElementById('ana-vsmonth').className='ac-value';
+    document.getElementById('ana-vsmonth-label').textContent=days+' day'+(days>1?'s':'')+' in cycle';
+  } else {
+    document.getElementById('ana-vsmonth').textContent='—';
+    document.getElementById('ana-vsmonth-label').textContent='Start a cycle to track';
+  }
+
+  // Build expense by category from cycle txns
+  const expByCategory={};
+  cycleTxns.filter(t=>t.type==='expense').forEach(t=>{
+    expByCategory[t.category]=(expByCategory[t.category]||0)+t.amount;
+  });
+  renderDonut(expByCategory);
+  renderCatSpend(expByCategory);
+
+  // Store for category detail access
+  state._anaCycleTxns=cycleTxns;
 }
 
 function renderDonut(expCat){
@@ -2310,15 +2351,15 @@ function openCatDetail(catName){
   const cat=getCat(catName,'expense');
   document.getElementById('cat-detail-title').textContent=catName;
   document.getElementById('cat-detail-dot').style.background=cat.color;
-  const txns=state.transactions.filter(t=>
+  // Use cycle transactions stored during analytics render
+  const pool=state._anaCycleTxns||state.transactions;
+  const txns=pool.filter(t=>
     t.type==='expense' &&
-    t.category===catName &&
-    new Date(t.date).getMonth()+1===state.anaMonth &&
-    new Date(t.date).getFullYear()===state.anaYear
+    t.category===catName
   ).sort((a,b)=>new Date(b.date)-new Date(a.date));
   const body=document.getElementById('cat-detail-body');
   if(!txns.length){
-    body.innerHTML='<div class="empty-state" style="padding:24px 0"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>No records this month</p></div>';
+    body.innerHTML='<div class="empty-state" style="padding:24px 0"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>No records this cycle</p></div>';
   } else {
     body.innerHTML=txns.map(t=>{
       const d=new Date(t.date);
