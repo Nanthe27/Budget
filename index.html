@@ -112,7 +112,7 @@ DESKTOP
 .screen.active{display:flex;}
 .bottom-nav{display:none!important;}
 .desktop-add-btn{display:flex!important;}
-#mobile-add-trip-btn{display:none!important;}
+#mobile-add-trip-btn,#mobile-add-deposit-btn,#mobile-add-saving-btn{display:none!important;}
 }
 @media(max-width:959px){
 .sidebar{display:none!important;}
@@ -379,6 +379,45 @@ HOME SCREEN
 #qa-trip .qa-icon{background:var(--amber-bg);}
 #qa-trip .qa-icon svg{stroke:var(--amber);}
 #qa-trip .qa-label{color:var(--amber);}
+#qa-saving .qa-icon{background:var(--blue-bg);}
+#qa-saving .qa-icon svg{stroke:var(--blue);}
+#qa-saving .qa-label{color:var(--blue);}
+/* ══ SAVINGS ══ */
+.saving-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;cursor:pointer;box-shadow:var(--shadow-sm);transition:all .15s;}
+.saving-card:active{transform:scale(.98);}
+.saving-card-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.saving-card-icon{width:36px;height:36px;border-radius:var(--r-sm);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.saving-card-icon svg{width:16px;height:16px;stroke:var(--blue);stroke-width:1.8;fill:none;}
+.saving-card-name{font-size:15px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.saving-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px;}
+.saving-status.active{background:var(--green-bg);color:var(--green);}
+.saving-status.ended{background:var(--bg3);color:var(--text3);}
+.saving-type-badge{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.saving-progress-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.saving-saved{font-weight:600;color:var(--blue);}
+.saving-target{color:var(--text3);}
+.saving-bar-bg{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.saving-bar-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .4s ease;}
+.saving-detail-hero{margin:10px 16px 14px;background:var(--blue);border-radius:var(--r-xl);padding:22px;color:#fff;position:relative;overflow:hidden;}
+.saving-detail-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:140px;height:140px;background:rgba(255,255,255,.08);border-radius:50%;}
+.sdh-name{font-size:20px;font-weight:800;margin-bottom:3px;color:#fff;}
+.sdh-dates{font-size:12px;opacity:.7;margin-bottom:16px;color:#fff;}
+.sdh-label{font-size:11px;opacity:.65;margin-bottom:4px;color:#fff;}
+.sdh-balance{font-size:32px;font-weight:800;font-family:var(--mono);letter-spacing:-1px;color:#fff;}
+.sdh-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.sdh-stat{background:rgba(255,255,255,.12);border-radius:var(--r);padding:10px;}
+.sdh-stat-label{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#fff;}
+.sdh-stat-value{font-size:15px;font-weight:700;font-family:var(--mono);color:#fff;}
+.saving-type-row{display:flex;background:var(--bg3);border-radius:var(--r);padding:3px;gap:3px;margin-bottom:10px;}
+.saving-type-btn{flex:1;text-align:center;padding:7px;border-radius:calc(var(--r) - 2px);font-size:13px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s;}
+.saving-type-btn.active{background:var(--blue);color:#fff;}
+/* ══ PERFORMANCE ══ */
+.screen{contain:layout style;}
+.modal-overlay{will-change:opacity;}
+.bottom-sheet{will-change:transform,opacity;}
+.page-content{overscroll-behavior:contain;}
+.numpad-btn,.quick-action,.menu-item,.txn-item,.saving-card,.sidebar-item{touch-action:manipulation;}
+.bottom-nav{will-change:transform;}
 .qa-label{font-size:11px;font-weight:600;color:var(--text2);}
 
 /* spending chart */
@@ -715,6 +754,9 @@ LOADING OVERLAY
     <div class="sidebar-item" data-screen="trips" id="sb-trips">
       <div class="sico"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>Trips
     </div>
+    <div class="sidebar-item" data-screen="savings" id="sb-savings">
+      <div class="sico"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>Savings
+    </div>
     <div class="sidebar-item" data-screen="more" id="sb-more">
       <div class="sico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>Settings
     </div>
@@ -763,6 +805,7 @@ LOADING OVERLAY
       <button class="numpad-btn" data-n="0">0</button>
       <button class="numpad-btn empty"></button>
     </div>
+    <div id="login-version" style="text-align:center;font-size:11px;color:var(--text3);margin-top:14px;font-weight:500;letter-spacing:.3px"></div>
   </div>
 </div>
 
@@ -826,9 +869,13 @@ LOADING OVERLAY
           <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg></div>
           <div class="qa-label">Income</div>
         </div>
-<div class="quick-action" id="qa-trip">
+        <div class="quick-action" id="qa-trip">
           <div class="qa-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
           <div class="qa-label">Trips</div>
+        </div>
+        <div class="quick-action" id="qa-saving">
+          <div class="qa-icon"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <div class="qa-label">Savings</div>
         </div>
       </div>
       <!-- spending chart -->
@@ -963,6 +1010,57 @@ LOADING OVERLAY
         </button>
       </div>
       <div class="txn-list" id="trip-txn-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SAVINGS ══════ -->
+
+<div class="screen" id="savings-screen">
+  <div class="main-layout">
+    <div class="page-header">
+      <h1>Savings</h1>
+      <button class="icon-btn" id="mobile-add-saving-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="desktop-add-btn" id="desktop-add-saving-btn" style="display:flex">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Goal
+      </button>
+    </div>
+    <div class="page-content"><div id="savings-list"></div></div>
+  </div>
+</div>
+
+<!-- ══════ SAVING DETAIL ══════ -->
+
+<div class="screen" id="saving-detail-screen">
+  <div class="main-layout">
+    <div class="page-header">
+      <button class="icon-btn" id="saving-detail-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <h1 id="saving-detail-title">Saving</h1>
+      <button class="icon-btn" id="mobile-add-deposit-btn" title="Add Deposit" style="display:none"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="icon-btn" id="saving-edit-btn" title="Edit Goal"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+      <button class="icon-btn" id="saving-delete-btn" title="Delete Goal" style="display:none"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      <button class="icon-btn" id="saving-end-btn" title="End Goal"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg></button>
+    </div>
+    <div class="page-content">
+      <div class="saving-detail-hero">
+        <div style="position:relative;z-index:1">
+          <div class="sdh-name" id="sdh-name"></div>
+          <div class="sdh-dates" id="sdh-dates"></div>
+          <div class="sdh-label">Saved So Far</div>
+          <div class="sdh-balance" id="sdh-balance">$0</div>
+          <div class="sdh-stats">
+            <div class="sdh-stat"><div class="sdh-stat-label">Target</div><div class="sdh-stat-value" id="sdh-target">—</div></div>
+            <div class="sdh-stat"><div class="sdh-stat-label">Remaining</div><div class="sdh-stat-value" id="sdh-remaining">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="section-header" style="padding:0 16px 8px">
+        <div class="section-title" style="padding:0">Deposits</div>
+        <button class="desktop-add-btn" id="saving-add-deposit-btn" style="display:flex;padding:6px 14px;font-size:12px">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Deposit
+        </button>
+      </div>
+      <div class="txn-list" id="saving-deposit-list"></div>
     </div>
   </div>
 </div>
@@ -1134,6 +1232,77 @@ LOADING OVERLAY
 <!-- ══════════════════════════════════════════
      MODALS
 ══════════════════════════════════════════ -->
+
+<!-- Add Saving Modal -->
+<div class="modal-overlay" id="add-saving-modal">
+  <div class="backdrop"></div>
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">New Saving Goal</div>
+      <button class="icon-btn" id="add-saving-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Goal Name</label><input class="form-input" id="saving-name" placeholder="e.g. Emergency Fund" maxlength="50"></div>
+      <div class="form-group"><label class="form-label">Target Amount (optional)</label><input class="form-input" id="saving-target" type="number" min="0" placeholder="Leave blank for open-ended"></div>
+      <div class="form-group"><label class="form-label">Type</label>
+        <div class="saving-type-row" id="add-saving-type-row">
+          <div class="saving-type-btn active" data-stype="flexible">Flexible</div>
+          <div class="saving-type-btn" data-stype="selected">Selected Period</div>
+        </div>
+      </div>
+      <div class="form-group" id="saving-deadline-group" style="display:none"><label class="form-label">Deadline</label><input class="form-input" id="saving-deadline" type="date"></div>
+      <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="saving-start" type="date"></div>
+      <button class="btn-primary" id="save-saving-btn">Create Goal</button>
+    </div>
+  </div>
+  <div id="add-saving-backdrop" class="backdrop" style="position:absolute;inset:0;z-index:-1"></div>
+</div>
+
+<!-- Add Deposit Modal -->
+<div class="modal-overlay" id="add-deposit-modal">
+  <div class="backdrop"></div>
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Add Deposit</div>
+      <button class="icon-btn" id="add-deposit-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Amount</label><input class="form-input" id="deposit-amount" type="number" min="0" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Note (optional)</label><input class="form-input" id="deposit-note" placeholder="e.g. Monthly contribution"></div>
+      <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="deposit-date" type="date"></div>
+      <button class="btn-primary" id="save-deposit-btn">Add Deposit</button>
+    </div>
+  </div>
+  <div id="add-deposit-backdrop" class="backdrop" style="position:absolute;inset:0;z-index:-1"></div>
+</div>
+
+<!-- Edit Saving Modal -->
+<div class="modal-overlay" id="edit-saving-modal">
+  <div class="backdrop"></div>
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Edit Goal</div>
+      <button class="icon-btn" id="edit-saving-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Goal Name</label><input class="form-input" id="edit-saving-name" maxlength="50"></div>
+      <div class="form-group"><label class="form-label">Target Amount (optional)</label><input class="form-input" id="edit-saving-target" type="number" min="0"></div>
+      <div class="form-group"><label class="form-label">Type</label>
+        <div class="saving-type-row" id="edit-saving-type-row">
+          <div class="saving-type-btn active" data-stype="flexible">Flexible</div>
+          <div class="saving-type-btn" data-stype="selected">Selected Period</div>
+        </div>
+      </div>
+      <div class="form-group" id="edit-saving-deadline-group" style="display:none"><label class="form-label">Deadline</label><input class="form-input" id="edit-saving-deadline" type="date"></div>
+      <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="edit-saving-start" type="date"></div>
+      <button class="btn-primary" id="save-edit-saving-btn">Save Changes</button>
+    </div>
+  </div>
+  <div id="edit-saving-backdrop" class="backdrop" style="position:absolute;inset:0;z-index:-1"></div>
+</div>
 
 <!-- Add Source Modal -->
 
@@ -1326,6 +1495,7 @@ LOADING OVERLAY
 ══════════════════════════════════════════ */
 const GAS_URL='https://script.google.com/macros/s/AKfycbx4ntxjXlcZdQY4OdfZhiXr5P_d5SJDT0bdKxMfeMYVKdGbDnM3F975R9ijelWzBM7a/exec';
 const COLORS=['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#84cc16','#6b7280','#1a1a1f'];
+const APP_VERSION='v1.2';
 
 /* ══════════════════════════════════════════
    STATE
@@ -1335,6 +1505,7 @@ const state={
   user:null, users:[], theme:localStorage.getItem('bbn-theme')||'auto',
   transactions:[], categories:[], sources:[], summary:null,
   trips:[], activeTrip:null,
+  savings:[], activeSaving:null,
   txnType:'expense', txnAmount:'', txnCat:'', txnSource:'',
   catFilter:'expense', selectedColor:COLORS[0],
   currentMonth:now.getMonth()+1, currentYear:now.getFullYear(),
@@ -1474,6 +1645,8 @@ const mockDB={
   ],
   sources:[{sourceId:'src1',userId:'u1',name:'Primary Job',isActive:true}],
   trips:[],
+  savings:[],
+  savingDeposits:[],
 };
 
 function mockAPI(action,data){
@@ -1505,8 +1678,16 @@ function mockAPI(action,data){
       const uid=data.userId;
       const txns=mockDB.transactions.filter(x=>x.userId===uid).sort((a,b)=>new Date(b.date)-new Date(a.date));
       const trips=mockDB.trips.filter(t=>t.userId===uid).map(t=>({...t,spent:txns.filter(x=>x.tripId===t.tripId&&x.type==='expense').reduce((s,x)=>s+x.amount,0)}));
-      return{success:true,transactions:txns,categories:mockDB.categories.filter(x=>x.userId==='default'||x.userId===uid),budgets:mockDB.budgets.filter(b=>b.userId===uid),sources:mockDB.sources.filter(s=>s.userId===uid&&s.isActive),trips};
+      const savings=mockDB.savings.filter(s=>s.userId===uid).map(s=>({...s,savedAmount:mockDB.savingDeposits.filter(d=>d.savingId===s.savingId).reduce((sum,d)=>sum+d.amount,0)}));
+      return{success:true,transactions:txns,categories:mockDB.categories.filter(x=>x.userId==='default'||x.userId===uid),budgets:mockDB.budgets.filter(b=>b.userId===uid),sources:mockDB.sources.filter(s=>s.userId===uid&&s.isActive),trips,savings};
     }
+    case 'getSavings':{const uid=data.userId;const savs=mockDB.savings.filter(s=>s.userId===uid).map(s=>({...s,savedAmount:mockDB.savingDeposits.filter(d=>d.savingId===s.savingId).reduce((sum,d)=>sum+d.amount,0)}));return{success:true,savings:savs};}
+    case 'addSaving':{const s={savingId:'sav_'+Date.now(),...data,createdAt:new Date().toISOString(),isActive:true};mockDB.savings.push(s);return{success:true,savingId:s.savingId};}
+    case 'endSaving':{const s=mockDB.savings.find(x=>x.savingId===data.savingId&&x.userId===data.userId);if(s){s.isActive=false;s.endDate=data.endDate||todayStr();}return{success:true};}
+    case 'deleteSaving':{const i=mockDB.savings.findIndex(x=>x.savingId===data.savingId&&x.userId===data.userId);if(i>-1)mockDB.savings.splice(i,1);return{success:true};}
+    case 'updateSaving':{const s=mockDB.savings.find(x=>x.savingId===data.savingId&&x.userId===data.userId);if(s){s.name=data.name||s.name;s.targetAmount=parseFloat(data.targetAmount)||0;s.type=data.type||s.type;s.startDate=data.startDate||s.startDate;s.endDate=data.endDate??s.endDate;}return{success:true};}
+    case 'addSavingDeposit':{const d={depositId:'dep_'+Date.now(),...data,createdAt:new Date().toISOString()};mockDB.savingDeposits.push(d);return{success:true,depositId:d.depositId};}
+    case 'getSavingDeposits':{const deps=mockDB.savingDeposits.filter(d=>d.savingId===data.savingId).sort((a,b)=>new Date(b.date)-new Date(a.date));return{success:true,deposits:deps};}
     case 'addTrip':{const t={tripId:'trip'+Date.now(),...data,createdAt:new Date().toISOString(),isActive:true};mockDB.trips.push(t);return{success:true,tripId:t.tripId};}
     case 'endTrip':{const t=mockDB.trips.find(x=>x.tripId===data.tripId);if(t){t.isActive=false;t.endDate=data.endDate||todayStr();}return{success:true};}
     case 'updateTrip':{const t=mockDB.trips.find(x=>x.tripId===data.tripId&&x.userId===data.userId);if(t){t.name=data.name||t.name;t.budget=parseFloat(data.budget)||0;t.startDate=data.startDate||t.startDate;t.endDate=data.endDate||'';}return{success:true};}
@@ -1562,6 +1743,7 @@ function navTo(screen){
   if(screen==='transactions') loadTransactions();
   else if(screen==='analytics') loadAnalytics();
   else if(screen==='trips') loadTrips();
+  else if(screen==='savings') loadSavings();
   else if(screen==='more') renderMore();
 }
 
@@ -1661,6 +1843,7 @@ function afterLogin(){
       if(d.categories) state.categories=d.categories;
       if(d.sources)    state.sources=d.sources;
       if(d.trips)      state.trips=d.trips;
+      if(d.savings)    state.savings=d.savings;
       if(d.transactions) state.transactions=d.transactions;
     }catch(e){}
   }
@@ -1691,6 +1874,7 @@ async function syncInBackground(){
   if(r.categories) state.categories=r.categories;
   if(r.sources)    state.sources=r.sources;
   if(r.trips)      state.trips=r.trips;
+  if(r.savings)    state.savings=r.savings;
   if(r.transactions) state.transactions=r.transactions;
   saveCache();
   setSyncStatus('ok');
@@ -1707,6 +1891,8 @@ function refreshCurrentScreen(){
   if(active==='home-screen') renderHomeFromTransactions(state.transactions);
   else if(active==='analytics-screen') loadAnalytics();
   else if(active==='trips-screen') loadTrips();
+  else if(active==='savings-screen') loadSavings();
+  else if(active==='saving-detail-screen' && state.activeSaving) loadSavingDetail(state.activeSaving);
   else if(active==='transactions-screen') renderTxnList(state.transactions);
   else if(active==='trip-detail-screen' && state.activeTrip) loadTripDetail(state.activeTrip);
 }
@@ -1720,12 +1906,13 @@ function saveCache(){
       categories: state.categories,
       sources: state.sources,
       trips: state.trips,
+      savings: state.savings,
       transactions: state.transactions.slice(0,500), // keep last 500
       cachedAt: Date.now(),
     }));
   }catch(e){
     // Storage full — try with fewer transactions
-    try{localStorage.setItem('bbn-data-'+state.user.userId,JSON.stringify({categories:state.categories,sources:state.sources,trips:state.trips,transactions:state.transactions.slice(0,100),cachedAt:Date.now()}));}catch(e2){}
+    try{localStorage.setItem('bbn-data-'+state.user.userId,JSON.stringify({categories:state.categories,sources:state.sources,trips:state.trips,savings:state.savings,transactions:state.transactions.slice(0,100),cachedAt:Date.now()}));}catch(e2){}
   }
 }
 
@@ -2578,6 +2765,216 @@ document.getElementById('add-trip-backdrop').addEventListener('click',()=>closeM
 document.getElementById('add-trip-close').addEventListener('click',()=>closeModal('add-trip-modal'));
 
 /* ══════════════════════════════════════════
+   SAVINGS
+══════════════════════════════════════════ */
+async function loadSavings(){
+  renderSavings();
+  const r=await api('getSavings',{userId:state.user.userId});
+  if(r.success){state.savings=r.savings;saveCache();renderSavings();}
+}
+
+function renderSavings(){
+  const el=document.getElementById('savings-list');
+  if(!state.savings.length){
+    el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><p>No saving goals yet.<br>Tap + to create your first goal!</p></div>';
+    return;
+  }
+  el.innerHTML=state.savings.map(s=>{
+    const saved=s.savedAmount||0;
+    const target=parseFloat(s.targetAmount)||0;
+    const pct=target?Math.min((saved/target)*100,100):0;
+    const start=s.startDate?safeDate(s.startDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+    const deadline=s.type==='selected'&&s.endDate?safeDate(s.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+    const typeLabel=s.type==='selected'?`Until ${deadline}`:'Flexible';
+    const isExpired=s.type==='selected'&&s.endDate&&new Date(s.endDate)<new Date()&&s.isActive;
+    return`<div class="saving-card" data-sid="${s.savingId}">
+      <div class="saving-card-header">
+        <div class="saving-card-icon"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <div class="saving-card-name">${s.name}</div>
+        <div class="saving-status ${s.isActive&&!isExpired?'active':'ended'}">${s.isActive&&!isExpired?'Active':'Ended'}</div>
+      </div>
+      <div class="saving-type-badge">${typeLabel}${start?' · Started '+start:''}</div>
+      ${target?`<div class="saving-progress-row"><div class="saving-saved">${fmt(saved)} saved</div><div class="saving-target">of ${fmt(target)}</div></div><div class="saving-bar-bg"><div class="saving-bar-fill" style="width:${pct}%"></div></div>`:`<div class="saving-type-badge" style="margin-top:4px">${fmt(saved)} saved</div>`}
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.saving-card').forEach(c=>{
+    c.addEventListener('click',()=>{const s=state.savings.find(x=>x.savingId===c.dataset.sid);if(s)openSavingDetail(s);});
+  });
+}
+
+async function openSavingDetail(saving){
+  state.activeSaving=saving;
+  showScreen('saving-detail-screen');
+  document.getElementById('saving-detail-title').textContent=saving.name;
+  const isExpired=saving.type==='selected'&&saving.endDate&&new Date(saving.endDate)<new Date()&&saving.isActive;
+  const active=saving.isActive&&!isExpired;
+  document.getElementById('saving-end-btn').style.display=active?'flex':'none';
+  document.getElementById('saving-delete-btn').style.display=saving.isActive?'none':'flex';
+  document.getElementById('mobile-add-deposit-btn').style.display=active?'flex':'none';
+  loadSavingDetail(saving);
+}
+
+async function loadSavingDetail(saving){
+  document.getElementById('sdh-name').textContent=saving.name;
+  const start=saving.startDate?safeDate(saving.startDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+  document.getElementById('sdh-dates').textContent=saving.type==='selected'&&saving.endDate
+    ?`${start} → ${safeDate(saving.endDate).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`
+    :`${start} · Flexible`;
+  const r=await api('getSavingDeposits',{savingId:saving.savingId,userId:state.user.userId});
+  const deposits=r.success?r.deposits:[];
+  const saved=deposits.reduce((s,d)=>s+d.amount,0);
+  const target=parseFloat(saving.targetAmount)||0;
+  document.getElementById('sdh-balance').textContent=fmt(saved);
+  document.getElementById('sdh-target').textContent=target?fmt(target):'No target';
+  document.getElementById('sdh-remaining').textContent=target?fmt(Math.max(target-saved,0)):'—';
+  const idx=state.savings.findIndex(s=>s.savingId===saving.savingId);
+  if(idx>-1)state.savings[idx].savedAmount=saved;
+  saveCache();
+  const el=document.getElementById('saving-deposit-list');
+  el.innerHTML=deposits.length?deposits.map(d=>`
+    <div class="txn-item" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border2)">
+      <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--blue);stroke-width:1.8;fill:none"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600">${d.note||'Deposit'}</div>
+        <div style="font-size:12px;color:var(--text3)">${d.date?safeDate(d.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):''}</div>
+      </div>
+      <div style="font-size:15px;font-weight:700;font-family:var(--mono);color:var(--blue)">+${fmt(d.amount)}</div>
+    </div>`).join('')
+    :'<div class="empty-state"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><p>No deposits yet</p></div>';
+}
+
+document.getElementById('saving-detail-back').addEventListener('click',()=>navTo('savings'));
+
+document.getElementById('saving-end-btn').addEventListener('click',async()=>{
+  if(!await confirmDlg('End Goal?','This will mark the goal as ended.','End Goal')) return;
+  const saving=state.activeSaving;
+  saving.isActive=false; saving.endDate=todayStr();
+  document.getElementById('saving-end-btn').style.display='none';
+  document.getElementById('saving-delete-btn').style.display='flex';
+  document.getElementById('mobile-add-deposit-btn').style.display='none';
+  const idx=state.savings.findIndex(s=>s.savingId===saving.savingId);
+  if(idx>-1){state.savings[idx].isActive=false;state.savings[idx].endDate=todayStr();}
+  saveCache(); toast('Goal ended','success');
+  api('endSaving',{savingId:saving.savingId,userId:state.user.userId,endDate:todayStr()});
+});
+
+document.getElementById('saving-delete-btn').addEventListener('click',async()=>{
+  if(!await confirmDlg('Delete Goal?',`"${state.activeSaving.name}" and all deposits will be removed.`,'Delete')) return;
+  state.savings=state.savings.filter(s=>s.savingId!==state.activeSaving.savingId);
+  saveCache(); toast('Goal deleted','success'); navTo('savings');
+  api('deleteSaving',{savingId:state.activeSaving.savingId,userId:state.user.userId});
+});
+
+document.getElementById('saving-edit-btn').addEventListener('click',()=>{
+  const s=state.activeSaving;
+  document.getElementById('edit-saving-name').value=s.name||'';
+  document.getElementById('edit-saving-target').value=s.targetAmount||'';
+  document.getElementById('edit-saving-start').value=s.startDate||'';
+  document.getElementById('edit-saving-deadline').value=s.endDate||'';
+  document.getElementById('edit-saving-type-row').querySelectorAll('.saving-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.stype===s.type));
+  document.getElementById('edit-saving-deadline-group').style.display=s.type==='selected'?'block':'none';
+  openModal('edit-saving-modal');
+});
+document.getElementById('edit-saving-backdrop').addEventListener('click',()=>closeModal('edit-saving-modal'));
+document.getElementById('edit-saving-close').addEventListener('click',()=>closeModal('edit-saving-modal'));
+document.getElementById('edit-saving-type-row').querySelectorAll('.saving-type-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.getElementById('edit-saving-type-row').querySelectorAll('.saving-type-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('edit-saving-deadline-group').style.display=b.dataset.stype==='selected'?'block':'none';
+  });
+});
+document.getElementById('save-edit-saving-btn').addEventListener('click',async()=>{
+  const name=document.getElementById('edit-saving-name').value.trim();
+  const target=parseFloat(document.getElementById('edit-saving-target').value)||0;
+  const start=document.getElementById('edit-saving-start').value||'';
+  const deadline=document.getElementById('edit-saving-deadline').value||'';
+  const type=document.getElementById('edit-saving-type-row').querySelector('.saving-type-btn.active')?.dataset.stype||'flexible';
+  if(!name){toast('Enter a goal name','error');return;}
+  if(type==='selected'&&!deadline){toast('Please set a deadline','error');return;}
+  const saving=state.activeSaving;
+  const endDate=type==='flexible'?'':deadline;
+  Object.assign(saving,{name,targetAmount:target,type,startDate:start,endDate});
+  const idx=state.savings.findIndex(s=>s.savingId===saving.savingId);
+  if(idx>-1)state.savings[idx]={...state.savings[idx],name,targetAmount:target,type,startDate:start,endDate};
+  saveCache(); closeModal('edit-saving-modal');
+  document.getElementById('saving-detail-title').textContent=name;
+  toast('Goal updated ✓','success'); loadSavingDetail(saving);
+  api('updateSaving',{savingId:saving.savingId,userId:state.user.userId,name,targetAmount:target,type,startDate:start,endDate});
+});
+
+function _openDepositModal(){
+  document.getElementById('deposit-amount').value='';
+  document.getElementById('deposit-note').value='';
+  document.getElementById('deposit-date').value=todayStr();
+  openModal('add-deposit-modal');
+}
+document.getElementById('saving-add-deposit-btn').addEventListener('click',_openDepositModal);
+document.getElementById('mobile-add-deposit-btn').addEventListener('click',_openDepositModal);
+document.getElementById('add-deposit-backdrop').addEventListener('click',()=>closeModal('add-deposit-modal'));
+document.getElementById('add-deposit-close').addEventListener('click',()=>closeModal('add-deposit-modal'));
+document.getElementById('save-deposit-btn').addEventListener('click',async()=>{
+  const amount=parseFloat(document.getElementById('deposit-amount').value)||0;
+  const note=document.getElementById('deposit-note').value.trim();
+  const date=document.getElementById('deposit-date').value||todayStr();
+  if(!amount||amount<=0){toast('Enter a valid amount','error');return;}
+  const saving=state.activeSaving;
+  const btn=document.getElementById('save-deposit-btn');
+  btn.disabled=true; btn.textContent='Saving…';
+  closeModal('add-deposit-modal');
+  const idx=state.savings.findIndex(s=>s.savingId===saving.savingId);
+  const newSaved=(saving.savedAmount||0)+amount;
+  if(idx>-1)state.savings[idx].savedAmount=newSaved;
+  saving.savedAmount=newSaved;
+  saveCache(); toast('Deposit added ✓','success');
+  btn.disabled=false; btn.textContent='Add Deposit';
+  const r=await api('addSavingDeposit',{savingId:saving.savingId,userId:state.user.userId,amount,note,date});
+  if(r.success)loadSavingDetail(saving);
+});
+
+document.getElementById('add-saving-type-row').querySelectorAll('.saving-type-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.getElementById('add-saving-type-row').querySelectorAll('.saving-type-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('saving-deadline-group').style.display=b.dataset.stype==='selected'?'block':'none';
+  });
+});
+document.getElementById('save-saving-btn').addEventListener('click',async()=>{
+  const name=document.getElementById('saving-name').value.trim();
+  const target=parseFloat(document.getElementById('saving-target').value)||0;
+  const start=document.getElementById('saving-start').value||todayStr();
+  const deadline=document.getElementById('saving-deadline').value||'';
+  const type=document.getElementById('add-saving-type-row').querySelector('.saving-type-btn.active')?.dataset.stype||'flexible';
+  if(!name){toast('Enter a goal name','error');return;}
+  if(type==='selected'&&!deadline){toast('Please set a deadline','error');return;}
+  const btn=document.getElementById('save-saving-btn');
+  btn.disabled=true; btn.textContent='Creating…';
+  closeModal('add-saving-modal');
+  const tmpId='sav_'+Date.now();
+  const newSaving={savingId:tmpId,userId:state.user.userId,name,targetAmount:target,type,startDate:start,endDate:type==='flexible'?'':deadline,isActive:true,savedAmount:0,createdAt:new Date().toISOString()};
+  state.savings.unshift(newSaving);
+  renderSavings();
+  document.getElementById('saving-name').value='';
+  document.getElementById('saving-target').value='';
+  document.getElementById('saving-start').value=todayStr();
+  document.getElementById('saving-deadline').value='';
+  document.getElementById('add-saving-type-row').querySelectorAll('.saving-type-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.getElementById('saving-deadline-group').style.display='none';
+  btn.disabled=false; btn.textContent='Create Goal';
+  toast('Goal created ✓','success');
+  const r=await api('addSaving',{userId:state.user.userId,name,targetAmount:target,type,startDate:start,endDate:newSaving.endDate});
+  if(r.success){const i=state.savings.findIndex(s=>s.savingId===tmpId);if(i>-1)state.savings[i].savingId=r.savingId;saveCache();renderSavings();}
+});
+function _openAddSavingModal(){document.getElementById('saving-start').value=todayStr();openModal('add-saving-modal');}
+document.getElementById('desktop-add-saving-btn').addEventListener('click',_openAddSavingModal);
+document.getElementById('mobile-add-saving-btn').addEventListener('click',_openAddSavingModal);
+document.getElementById('add-saving-backdrop').addEventListener('click',()=>closeModal('add-saving-modal'));
+document.getElementById('add-saving-close').addEventListener('click',()=>closeModal('add-saving-modal'));
+document.getElementById('qa-saving').addEventListener('click',()=>navTo('savings'));
+
+/* ══════════════════════════════════════════
    SETTINGS / MORE
 ══════════════════════════════════════════ */
 function renderMore(){
@@ -2822,6 +3219,12 @@ document.getElementById('txn-date').value=todayStr();
 // Always hide loading overlay first — before anything else
 document.getElementById('loading-overlay').classList.add('hidden');
 
+// Show version on login page
+document.getElementById('login-version').textContent='budgetBynan '+APP_VERSION;
+
+// Auto-clear stale SW caches on version update — one-time reload so users always get fresh content
+(function(){var v=APP_VERSION,p=localStorage.getItem('bbn-vcache');localStorage.setItem('bbn-vcache',v);if(p&&p!==v&&'caches' in window){caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>location.reload()).catch(()=>location.reload());}})();
+
 try{
   const savedUser=localStorage.getItem('bbn-user');
   const savedTs=parseInt(localStorage.getItem('bbn-user-ts')||'0');
@@ -2836,7 +3239,7 @@ try{
       document.getElementById('home-username-display').textContent=state.user.name;
       showScreen('home-screen');
       const cached=localStorage.getItem('bbn-data-'+state.user.userId);
-      if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.trips)state.trips=d.trips;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
+      if(cached){try{const d=JSON.parse(cached);if(d.categories)state.categories=d.categories;if(d.sources)state.sources=d.sources;if(d.trips)state.trips=d.trips;if(d.savings)state.savings=d.savings;if(d.transactions)state.transactions=d.transactions;}catch(e){}}
       if(state.transactions.length) renderHomeFromTransactions(state.transactions);
       syncInBackground();
     }catch(e){localStorage.removeItem('bbn-user');initLogin();}
@@ -2876,7 +3279,7 @@ window.addEventListener('orientationchange',()=>{
 ══════════════════════════════════════════ */
 if('serviceWorker' in navigator){
   const swCode=`
-const CACHE='bbn-v5';
+const CACHE='bbn-v6';
 const SHELL=[location.href];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
