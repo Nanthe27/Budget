@@ -803,9 +803,10 @@ LOADING OVERLAY
       <button class="numpad-btn" data-n="9">9</button>
       <button class="numpad-btn empty"></button>
       <button class="numpad-btn" data-n="0">0</button>
-      <button class="numpad-btn empty"></button>
+      <button class="numpad-btn delete" id="pin-del-btn"><svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
     </div>
-    <div id="login-version" style="text-align:center;font-size:11px;color:var(--text3);margin-top:14px;font-weight:500;letter-spacing:.3px"></div>
+    <div id="login-err" style="text-align:center;font-size:12px;color:var(--red);margin-top:10px;min-height:18px;font-weight:500;letter-spacing:.2px"></div>
+    <div id="login-version" style="text-align:center;font-size:11px;color:var(--text3);margin-top:6px;font-weight:500;letter-spacing:.3px"></div>
   </div>
 </div>
 
@@ -1495,7 +1496,7 @@ LOADING OVERLAY
 ══════════════════════════════════════════ */
 const GAS_URL='https://script.google.com/macros/s/AKfycbx4ntxjXlcZdQY4OdfZhiXr5P_d5SJDT0bdKxMfeMYVKdGbDnM3F975R9ijelWzBM7a/exec';
 const COLORS=['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#84cc16','#6b7280','#1a1a1f'];
-const APP_VERSION='v1.2';
+const APP_VERSION='v1.3';
 
 /* ══════════════════════════════════════════
    STATE
@@ -1763,9 +1764,10 @@ async function initLogin(){
   showNav(false);
   showSidebar(false);
   document.body.style.overflow='';
-  // Restore pin dots to clean state
+  // Restore pin dots and error to clean state
   document.querySelectorAll('.pin-dot').forEach(d=>d.className='pin-dot');
   document.querySelector('#login-screen .numpad')?.classList.remove('pin-loading');
+  document.getElementById('login-err').textContent='';
   // Try to get user from cache first for instant display
   const cachedUsers=localStorage.getItem('bbn-users');
   if(cachedUsers){
@@ -1789,6 +1791,7 @@ function updatePinDots(){
 document.querySelectorAll('#login-screen .numpad-btn[data-n]').forEach(b=>{
   b.addEventListener('click',async()=>{
     if(pinBuffer.length>=4) return;
+    document.getElementById('login-err').textContent='';
     pinBuffer+=b.dataset.n;
     updatePinDots();
     if(pinBuffer.length===4){
@@ -1806,23 +1809,34 @@ document.querySelectorAll('#login-screen .numpad-btn[data-n]').forEach(b=>{
         document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('loading'));
         document.querySelector('#login-screen .numpad')?.classList.remove('pin-loading');
         document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('error'));
-        setTimeout(()=>{document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('error','filled');});pinBuffer='';},800);
+        document.getElementById('login-err').textContent='Cannot reach server — make sure your GAS script is deployed';
+        setTimeout(()=>{document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('error','filled');});pinBuffer='';},1500);
         return;
       }
       const r=await api('login',{userId:targetUser.userId,pin:pinBuffer});
       document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('loading'));
       document.querySelector('#login-screen .numpad')?.classList.remove('pin-loading');
       if(r.success){
+        document.getElementById('login-err').textContent='';
         state.user=r.user;
         localStorage.setItem('bbn-user',JSON.stringify(r.user));
         localStorage.setItem('bbn-user-ts',Date.now().toString());
         afterLogin();
       } else {
         document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('error'));
-        setTimeout(()=>{document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('error','filled');});pinBuffer='';},800);
+        document.getElementById('login-err').textContent='Wrong PIN — try again';
+        setTimeout(()=>{document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('error','filled');});document.getElementById('login-err').textContent='';pinBuffer='';},1500);
       }
     }
   });
+});
+
+document.getElementById('pin-del-btn')?.addEventListener('click',()=>{
+  if(pinBuffer.length>0){
+    pinBuffer=pinBuffer.slice(0,-1);
+    updatePinDots();
+    document.getElementById('login-err').textContent='';
+  }
 });
 
 
@@ -3279,7 +3293,7 @@ window.addEventListener('orientationchange',()=>{
 ══════════════════════════════════════════ */
 if('serviceWorker' in navigator){
   const swCode=`
-const CACHE='bbn-v6';
+const CACHE='bbn-v7';
 const SHELL=[location.href];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
