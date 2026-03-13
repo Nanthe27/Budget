@@ -1405,7 +1405,7 @@ LOADING OVERLAY
 ══════════════════════════════════════════ */
 const GAS_URL='https://script.google.com/macros/s/AKfycbzK-12oq9m6iZQ3WDaxRS_GrReDp_MLphK0U5ZTZwSAllM64-GxvxBaiDVJ6Lm9o-XP/exec';
 const COLORS=['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#84cc16','#6b7280','#1a1a1f'];
-const APP_VERSION='v1.1.0';
+const APP_VERSION='v1.1.1';
 
 /* ══════════════════════════════════════════
    STATE
@@ -2949,10 +2949,56 @@ async function _doClearData(){
 /* ══════════════════════════════════════════
    SAVINGS
 ══════════════════════════════════════════ */
+/* ─────────────────────────────────────────
+   Savings detection helpers
+   ─────────────────────────────────────────
+   Savings IN  = expense whose category matches /saving|save/i
+                 → money left the spending budget, went INTO savings
+   Savings OUT = income whose source name matches /saving|save|withdraw/i
+                 → money pulled OUT of savings back to spending budget
+   ───────────────────────────────────────── */
+function _getSavingsTxns(){
+  const savIn=state.transactions.filter(t=>
+    t.type==='expense' && /saving|save/i.test(t.category)
+  );
+  const savOut=state.transactions.filter(t=>{
+    if(t.type!=='income') return false;
+    const src=state.sources.find(s=>s.sourceId===t.incomeSourceId);
+    return src && /saving|save|withdraw/i.test(src.name);
+  });
+  return{savIn,savOut};
+}
+
+// Render a transaction from the savings perspective
+// isSavIn=true → green "+", isSavIn=false → red "−"
+function savTxnHtml(t,isSavIn){
+  const d=safeDate(t.date);
+  const dateDisplay=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const color=isSavIn?'var(--green)':'var(--red)';
+  const bgColor=isSavIn?'var(--green-bg)':'var(--red-bg)';
+  const sign=isSavIn?'+':'-';
+  const icon=isSavIn
+    ?`<svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`
+    :`<svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`;
+  const srcName=isSavIn
+    ? t.category
+    : (state.sources.find(s=>s.sourceId===t.incomeSourceId)?.name||'Saving Withdrawal');
+  const label=t.description||srcName;
+  return`<div class="txn-item" data-id="${t.txnId}">
+    <div class="txn-icon" style="background:${bgColor}">${icon.replace('svg ','svg style="stroke:'+color+'" ')}</div>
+    <div class="txn-info">
+      <div class="txn-name">${label}</div>
+      <div class="txn-meta">${srcName} · ${dateDisplay}</div>
+    </div>
+    <div class="txn-amount" style="color:${color};font-size:15px;font-weight:700;font-family:var(--mono)">${sign}${fmt(t.amount)}</div>
+  </div>`;
+}
+
 function renderSavings(){
-  const savTxns=state.transactions.filter(t=>/saving|save/i.test(t.category));
-  const savIn=savTxns.filter(t=>t.type==='income');
-  const savOut=savTxns.filter(t=>t.type==='expense');
+  const{savIn,savOut}=_getSavingsTxns();
+  // Store for filter-only re-renders
+  state._savIn=savIn; state._savOut=savOut;
+
   const totalIn=savIn.reduce((s,t)=>s+t.amount,0);
   const totalOut=savOut.reduce((s,t)=>s+t.amount,0);
   const net=totalIn-totalOut;
@@ -2966,7 +3012,7 @@ function renderSavings(){
         <div class="sav-hero-amount" style="color:${netColor}">${fmt(net)}</div>
         <div class="sav-hero-stats">
           <div class="sav-hero-stat">
-            <div class="sav-stat-lbl">↓ Deposited</div>
+            <div class="sav-stat-lbl">↓ Saved</div>
             <div class="sav-stat-val" style="color:var(--green)">+${fmt(totalIn)}</div>
           </div>
           <div class="sav-hero-stat">
@@ -2980,13 +3026,14 @@ function renderSavings(){
     </div>`;
 
   // ── Analysis cards ──
-  const count=savTxns.length;
+  const count=savIn.length+savOut.length;
   const avgDeposit=savIn.length?totalIn/savIn.length:0;
-  const sorted=[...savTxns].sort((a,b)=>safeDate(b.date)-safeDate(a.date));
-  const lastDate=sorted[0]?safeDate(sorted[0].date).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'—';
+  const allSorted=[...savIn,...savOut].sort((a,b)=>safeDate(b.date)-safeDate(a.date));
+  const lastDate=allSorted[0]?safeDate(allSorted[0].date).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'—';
   const nowD=new Date();
-  const thisMonthNet=savTxns.filter(t=>{const d=safeDate(t.date);return d.getMonth()===nowD.getMonth()&&d.getFullYear()===nowD.getFullYear();})
-    .reduce((s,t)=>s+(t.type==='income'?t.amount:-t.amount),0);
+  const thisMonthNet=
+    savIn.filter(t=>{const d=safeDate(t.date);return d.getMonth()===nowD.getMonth()&&d.getFullYear()===nowD.getFullYear();}).reduce((s,t)=>s+t.amount,0)
+   -savOut.filter(t=>{const d=safeDate(t.date);return d.getMonth()===nowD.getMonth()&&d.getFullYear()===nowD.getFullYear();}).reduce((s,t)=>s+t.amount,0);
   document.getElementById('sav-ana-area').innerHTML=`
     <div class="sav-ana-grid">
       <div class="ac"><div class="ac-label">Entries</div><div class="ac-value">${count}</div></div>
@@ -3003,8 +3050,9 @@ function renderSavings(){
     months.push({m:d.getMonth()+1,y:d.getFullYear(),lbl:d.toLocaleDateString('en-US',{month:'short'})});
   }
   const chartD=months.map(({m,y,lbl})=>{
-    const mo=savTxns.filter(t=>{const d=safeDate(t.date);return d.getMonth()+1===m&&d.getFullYear()===y;});
-    return{lbl,in:mo.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0),out:mo.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0)};
+    const inAmt=savIn.filter(t=>{const d=safeDate(t.date);return d.getMonth()+1===m&&d.getFullYear()===y;}).reduce((s,t)=>s+t.amount,0);
+    const outAmt=savOut.filter(t=>{const d=safeDate(t.date);return d.getMonth()+1===m&&d.getFullYear()===y;}).reduce((s,t)=>s+t.amount,0);
+    return{lbl,in:inAmt,out:outAmt};
   });
   const maxV=Math.max(...chartD.flatMap(d=>[d.in,d.out]),1);
   document.getElementById('sav-chart-area').innerHTML=`
@@ -3012,8 +3060,8 @@ function renderSavings(){
       <div class="chart-header">
         <div class="chart-label">6-Month Overview</div>
         <div style="display:flex;gap:10px;align-items:center;font-size:11px;color:var(--text3)">
-          <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:var(--purple);display:inline-block"></span>In</span>
-          <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span>Out</span>
+          <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:var(--purple);display:inline-block"></span>Saved</span>
+          <span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span>Withdrawn</span>
         </div>
       </div>
       <div style="display:flex;align-items:flex-end;gap:6px;height:60px;margin-top:10px">
@@ -3031,20 +3079,23 @@ function renderSavings(){
       </div>
     </div>`;
 
-  _renderSavingsTxns(savTxns,state.savFilter);
+  _renderSavingsTxns(savIn,savOut,state.savFilter);
 }
 
-function _renderSavingsTxns(savTxns,filter){
-  let txns=[...savTxns];
-  if(filter==='in') txns=txns.filter(t=>t.type==='income');
-  else if(filter==='out') txns=txns.filter(t=>t.type==='expense');
-  txns.sort((a,b)=>safeDate(b.date)-safeDate(a.date));
+function _renderSavingsTxns(savIn,savOut,filter){
+  let tagged=[];
+  if(filter==='all'||filter==='in')  tagged=tagged.concat(savIn.map(t=>({t,isSavIn:true})));
+  if(filter==='all'||filter==='out') tagged=tagged.concat(savOut.map(t=>({t,isSavIn:false})));
+  tagged.sort((a,b)=>safeDate(b.t.date)-safeDate(a.t.date));
   const el=document.getElementById('sav-txn-list');
-  if(!txns.length){
-    el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="17"/><path d="M9.5 9.5h4a1.5 1.5 0 1 1 0 3H11a1.5 1.5 0 0 0 0 3H15"/></svg><p>No savings records yet.<br>Tag a transaction with a "Saving" category.</p></div>';
+  if(!tagged.length){
+    const tip=filter==='out'
+      ?'No withdrawals yet.<br>Add an income with a source named "Withdraw from Saving".'
+      :'No savings records yet.<br>Add an expense with a category named "Saving".';
+    el.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="17"/><path d="M9.5 9.5h4a1.5 1.5 0 1 1 0 3H11a1.5 1.5 0 0 0 0 3H15"/></svg><p>${tip}</p></div>`;
     return;
   }
-  el.innerHTML='<div class="txn-list">'+txns.map(t=>txnHtml(t)).join('')+'</div>';
+  el.innerHTML='<div class="txn-list">'+tagged.map(({t,isSavIn})=>savTxnHtml(t,isSavIn)).join('')+'</div>';
   el.querySelectorAll('.txn-item').forEach(item=>{
     item.addEventListener('click',()=>openTxnActionSheet(item.dataset.id));
   });
@@ -3063,8 +3114,7 @@ document.getElementById('savings-filter-row').querySelectorAll('.filter-chip').f
     document.getElementById('savings-filter-row').querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active'));
     c.classList.add('active');
     state.savFilter=c.dataset.sf;
-    const savTxns=state.transactions.filter(t=>/saving|save/i.test(t.category));
-    _renderSavingsTxns(savTxns,state.savFilter);
+    _renderSavingsTxns(state._savIn||[],state._savOut||[],state.savFilter);
   });
 });
 document.getElementById('savings-content').addEventListener('scroll',function(){
