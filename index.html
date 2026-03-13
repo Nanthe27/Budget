@@ -242,6 +242,13 @@ MODALS — centered popup with blur
 .slide-confirm.confirmed .slide-confirm-track{color:#fff;opacity:1;}
 .slide-confirm.confirmed .slide-confirm-thumb{background:#fff;}
 .slide-confirm.confirmed .slide-confirm-thumb svg{stroke:var(--green);}
+.slide-confirm.danger{background:var(--red-bg);}
+.slide-confirm.danger .slide-confirm-track{color:var(--red);}
+.slide-confirm.danger .slide-confirm-thumb{background:var(--red);}
+.slide-confirm.danger.confirmed{background:var(--red);}
+.slide-confirm.danger.confirmed .slide-confirm-track{color:#fff;opacity:1;}
+.slide-confirm.danger.confirmed .slide-confirm-thumb{background:#fff;}
+.slide-confirm.danger.confirmed .slide-confirm-thumb svg{stroke:var(--red);}
 
 /* ── New cycle checkbox ── */
 .cycle-check-row{display:flex;align-items:center;gap:10px;padding:10px 0;margin-top:2px;}
@@ -763,6 +770,11 @@ LOADING OVERLAY
       <button class="numpad-btn" data-n="0">0</button>
       <button class="numpad-btn empty"></button>
     </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button id="check-update-btn" style="flex:1;padding:10px 0;background:var(--bg3);border-radius:var(--r);font-size:13px;font-weight:600;color:var(--text2);border:1px solid var(--border);cursor:pointer;transition:opacity .15s" ontouchstart="this.style.opacity='.6'" ontouchend="this.style.opacity='1'">↻ Check for Update</button>
+      <button id="clear-data-btn" style="flex:1;padding:10px 0;background:var(--red-bg);border-radius:var(--r);font-size:13px;font-weight:600;color:var(--red);border:1px solid var(--red-bg);cursor:pointer;transition:opacity .15s" ontouchstart="this.style.opacity='.6'" ontouchend="this.style.opacity='1'">Clear Data</button>
+    </div>
+    <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text3)" id="login-version"></div>
   </div>
 </div>
 
@@ -1319,6 +1331,26 @@ LOADING OVERLAY
   </div>
 </div>
 
+<!-- ══════ CLEAR DATA MODAL ══════ -->
+<div class="modal-overlay" id="clear-data-modal">
+  <div class="backdrop" id="clear-data-backdrop"></div>
+  <div class="bottom-sheet">
+    <div class="sheet-header">
+      <h3 style="color:var(--red)">Clear App Data</h3>
+      <button class="sheet-close" id="clear-data-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sheet-body">
+      <p style="font-size:14px;color:var(--text2);line-height:1.55;margin-bottom:6px">This will delete all locally cached data, saved login, and app settings. <strong style="color:var(--text)">Your data in Google Sheets is safe.</strong></p>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:20px">You'll be signed out and the app will reload fresh.</p>
+      <div class="slide-confirm danger" id="clear-data-slider">
+        <div class="slide-confirm-track">Slide to clear all data →</div>
+        <div class="slide-confirm-thumb" id="clear-data-thumb"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+    </div>
+    <div class="sheet-footer" style="padding-bottom:max(var(--safe-b),12px)"></div>
+  </div>
+</div>
+
 <script>
 'use strict';
 /* ══════════════════════════════════════════
@@ -1326,6 +1358,7 @@ LOADING OVERLAY
 ══════════════════════════════════════════ */
 const GAS_URL='https://script.google.com/macros/s/AKfycbzK-12oq9m6iZQ3WDaxRS_GrReDp_MLphK0U5ZTZwSAllM64-GxvxBaiDVJ6Lm9o-XP/exec';
 const COLORS=['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#84cc16','#6b7280','#1a1a1f'];
+const APP_VERSION='v1.0.5';
 
 /* ══════════════════════════════════════════
    STATE
@@ -2617,7 +2650,8 @@ function renderMore(){
     <div class="menu-item" id="ml-logout" style="border-color:var(--red-bg)">
       <div class="menu-icon" style="background:var(--red-bg)"><svg viewBox="0 0 24 24" style="stroke:var(--red)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
       <div class="menu-label" style="color:var(--red)">Sign Out</div>
-    </div>`;
+    </div>
+    <div style="text-align:center;padding:16px 0 4px;font-size:12px;color:var(--text3)">budgetBynan ${APP_VERSION}</div>`;
   document.getElementById('ml-categories').addEventListener('click',()=>{showScreen('categories-screen');renderCatList();});
   document.getElementById('ml-income-sources').addEventListener('click',()=>{showScreen('sources-screen');renderSourcesList();});
   document.getElementById('ml-export').addEventListener('click',()=>openModal('export-modal'));
@@ -2774,6 +2808,93 @@ function logout(){
   initLogin();
 }
 
+/* ══════════════════════════════════════════
+   VERSION & LOGIN UTILITIES
+══════════════════════════════════════════ */
+// Set version label on login screen
+document.getElementById('login-version').textContent='budgetBynan '+APP_VERSION;
+
+// Check for update — forces SW update then hard reloads
+document.getElementById('check-update-btn').addEventListener('click',async function(){
+  this.textContent='Checking…';
+  this.disabled=true;
+  try{
+    if('serviceWorker' in navigator){
+      const reg=await navigator.serviceWorker.getRegistration();
+      if(reg) await reg.update();
+    }
+  }catch(e){}
+  location.reload(true);
+});
+
+// Clear data — open confirm modal
+document.getElementById('clear-data-btn').addEventListener('click',()=>{
+  _resetClearSlider();
+  openModal('clear-data-modal');
+});
+document.getElementById('clear-data-backdrop').addEventListener('click',()=>closeModal('clear-data-modal'));
+document.getElementById('clear-data-close').addEventListener('click',()=>closeModal('clear-data-modal'));
+
+function _resetClearSlider(){
+  const track=document.getElementById('clear-data-slider');
+  const thumb=document.getElementById('clear-data-thumb');
+  track.classList.remove('confirmed');
+  track.querySelector('.slide-confirm-track').textContent='Slide to clear all data →';
+  thumb.classList.add('animating');
+  thumb.style.left='3px';
+}
+
+async function _doClearData(){
+  try{localStorage.clear();}catch(e){}
+  try{if('caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}}catch(e){}
+  try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}}catch(e){}
+  location.reload(true);
+}
+
+// Slide-to-confirm widget for clear data
+(function(){
+  const track=document.getElementById('clear-data-slider');
+  const thumb=document.getElementById('clear-data-thumb');
+  let dragging=false,startX=0,thumbLeft=0,maxLeft=0;
+  function getMaxLeft(){return track.offsetWidth-thumb.offsetWidth-6;}
+  function onStart(e){
+    if(track.classList.contains('confirmed')) return;
+    dragging=true;
+    thumb.classList.remove('animating');
+    startX=(e.touches?e.touches[0].clientX:e.clientX);
+    thumbLeft=thumb.offsetLeft;
+    maxLeft=getMaxLeft();
+  }
+  function onMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    const x=(e.touches?e.touches[0].clientX:e.clientX);
+    const newLeft=Math.max(3,Math.min(thumbLeft+(x-startX),maxLeft));
+    thumb.style.left=newLeft+'px';
+  }
+  function onEnd(){
+    if(!dragging) return;
+    dragging=false;
+    maxLeft=getMaxLeft();
+    const current=parseInt(thumb.style.left)||3;
+    if(current>=maxLeft*0.85){
+      thumb.classList.add('animating');
+      thumb.style.left=maxLeft+'px';
+      track.classList.add('confirmed');
+      track.querySelector('.slide-confirm-track').textContent='Clearing data…';
+      setTimeout(_doClearData,600);
+    } else {
+      thumb.classList.add('animating');
+      thumb.style.left='3px';
+    }
+  }
+  thumb.addEventListener('mousedown',onStart);
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onEnd);
+  thumb.addEventListener('touchstart',onStart,{passive:false});
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onEnd);
+})();
 
 /* ══════════════════════════════════════════
    EXPORT TO EXCEL (CSV download)
