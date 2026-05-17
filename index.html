@@ -661,7 +661,7 @@ TOP TAB BAR (mobile)
     /* FAB */
     .fab {
       position: fixed;
-      bottom: max(10px, calc(0px + var(--safe-b)));
+      bottom: max(0px, var(--safe-b));
       right: 20px;
       width: 56px;
       height: 56px;
@@ -4522,7 +4522,7 @@ LOADING OVERLAY
     ══════════════════════════════════════════ */
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzK-12oq9m6iZQ3WDaxRS_GrReDp_MLphK0U5ZTZwSAllM64-GxvxBaiDVJ6Lm9o-XP/exec';
     const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#84cc16', '#6b7280', '#1a1a1f'];
-    const APP_VERSION = 'v2.1.0';
+    const APP_VERSION = 'v2.1.1';
 
     /* ══════════════════════════════════════════
        STATE
@@ -6396,7 +6396,7 @@ LOADING OVERLAY
     ══════════════════════════════════════════ */
     if ('serviceWorker' in navigator) {
       const swCode = `
-const CACHE='bbn-v6';
+const CACHE='bbn-v7';
 const SHELL=[location.href];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
