@@ -428,6 +428,14 @@ DESKTOP
       .desktop-add-btn {
         display: none !important;
       }
+
+      #dark-mode-toggle {
+        margin-right: 48px !important;
+      }
+
+      #txn-header .month-nav {
+        margin-right: 48px !important;
+      }
     }
 
     /* ══════════════════════════════════════════
@@ -3436,14 +3444,13 @@ LOADING OVERLAY
     /* ── Floating Portal Button ── */
     .portal-fab {
       position: fixed;
-      bottom: calc(var(--safe-b) - 10px);
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 60px;
+      top: calc(var(--safe-t) + 12px);
+      right: 20px;
+      width: 40px;
+      height: 40px;
       background: linear-gradient(135deg, var(--primary) 0%, #b8862b 100%);
       color: #000;
-      border-radius: 22px;
+      border-radius: 50%;
       display: none;
       /* Mobile only */
       align-items: center;
@@ -3456,12 +3463,12 @@ LOADING OVERLAY
     }
 
     .portal-fab:active {
-      transform: translateX(-50%) scale(0.9);
+      transform: scale(0.9);
       box-shadow: 0 6px 15px rgba(212, 164, 74, 0.2);
     }
 
     .portal-fab.open {
-      transform: translateX(-50%) rotate(45deg) scale(0.85);
+      transform: rotate(45deg) scale(0.85);
       background: var(--surface2);
       color: var(--text);
       box-shadow: var(--shadow-elevated);
@@ -3469,8 +3476,8 @@ LOADING OVERLAY
     }
 
     .portal-fab svg {
-      width: 28px;
-      height: 28px;
+      width: 20px;
+      height: 20px;
       stroke: currentColor;
       stroke-width: 2.5;
       stroke-linecap: round;
@@ -4522,7 +4529,7 @@ LOADING OVERLAY
     ══════════════════════════════════════════ */
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzK-12oq9m6iZQ3WDaxRS_GrReDp_MLphK0U5ZTZwSAllM64-GxvxBaiDVJ6Lm9o-XP/exec';
     const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#84cc16', '#6b7280', '#1a1a1f'];
-    const APP_VERSION = 'v2.1.1';
+    const APP_VERSION = 'v2.2.0';
 
     /* ══════════════════════════════════════════
        STATE
@@ -6396,7 +6403,7 @@ LOADING OVERLAY
     ══════════════════════════════════════════ */
     if ('serviceWorker' in navigator) {
       const swCode = `
-const CACHE='bbn-v7';
+const CACHE='bbn-v8';
 const SHELL=[location.href];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
