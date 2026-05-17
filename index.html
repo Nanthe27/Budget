@@ -87,7 +87,12 @@ APP SHELL
 ══════════════════════════════════════════ */
 #app{width:100%;height:100dvh;display:flex;overflow:hidden;touch-action:pan-y;overscroll-behavior-x:none;}
 .screen{display:none;flex-direction:column;width:100%;height:100%;overflow:hidden;max-width:var(--max-w);margin:0 auto;position:relative;}
-.screen.active{display:flex;}
+.screen.active{display:flex;animation:screenReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;}
+
+@keyframes screenReveal {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
 
 /* ══════════════════════════════════════════
 SIDEBAR
@@ -700,6 +705,195 @@ LOADING OVERLAY
 .sync-dot.sync-error{background:#ef4444;}
 .sync-btn.syncing svg{animation:spin .7s linear infinite;}
 /* red back btn on pin pad */
+/* ── Goalkeeper Summary (Premium Ring Design) ── */
+.goals-summary-card{margin-bottom:20px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-modal);padding:20px;box-shadow:var(--shadow-elevated);display:flex;align-items:center;gap:24px;position:relative;overflow:hidden;animation:fadeUp 0.6s var(--ease1) both;}
+.goals-summary-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 30%, var(--primary-bg), transparent 70%);opacity:0.3;pointer-events:none;}
+
+.gs-ring-wrap{position:relative;width:84px;height:84px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.gs-ring-svg{width:100%;height:100%;transform:rotate(-90deg);}
+.gs-ring-track{fill:none;stroke:var(--surface2);stroke-width:8;}
+.gs-ring-fill{fill:none;stroke:url(#gs-grad);stroke-width:8;stroke-linecap:round;transition:stroke-dasharray 1s var(--ease1);}
+.gs-ring-text{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.gs-ring-pct{font-size:18px;font-weight:700;font-family:var(--font-h);color:var(--primary);line-height:1;}
+.gs-ring-label{font-size:8px;font-weight:600;color:var(--text3);text-transform:uppercase;margin-top:2px;}
+
+.gs-content{flex:1;display:flex;flex-direction:column;gap:4px;}
+.gs-label-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.gs-label-pill{font-size:9px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.1em;background:var(--primary-bg);padding:2px 10px;border-radius:100px;}
+.gs-saved-amt{font-size:28px;font-weight:700;font-family:var(--font-h);color:var(--text);letter-spacing:-0.03em;line-height:1.1;}
+.gs-remaining-amt{font-size:14px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;}
+.gs-remaining-amt span{color:var(--primary);}
+
+.gs-footer-stats{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:20px;}
+.gs-mini-stat{display:flex;flex-direction:column;gap:2px;}
+.gs-mini-label{font-size:8px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;}
+.gs-mini-val{font-size:12px;font-weight:600;font-family:var(--font-h);color:var(--text);}
+
+/* ── Goal History ── */
+.goal-history-list{margin-top:20px;display:flex;flex-direction:column;gap:10px;}
+.gh-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s var(--ease1) both;}
+.gh-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.gh-icon.in{background:var(--success-bg);color:var(--success);}
+.gh-icon.out{background:var(--danger-bg);color:var(--danger);}
+.gh-info{flex:1;min-width:0;}
+.gh-note{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gh-date{font-size:11px;color:var(--text3);margin-top:2px;}
+.gh-amt{font-size:14px;font-weight:700;font-family:var(--font-h);}
+.gh-amt.in{color:var(--success);}
+.gh-amt.out{color:var(--danger);}
+
+/* ── Goal Selector in Txn Modal ── */
+#txn-goal-selector-wrap{margin-top:12px;display:none;animation:fadeDown 0.3s var(--ease1) both;}
+.goal-select-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;}
+.goal-select-item{padding:10px;background:var(--bg3);border:1.5px solid transparent;border-radius:12px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.goal-select-item.selected{background:var(--primary-bg);border-color:var(--primary);color:var(--primary);}
+
+/* ── Floating Portal Button ── */
+.portal-fab {
+  position: fixed;
+  bottom: calc(var(--safe-b) + 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--primary) 0%, #b8862b 100%);
+  color: #000;
+  border-radius: 22px;
+  display: none; /* Mobile only */
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(212, 164, 74, 0.3);
+  z-index: 5000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+.portal-fab:active {
+  transform: translateX(-50%) scale(0.9);
+  box-shadow: 0 6px 15px rgba(212, 164, 74, 0.2);
+}
+.portal-fab.open {
+  transform: translateX(-50%) rotate(45deg) scale(0.85);
+  background: var(--surface2);
+  color: var(--text);
+  box-shadow: var(--shadow-elevated);
+  border: 1px solid var(--border);
+}
+.portal-fab svg {
+  width: 28px;
+  height: 28px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  transition: transform 0.3s var(--ease1);
+}
+
+/* ── Portal Overlay ── */
+.portal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  z-index: 4500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.portal-overlay.open { opacity: 1; pointer-events: auto; }
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.portal-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.portal-record-btn {
+  width: calc(100% - 40px);
+  height: 56px;
+  background: linear-gradient(135deg, var(--primary) 0%, #b8862b 100%);
+  color: #000;
+  border-radius: 22px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 12px 30px rgba(212, 164, 74, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s var(--ease1);
+}
+.portal-overlay.open .portal-record-btn {
+  animation: portalPop 0.5s var(--ease1) both;
+  animation-delay: 0.2s;
+  pointer-events: auto;
+}
+.portal-record-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 6px 15px rgba(212, 164, 74, 0.15);
+}
+.portal-record-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.portal-item {
+  aspect-ratio: 1;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text);
+  transition: all 0.3s var(--ease1);
+}
+.portal-overlay.open .portal-item { animation: portalPop 0.5s var(--ease1) both; }
+.portal-overlay.open .portal-item:nth-child(1) { animation-delay: 0s; }
+.portal-overlay.open .portal-item:nth-child(2) { animation-delay: 0.04s; }
+.portal-overlay.open .portal-item:nth-child(3) { animation-delay: 0.08s; }
+.portal-overlay.open .portal-item:nth-child(4) { animation-delay: 0.12s; }
+.portal-overlay.open .portal-item:nth-child(5) { animation-delay: 0.16s; }
+.portal-item:active { transform: scale(0.9); background: var(--surface2); }
+.portal-item svg { width: 34px; height: 34px; stroke: var(--primary); stroke-width: 1.5; fill: none; }
+.portal-item span { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+
+@keyframes portalPop {
+  from { opacity: 0; transform: scale(0.6) translateY(30px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media(max-width:960px){
+  .portal-fab { display: flex; }
+}
 </style>
 
 </head>
@@ -710,6 +904,17 @@ LOADING OVERLAY
   <div class="load-bar-wrap"><div class="load-bar"></div></div>
 </div>
 <div id="toast-container"></div>
+
+<script>
+  // Fail-safe: Hide loader after 2s no matter what
+  setTimeout(() => {
+    const loader = document.getElementById('loading-overlay');
+    if(loader && !loader.classList.contains('hidden')) {
+      loader.classList.add('hidden');
+      console.log('Loader removed by fail-safe');
+    }
+  }, 2000);
+</script>
 
 <!-- ══════════════════════════════════════════
      CONFIRM DIALOG
@@ -823,6 +1028,7 @@ LOADING OVERLAY
     </div>
     <div class="page-content">
       <div style="padding:0 16px 12px">
+        <div id="goals-summary"></div>
         <button class="btn-primary" id="open-add-goal-btn" style="margin-bottom:12px">+ Add Goalkeeper</button>
         <div id="goals-list"></div>
       </div>
@@ -845,35 +1051,8 @@ LOADING OVERLAY
       </button>
     </div>
     <div class="page-content" id="home-content">
-      <!-- hero -->
-      <div class="home-hero">
-        <div class="hero-period">
-          <button id="hero-period-btn">← prev</button>
-          <span id="hero-period-label"></span>
-          <button id="hero-period-next">next →</button>
-          <button id="hero-period-today" style="display:none">today</button>
-        </div>
-        <div class="hero-label" id="cycle-label">Balance</div>
-        <div class="balance-bar-wrap" id="balance-bar-wrap">
-          <div class="balance-bar-track"><div class="balance-bar-fill" id="balance-bar-fill"></div><div class="balance-bar-hint">budgetBynan</div></div>
-          <div class="balance-bar-amount" id="balance-bar-amount"></div>
-        </div>
-        <div class="hero-stats" style="margin-top:10px">
-          <div class="hero-stat">
-            <div class="hero-stat-label">
-              <svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
-              EXPENSES
-            </div>
-            <div class="hero-stat-value expense" id="hero-expense">$0</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-label">
-              <svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
-              INCOME
-            </div>
-            <div class="hero-stat-value income" id="hero-income">$0</div>
-          </div>
-        </div>
+      <div style="padding:0 16px 12px">
+        <div id="home-summary-container"></div>
       </div>
 
 
@@ -1013,6 +1192,43 @@ LOADING OVERLAY
   </div>
 </div>
 
+<!-- ══════ FLOATING PORTAL (mobile) ══════ -->
+
+<button class="portal-fab" id="portal-fab">
+  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<div class="portal-overlay" id="portal-overlay">
+  <div class="portal-container">
+    <div class="portal-grid">
+      <div class="portal-item" data-screen="home">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Budget</span>
+      </div>
+      <div class="portal-item" data-screen="goals">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>Goals</span>
+      </div>
+      <div class="portal-item" data-screen="transactions">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>History</span>
+      </div>
+      <div class="portal-item" data-screen="analytics">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Charts</span>
+      </div>
+      <div class="portal-item" data-screen="more" style="grid-column: span 2; aspect-ratio: auto; height: 80px; flex-direction: row; gap: 16px;">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings & Profile</span>
+      </div>
+    </div>
+    <button class="portal-record-btn" id="portal-record-btn">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Record Money In / Out
+    </button>
+  </div>
+</div>
+
 <!-- ══════ SOURCES ══════ -->
 
 <div class="screen" id="sources-screen">
@@ -1070,6 +1286,12 @@ LOADING OVERLAY
       <div class="form-group" style="flex-shrink:0">
         <label class="form-label">Category</label>
         <div class="cat-grid" id="txn-cat-grid"></div>
+        
+        <!-- Smart Goal Selector -->
+        <div id="txn-goal-selector-wrap">
+          <label class="form-label" id="txn-goal-label">Link to Goalkeeper</label>
+          <div class="goal-select-grid" id="txn-goal-grid"></div>
+        </div>
       </div>
       <!-- Description + Date row -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0">
@@ -1108,37 +1330,6 @@ LOADING OVERLAY
   </div>
 </div>
 
-<!-- Mobile FAB -->
-<button class="fab hidden" id="mobile-fab">
-  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-</button>
-
-<!-- ══════ TOP TAB BAR (mobile) ══════ -->
-
-<nav class="bottom-nav hidden" id="bottom-nav">
-  <div class="nav-pills">
-    <div class="nav-pill active" data-screen="home">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span class="nav-label">Budget</span>
-    </div>
-    <div class="nav-pill" data-screen="goals">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-      <span class="nav-label">Goalkeeper</span>
-    </div>
-    <div class="nav-pill" data-screen="transactions">
-      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      <span class="nav-label">History</span>
-    </div>
-    <div class="nav-pill" data-screen="analytics">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span class="nav-label">Analytics</span>
-    </div>
-    <div class="nav-pill" data-screen="more">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-      <span class="nav-label">More</span>
-    </div>
-  </div>
-</nav>
 
 </div><!-- /desktop-main -->
 </div><!-- /app -->
@@ -1355,7 +1546,12 @@ LOADING OVERLAY
       </div>
       
       <button class="btn-secondary" id="goal-edit-btn" style="margin-bottom:12px">Edit Goalkeeper</button>
-      <button class="btn-secondary" id="goal-delete-btn" style="color:var(--danger);border-color:var(--danger-bg)">Delete Goalkeeper</button>
+      <button class="btn-secondary" id="goal-delete-btn" style="color:var(--danger);border-color:var(--danger-bg);margin-bottom:24px">Delete Goalkeeper</button>
+
+      <div style="border-top:1px solid var(--border);padding-top:20px">
+        <h4 style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:0.08em;margin-bottom:12px">Adjustment History</h4>
+        <div id="goal-history-list" class="goal-history-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1373,6 +1569,16 @@ LOADING OVERLAY
         <label class="form-label">Amount</label>
         <input class="form-input" id="goal-adjust-input" type="number" inputmode="decimal" placeholder="0.00">
       </div>
+      <div class="form-group">
+        <label class="form-label">Note (Optional)</label>
+        <input class="form-input" id="goal-adjust-note" type="text" placeholder="e.g. Monthly contribution">
+      </div>
+      <div class="form-group" style="margin-top:4px">
+        <div class="cycle-check-row" id="goal-sync-toggle" style="cursor:pointer">
+          <div class="cycle-checkbox checked" id="goal-sync-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="cycle-check-label" style="font-size:12px">Record in Budget history</span>
+        </div>
+      </div>
       <button class="btn-primary" id="save-adjust-btn">Save</button>
     </div>
   </div>
@@ -1385,7 +1591,7 @@ LOADING OVERLAY
 ══════════════════════════════════════════ */
 const GAS_URL='https://script.google.com/macros/s/AKfycbzK-12oq9m6iZQ3WDaxRS_GrReDp_MLphK0U5ZTZwSAllM64-GxvxBaiDVJ6Lm9o-XP/exec';
 const COLORS=['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#84cc16','#6b7280','#1a1a1f'];
-const APP_VERSION='v1.2.0';
+const APP_VERSION='v2.1.0';
 
 /* ══════════════════════════════════════════
    STATE
@@ -1393,7 +1599,7 @@ const APP_VERSION='v1.2.0';
 const now=new Date();
 const state={
   user:null, users:[], theme:localStorage.getItem('bbn-theme')||'auto',
-  transactions:[], categories:[], sources:[], goals:[], summary:null,
+  transactions:[], goalTransactions:[], categories:[], sources:[], goals:[], summary:null,
   txnType:'expense', txnAmount:'', txnCat:'', txnSource:'',
   catFilter:'expense', selectedColor:COLORS[0],
   currentMonth:now.getMonth()+1, currentYear:now.getFullYear(),
@@ -1402,12 +1608,14 @@ const state={
   txnFilter:'all',
   isSaving:false,
   editingTxn:null, // txn object being edited, null = adding new
+  linkedGoalId: '', // for smart saving category
 };
 
 /* ══════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════ */
 function todayStr(){return new Date().toISOString().split('T')[0];}
+function safeDate(d){if(!d)return new Date();const p=String(d).split('-');if(p.length===3)return new Date(p[0],p[1]-1,p[2]);return new Date(d);}
 function fmt(n,sign=false){const s=Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2});return (sign&&n>0?'+':'')+(n<0?'-':'')+'$'+s;}
 function monthName(m,y){return new Date(y,m-1,1).toLocaleDateString('en-US',{month:'short',year:'numeric'});}
 function greeting(){const h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening';}
@@ -1465,6 +1673,11 @@ function closeModal(id){
 ['add-source','add-cat','add-goal','goal-detail','goal-adjust'].forEach(id=>{
   document.getElementById(id+'-backdrop')?.addEventListener('click',()=>closeModal(id+'-modal'));
   document.getElementById(id+'-close')?.addEventListener('click',()=>closeModal(id+'-modal'));
+});
+
+document.getElementById('goal-sync-toggle')?.addEventListener('click',()=>{
+  const cb = document.getElementById('goal-sync-checkbox');
+  cb.classList.toggle('checked');
 });
 
 /* ══════════════════════════════════════════
@@ -1532,6 +1745,7 @@ const mockDB={
   ],
   sources:[{sourceId:'src1',userId:'u1',name:'Primary Job',isActive:true}],
   goals:[],
+  goalTransactions:[],
 };
 
 function mockAPI(action,data){
@@ -1565,8 +1779,9 @@ function mockAPI(action,data){
     case 'getAll':{
       const uid=data.userId;
       const txns=mockDB.transactions.filter(x=>x.userId===uid).sort((a,b)=>new Date(b.date)-new Date(a.date));
-      return{success:true,transactions:txns,categories:mockDB.categories.filter(x=>x.userId==='default'||x.userId===uid),budgets:mockDB.budgets.filter(b=>b.userId===uid),sources:mockDB.sources.filter(s=>s.userId===uid&&s.isActive),goals:mockDB.goals.filter(g=>g.userId===uid)};
+      return{success:true,transactions:txns,goalTransactions:mockDB.goalTransactions.filter(x=>x.userId===uid),categories:mockDB.categories.filter(x=>x.userId==='default'||x.userId===uid),budgets:mockDB.budgets.filter(b=>b.userId===uid),sources:mockDB.sources.filter(s=>s.userId===uid&&s.isActive),goals:mockDB.goals.filter(g=>g.userId===uid)};
     }
+    case 'addGoalTransaction':{const t={gtxnId:'gtxn'+Date.now(),...data,createdAt:new Date().toISOString()};mockDB.goalTransactions.push(t);return{success:true,gtxnId:t.gtxnId};}
 
     case 'updateUserPhoto':{const u=mockDB.users.find(x=>x.userId===data.userId);if(u)u.photoUrl=data.photoUrl;return{success:true};}
     case 'getSummary':{
@@ -1595,18 +1810,14 @@ function mockAPI(action,data){
 ══════════════════════════════════════════ */
 function showSidebar(show){
   const sb=document.getElementById('sidebar');
+  if(!sb) return;
   sb.style.display=(show&&window.innerWidth>=960)?'flex':'none';
 }
 function showNav(show){
-  const nav=document.getElementById('bottom-nav');
-  const fab=document.getElementById('mobile-fab');
-  if(show){
-    nav.classList.remove('hidden');
-    fab.classList.remove('hidden');
-  } else {
-    nav.classList.add('hidden');
-    fab.classList.add('hidden');
-  }
+  const fab=document.getElementById('portal-fab');
+  if(!fab) return;
+  if(show && window.innerWidth < 960) fab.style.display='flex';
+  else fab.style.display='none';
 }
 window.addEventListener('resize',()=>{
   if(state.user){
@@ -1623,8 +1834,8 @@ function showScreen(id){
 }
 
 function navTo(screen){
-  // update nav pills
-  document.querySelectorAll('.nav-pill').forEach(p=>{p.classList.toggle('active',p.dataset.screen===screen);});
+  // update portal items
+  document.querySelectorAll('.portal-item').forEach(p=>{p.classList.toggle('active',p.dataset.screen===screen);});
   // update sidebar
   document.querySelectorAll('.sidebar-item[data-screen]').forEach(p=>{p.classList.toggle('active',p.dataset.screen===screen);});
   showScreen(screen+'-screen');
@@ -1634,7 +1845,6 @@ function navTo(screen){
   else if(screen==='goals') renderGoals();
 }
 
-document.querySelectorAll('.nav-pill').forEach(p=>p.addEventListener('click',()=>navTo(p.dataset.screen)));
 document.querySelectorAll('.sidebar-item[data-screen]').forEach(p=>p.addEventListener('click',()=>navTo(p.dataset.screen)));
 
 /* ══════════════════════════════════════════
@@ -1731,6 +1941,41 @@ window.addEventListener('keydown',(e)=>{
 
 
 /* ══════════════════════════════════════════
+   PORTAL LOGIC
+══════════════════════════════════════════ */
+const portalFab = document.getElementById('portal-fab');
+const portalOverlay = document.getElementById('portal-overlay');
+
+function togglePortal() {
+  const isOpen = portalOverlay.classList.contains('open');
+  if (isOpen) {
+    portalOverlay.classList.remove('open');
+    portalFab.classList.remove('open');
+  } else {
+    portalOverlay.classList.add('open');
+    portalFab.classList.add('open');
+  }
+}
+
+portalFab.addEventListener('click', togglePortal);
+portalOverlay.addEventListener('click', (e) => {
+  if (e.target === portalOverlay || e.target.classList.contains('portal-container')) togglePortal();
+});
+
+document.querySelectorAll('.portal-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const screen = item.dataset.screen;
+    togglePortal();
+    navTo(screen);
+  });
+});
+
+document.getElementById('portal-record-btn')?.addEventListener('click', () => {
+  togglePortal();
+  openAddChoiceModal();
+});
+
+/* ══════════════════════════════════════════
    AFTER LOGIN
 ══════════════════════════════════════════ */
 function afterLogin(){
@@ -1747,6 +1992,7 @@ function afterLogin(){
       if(d.categories) state.categories=d.categories;
       if(d.sources)    state.sources=d.sources;
       if(d.goals)      state.goals=d.goals;
+      if(d.goalTransactions) state.goalTransactions=d.goalTransactions;
       if(d.transactions) state.transactions=d.transactions;
     }catch(e){}
   }
@@ -1785,6 +2031,9 @@ async function syncInBackground(){
     const pending=state.transactions.filter(t=>String(t.txnId).startsWith('tmp'));
     state.transactions=[...r.transactions,...pending];
   }
+  if(r.goalTransactions){
+    state.goalTransactions=r.goalTransactions;
+  }
   saveCache();
   setSyncStatus('ok');
   refreshCurrentScreen();
@@ -1813,6 +2062,7 @@ function saveCache(){
       categories: state.categories,
       sources: state.sources,
       goals: state.goals,
+      goalTransactions: state.goalTransactions,
       transactions: state.transactions.slice(0,500), // keep last 500
       cachedAt: Date.now(),
     }));
@@ -1860,35 +2110,144 @@ function safeDate(v){
 }
 
 function renderHomeFromTransactions(txns){
-  // Only show salary cycle when viewing the current month
+  const m=state.currentMonth, y=state.currentYear;
   const _rNow=new Date();
-  const isCurrentPeriod=state.currentMonth===(_rNow.getMonth()+1)&&state.currentYear===_rNow.getFullYear();
-  // Compute cycle from last user-confirmed cycle start (isSalary flag only)
+  const isCurrentPeriod=m===(_rNow.getMonth()+1)&&y===_rNow.getFullYear();
+  
+  let cycleTxns = [];
+  let cycleLabel = 'Current Balance';
+  
+  // Compute cycle from last user-confirmed cycle start (isSalary flag)
   const allSalaries=txns.filter(t=>t.isSalary===true).sort((a,b)=>safeDate(b.date)-safeDate(a.date));
   const lastSalary=allSalaries[0]||null;
-  if(lastSalary&&isCurrentPeriod){
+  
+  if(lastSalary && isCurrentPeriod){
     const cycleStart=safeDate(lastSalary.date);
-    const cycleTxns=txns.filter(t=>safeDate(t.date)>=cycleStart);
-    const inc=cycleTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-    const exp=cycleTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-    _updateBalanceBar(inc-exp,inc);
-    document.getElementById('hero-income').textContent=fmt(inc);
-    document.getElementById('hero-expense').textContent=fmt(exp);
-    const d=safeDate(lastSalary.date);
-    document.getElementById('cycle-label').textContent='Since '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    // Filter transactions from all months that are part of this cycle
+    cycleTxns = txns.filter(t=>safeDate(t.date)>=cycleStart);
+    cycleLabel = 'Since ' + cycleStart.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   } else {
-    const m=state.currentMonth, y=state.currentYear;
-    const cur=txns.filter(t=>{const d=safeDate(t.date);return !isNaN(d)&&(d.getMonth()+1)===m&&d.getFullYear()===y;});
-    const inc=cur.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-    const exp=cur.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-    _updateBalanceBar(inc-exp,inc);
-    document.getElementById('hero-income').textContent=fmt(inc);
-    document.getElementById('hero-expense').textContent=fmt(exp);
-    document.getElementById('cycle-label').textContent='Balance';
+    // Standard monthly view
+    cycleTxns = txns.filter(t=>{const d=safeDate(t.date);return !isNaN(d)&&(d.getMonth()+1)===m&&d.getFullYear()===y;});
+    cycleLabel = 'Monthly Balance';
   }
+
+  const inc=cycleTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const exp=cycleTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const bal = inc - exp;
+  const spendPct = inc > 0 ? Math.min(100, Math.max(0, (exp / inc) * 100)) : (exp > 0 ? 100 : 0);
+
+  // Dynamic Advisory Status Message
+  let statusMsg = 'Safe to spend';
+  let statusDesc = 'You are in the safe zone. Spending is well-proportioned for your income.';
+  let statusColor = 'var(--text2)';
+
+  if (bal < 0) { 
+    statusMsg = 'Budget Exceeded'; 
+    statusDesc = 'You are spending more than your current income. Review your transactions immediately.';
+    statusColor = 'var(--danger)'; 
+  }
+  else if (spendPct === 0) { 
+    statusMsg = 'Fresh Start'; 
+    statusDesc = 'Your budget is fully intact. A new cycle has begun—spend wisely!';
+  }
+  else if (spendPct < 30) { 
+    statusMsg = 'Excellent Control'; 
+    statusDesc = 'Financial control is peak! You have only used a small portion of your budget. Keep this pace!';
+  }
+  else if (spendPct < 60) { 
+    statusMsg = 'Safe to Spend'; 
+    statusDesc = 'You are in the safe zone. Current spending is well-proportioned for your income.';
+  }
+  else if (spendPct < 85) { 
+    statusMsg = 'Budget Speeding Up'; 
+    statusDesc = 'Spending is picking up speed. You have used over half your budget—prioritize essentials now.';
+  }
+  else { 
+    statusMsg = 'Budget Warning'; 
+    statusDesc = 'Budget nearly exhausted. Minimize spending to ensure you reach the next payday comfortably.';
+    statusColor = 'var(--warning)'; 
+  }
+
+  // Render Premium Summary
+  const radius = 36;
+  const circ = 2 * Math.PI * radius;
+  const offset = circ - (spendPct / 100) * circ;
+  
+  const container = document.getElementById('home-summary-container');
+  container.innerHTML = `
+    <div class="hero-period" style="margin-bottom:12px;justify-content:center">
+      <button id="hero-period-btn">← prev</button>
+      <span id="hero-period-label" style="font-weight:700;color:var(--text);font-size:14px">${monthName(m, y)}</span>
+      <button id="hero-period-next">next →</button>
+    </div>
+
+    <div class="goals-summary-card" style="margin-bottom:16px">
+      <div class="gs-ring-wrap">
+        <svg class="gs-ring-svg" viewBox="0 0 100 100">
+          <circle class="gs-ring-track" cx="50" cy="50" r="${radius}" />
+          <circle class="gs-ring-fill" cx="50" cy="50" r="${radius}" 
+            stroke-dasharray="${circ}" 
+            stroke-dashoffset="${offset}" 
+            style="stroke:${spendPct > 90 ? 'var(--danger)' : 'var(--primary)'}" />
+        </svg>
+        <div class="gs-ring-text">
+          <div class="gs-ring-pct" style="color:${spendPct > 90 ? 'var(--danger)' : 'var(--primary)'}">${spendPct.toFixed(0)}%</div>
+          <div class="gs-ring-label">Spent</div>
+        </div>
+      </div>
+      
+      <div class="gs-content">
+        <div class="gs-label-row">
+          <div class="gs-label-pill">${cycleLabel}</div>
+        </div>
+        <div class="gs-saved-amt stealth-val" id="stealth-bal">${fmt(bal)}</div>
+        <div class="gs-remaining-amt" style="font-size:12px; color:${statusColor}; font-weight:700; margin-bottom:2px">
+          ${statusMsg}
+        </div>
+        <div style="font-size:10px; color:var(--text3); line-height:1.3; max-width:180px">
+          ${statusDesc}
+        </div>
+        
+        <div class="gs-footer-stats">
+          <div class="gs-mini-stat">
+            <div class="gs-mini-label">Income</div>
+            <div class="gs-mini-val stealth-val" id="stealth-inc" style="color:var(--success)">${fmt(inc)}</div>
+          </div>
+          <div class="gs-mini-stat">
+            <div class="gs-mini-label">Expenses</div>
+            <div class="gs-mini-val stealth-val" id="stealth-exp" style="color:var(--danger)">${fmt(exp)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Re-attach listeners for month nav
+  document.getElementById('hero-period-btn').addEventListener('click',()=>{
+    state.currentMonth--;if(state.currentMonth<1){state.currentMonth=12;state.currentYear--;}
+    refreshHome();
+  });
+  document.getElementById('hero-period-next').addEventListener('click',()=>{
+    state.currentMonth++;if(state.currentMonth>12){state.currentMonth=1;state.currentYear++;}
+    refreshHome();
+  });
+
+  // Individual Stealth Mode (Per-element Reveal)
+  document.querySelectorAll('.stealth-val').forEach(el => {
+    el.classList.add('blurred'); // Initial blur
+    
+    let timer;
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      el.classList.remove('blurred');
+      clearTimeout(timer);
+      timer = setTimeout(() => el.classList.add('blurred'), 5000);
+    });
+  });
+
   // Start income blur timer after each render
   if(typeof _startIncomeReveal==='function') _startIncomeReveal();
-  document.getElementById('hero-period-label').textContent=monthName(state.currentMonth,state.currentYear);
 
   // recent
   const recent=[...txns].sort((a,b)=>{
@@ -2043,7 +2402,38 @@ function renderCatGrid(){
     </div>
   `).join('');
   document.querySelectorAll('#txn-cat-grid .cat-item-btn').forEach(b=>{
-    b.addEventListener('click',()=>{state.txnCat=b.dataset.cat;renderCatGrid();});
+    b.addEventListener('click',()=>{
+      state.txnCat=b.dataset.cat;
+      const isSaving = b.dataset.cat.toLowerCase().includes('saving');
+      const wrap = document.getElementById('txn-goal-selector-wrap');
+      if(isSaving){
+        wrap.style.display = 'block';
+        renderGoalSelectorGrid();
+      } else {
+        wrap.style.display = 'none';
+        state.linkedGoalId = '';
+      }
+      renderCatGrid();
+    });
+  });
+}
+
+function renderGoalSelectorGrid(){
+  const grid = document.getElementById('txn-goal-grid');
+  if(!state.goals.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;font-size:11px;color:var(--text3);text-align:center;padding:10px">No goals found.</div>';
+    return;
+  }
+  grid.innerHTML = state.goals.map(g=>`
+    <div class="goal-select-item${state.linkedGoalId===g.goalId?' selected':''}" data-id="${g.goalId}">
+      ${g.name}
+    </div>
+  `).join('');
+  document.querySelectorAll('#txn-goal-grid .goal-select-item').forEach(i=>{
+    i.addEventListener('click',()=>{
+      state.linkedGoalId = i.dataset.id;
+      renderGoalSelectorGrid();
+    });
   });
 }
 
@@ -2217,6 +2607,31 @@ async function _doSaveTxn(){
       if(idx>-1) state.transactions[idx].txnId=r.txnId;
       saveCache();
     }
+    
+    // Linked Goal Logic
+    if(state.linkedGoalId && !state.editingTxn){
+      const g = state.goals.find(x=>x.goalId===state.linkedGoalId);
+      if(g){
+        const isExp = state.txnType === 'expense';
+        const adjustAmt = isExp ? amount : -amount;
+        g.savedAmount = Math.max(0, (parseFloat(g.savedAmount)||0) + adjustAmt);
+        
+        const gTxn = {
+          gtxnId: 'tmp_gtxn_' + Date.now(),
+          userId: state.user.userId,
+          goalId: g.goalId,
+          type: isExp ? 'add' : 'remove',
+          amount: amount,
+          note: 'Linked from budget',
+          date: txnData.date
+        };
+        if(!state.goalTransactions) state.goalTransactions = [];
+        state.goalTransactions.unshift(gTxn);
+        saveCache();
+        api('updateGoal',{goalId:g.goalId,userId:state.user.userId,savedAmount:g.savedAmount});
+        api('addGoalTransaction',{userId:state.user.userId,goalId:g.goalId,type:gTxn.type,amount:amount,note:gTxn.note,date:gTxn.date});
+      }
+    }
   }
   state.isSaving=false;
   btn.disabled=false;
@@ -2230,54 +2645,15 @@ document.getElementById('save-txn-btn').addEventListener('click',_doSaveTxn);
 ══════════════════════════════════════════ */
 const REAL_NOW=new Date();
 function updateHeroPeriodBtns(){
-  const isCurrentMonth=state.currentMonth===REAL_NOW.getMonth()+1&&state.currentYear===REAL_NOW.getFullYear();
-  document.getElementById('hero-period-next').style.display=isCurrentMonth?'none':'';
-  document.getElementById('hero-period-today').style.display=isCurrentMonth?'none':'';
+  // Obsolete - logic handled in renderHomeFromTransactions
 }
-let _incomeBlurTimer=null;
-const _incomeEl=document.getElementById('hero-income');
-function _applyIncomeBlur(){_incomeEl.classList.add('income-blur');}
 function _startIncomeReveal(){
-  _incomeEl.classList.remove('income-blur');
-  clearTimeout(_incomeBlurTimer);
-  _incomeBlurTimer=setTimeout(_applyIncomeBlur,5000);
+  // Obsolete - functionality integrated into premium summary if needed
 }
-_incomeEl.addEventListener('click',()=>{
-  if(_incomeEl.classList.contains('income-blur')){_startIncomeReveal();}
-  else{clearTimeout(_incomeBlurTimer);_incomeBlurTimer=setTimeout(_applyIncomeBlur,5000);}
-});
-let _bbTimer=null;
-const _bbFill=document.getElementById('balance-bar-fill');
-const _bbAmount=document.getElementById('balance-bar-amount');
 function _updateBalanceBar(balance,income){
-  const pct=income>0?Math.max(0,Math.min(100,(balance/income)*100)):(balance>0?100:0);
-  const color=balance<0||pct<20?'#f87171':pct<50?'#fbbf24':'#4ade80';
-  _bbFill.style.width=pct+'%';
-  _bbFill.style.backgroundColor=color;
-  _bbAmount.textContent=fmt(balance);
+  // Obsolete - functionality integrated into renderHomeFromTransactions
 }
-function _showBalanceAmount(){
-  _bbAmount.classList.add('bb-visible');
-  clearTimeout(_bbTimer);
-  _bbTimer=setTimeout(()=>_bbAmount.classList.remove('bb-visible'),5000);
-}
-document.getElementById('balance-bar-wrap').addEventListener('click',()=>{
-  if(_bbAmount.classList.contains('bb-visible')){clearTimeout(_bbTimer);_bbTimer=setTimeout(()=>_bbAmount.classList.remove('bb-visible'),5000);}
-  else{_showBalanceAmount();}
-});
-
-document.getElementById('hero-period-btn').addEventListener('click',()=>{
-  state.currentMonth--;if(state.currentMonth<1){state.currentMonth=12;state.currentYear--;}
-  updateHeroPeriodBtns();refreshHome();
-});
-document.getElementById('hero-period-next').addEventListener('click',()=>{
-  state.currentMonth++;if(state.currentMonth>12){state.currentMonth=1;state.currentYear++;}
-  updateHeroPeriodBtns();refreshHome();
-});
-document.getElementById('hero-period-today').addEventListener('click',()=>{
-  state.currentMonth=REAL_NOW.getMonth()+1;state.currentYear=REAL_NOW.getFullYear();
-  updateHeroPeriodBtns();refreshHome();
-});
+// Hero period listeners now handled dynamically in renderHomeFromTransactions
 document.getElementById('txn-prev-month').addEventListener('click',()=>{state.txnMonth--;if(state.txnMonth<1){state.txnMonth=12;state.txnYear--;}loadTransactions();});
 document.getElementById('txn-next-month').addEventListener('click',()=>{state.txnMonth++;if(state.txnMonth>12){state.txnMonth=1;state.txnYear++;}loadTransactions();});
 
@@ -2672,7 +3048,7 @@ document.getElementById('see-all-link').addEventListener('click',()=>navTo('tran
 document.getElementById('logout-btn')?.addEventListener('click',logout);
 document.getElementById('sidebar-logout')?.addEventListener('click',logout);
 document.getElementById('hub-logout')?.addEventListener('click',logout);
-document.getElementById('mobile-fab').addEventListener('click',openAddChoiceModal);
+document.getElementById('mobile-fab')?.addEventListener('click',openAddChoiceModal);
 
 
 
@@ -2681,10 +3057,72 @@ document.getElementById('mobile-fab').addEventListener('click',openAddChoiceModa
 ══════════════════════════════════════════ */
 function renderGoals(){
   const el=document.getElementById('goals-list');
+  const summaryEl=document.getElementById('goals-summary');
+  
   if(!state.goals || !state.goals.length){
     el.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><p>No goals yet. Start saving!</p></div>';
+    summaryEl.innerHTML='';
     return;
   }
+  
+  // Calculate Summary
+  let totalSaved = 0;
+  let totalTarget = 0;
+  state.goals.forEach(g=>{
+    totalSaved += (parseFloat(g.savedAmount)||0);
+    totalTarget += (parseFloat(g.targetAmount)||0);
+  });
+  const totalRemaining = Math.max(0, totalTarget - totalSaved);
+  const overallPct = totalTarget > 0 ? Math.min(100, (totalSaved / totalTarget) * 100) : 0;
+  
+  // Render Summary
+  const radius = 36;
+  const circ = 2 * Math.PI * radius;
+  const offset = circ - (overallPct / 100) * circ;
+  
+  summaryEl.innerHTML = `
+    <div class="goals-summary-card">
+      <div class="gs-ring-wrap">
+        <svg class="gs-ring-svg" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="gs-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:var(--primary)" />
+              <stop offset="100%" style="stop-color:#e5b96a" />
+            </linearGradient>
+          </defs>
+          <circle class="gs-ring-track" cx="50" cy="50" r="${radius}" />
+          <circle class="gs-ring-fill" cx="50" cy="50" r="${radius}" 
+            stroke-dasharray="${circ}" 
+            stroke-dashoffset="${offset}" />
+        </svg>
+        <div class="gs-ring-text">
+          <div class="gs-ring-pct">${overallPct.toFixed(0)}%</div>
+          <div class="gs-ring-label">Done</div>
+        </div>
+      </div>
+      
+      <div class="gs-content">
+        <div class="gs-label-row">
+          <div class="gs-label-pill">Overall Progress</div>
+        </div>
+        <div class="gs-saved-amt">${fmt(totalSaved)}</div>
+        <div class="gs-remaining-amt">Need <span>${fmt(totalRemaining)}</span> more</div>
+        
+        <div class="gs-footer-stats">
+          <div class="gs-mini-stat">
+            <div class="gs-mini-label">Total Target</div>
+            <div class="gs-mini-val">${fmt(totalTarget)}</div>
+          </div>
+          <div class="gs-mini-stat">
+            <div class="gs-mini-label">Goals</div>
+            <div class="gs-mini-val">${state.goals.length} Active</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Render Individual Goals
   el.innerHTML=state.goals.map(g=>{
     const saved = parseFloat(g.savedAmount)||0;
     const target = parseFloat(g.targetAmount)||1;
@@ -2719,6 +3157,29 @@ function openGoalDetail(goalId){
   document.getElementById('goal-detail-title').textContent=g.name;
   document.getElementById('goal-detail-saved').textContent=fmt(g.savedAmount||0);
   document.getElementById('goal-detail-target').textContent='of '+fmt(g.targetAmount||0);
+  
+  // Render History
+  const hist = (state.goalTransactions||[]).filter(t=>t.goalId===goalId);
+  const histEl = document.getElementById('goal-history-list');
+  if(!hist.length){
+    histEl.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:20px 0">No adjustment history yet.</div>';
+  } else {
+    histEl.innerHTML = hist.map(t=>{
+      const isIn = t.type==='add';
+      return `
+      <div class="gh-item">
+        <div class="gh-icon ${isIn?'in':'out'}">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5"><polyline points="${isIn?'17 11 12 6 7 11':'7 13 12 18 17 13'}"/><line x1="12" y1="${isIn?'6':'18'}" x2="12" y2="${isIn?'18':'6'}"/></svg>
+        </div>
+        <div class="gh-info">
+          <div class="gh-note">${t.note || (isIn?'Added Money':'Removed Money')}</div>
+          <div class="gh-date">${t.date}</div>
+        </div>
+        <div class="gh-amt ${isIn?'in':'out'}">${isIn?'+':'-'}${fmt(t.amount)}</div>
+      </div>`;
+    }).join('');
+  }
+  
   openModal('goal-detail-modal');
 }
 
@@ -2746,6 +3207,7 @@ document.getElementById('goal-add-money-btn').addEventListener('click',()=>{
   state.goalAdjustAction='add';
   document.getElementById('goal-adjust-title').textContent='Add Money';
   document.getElementById('goal-adjust-input').value='';
+  document.getElementById('goal-adjust-note').value='';
   openModal('goal-adjust-modal');
 });
 
@@ -2754,23 +3216,71 @@ document.getElementById('goal-remove-money-btn').addEventListener('click',()=>{
   state.goalAdjustAction='remove';
   document.getElementById('goal-adjust-title').textContent='Remove Money';
   document.getElementById('goal-adjust-input').value='';
+  document.getElementById('goal-adjust-note').value='';
   openModal('goal-adjust-modal');
 });
 
 document.getElementById('save-adjust-btn').addEventListener('click',async()=>{
   const amount=parseFloat(document.getElementById('goal-adjust-input').value);
+  const note=document.getElementById('goal-adjust-note').value.trim();
   if(!amount||amount<=0){toast('Enter a valid amount','error');return;}
   closeModal('goal-adjust-modal');
   const g=state.editingGoal;
-  if(state.goalAdjustAction==='add'){
+  const type=state.goalAdjustAction;
+  
+  if(type==='add'){
     g.savedAmount=(parseFloat(g.savedAmount)||0)+amount;
   }else{
     g.savedAmount=Math.max(0,(parseFloat(g.savedAmount)||0)-amount);
   }
+  
+  // Optimistic history update
+  const newTxn = {
+    gtxnId: 'tmp_gtxn_' + Date.now(),
+    userId: state.user.userId,
+    goalId: g.goalId,
+    type: type,
+    amount: amount,
+    note: note,
+    date: todayStr()
+  };
+  if(!state.goalTransactions) state.goalTransactions=[];
+  state.goalTransactions.unshift(newTxn);
+  
+  // Budget Sync Logic
+  const syncBudget = document.getElementById('goal-sync-checkbox').classList.contains('checked');
+  if(syncBudget){
+    const txnData = {
+      userId: state.user.userId,
+      type: type === 'add' ? 'expense' : 'income',
+      amount: amount,
+      category: 'Saving',
+      description: (type==='add'?'Contribution: ':'Withdrawal: ') + g.name,
+      date: todayStr(),
+      createdAt: new Date().toISOString()
+    };
+    const tmpTxnId = 'tmp_txn_' + Date.now();
+    state.transactions.unshift({...txnData, txnId: tmpTxnId});
+    api('addTransaction', txnData).then(r=>{
+      if(r.success){
+        const idx = state.transactions.findIndex(t=>t.txnId===tmpTxnId);
+        if(idx>-1) state.transactions[idx].txnId = r.txnId;
+        saveCache();
+      }
+    });
+  }
+
   saveCache();
   renderGoals();
   toast('Updated successfully','success');
+  
   api('updateGoal',{goalId:g.goalId,userId:state.user.userId,savedAmount:g.savedAmount});
+  api('addGoalTransaction',{userId:state.user.userId,goalId:g.goalId,type,amount,note,date:todayStr()}).then(r=>{
+    if(r.success) {
+      newTxn.gtxnId = r.gtxnId;
+      saveCache();
+    }
+  });
 });
 
 document.getElementById('open-add-goal-btn').addEventListener('click',()=>{
@@ -2816,6 +3326,7 @@ document.getElementById('home-content').addEventListener('scroll',function(){
 document.getElementById('txn-content').addEventListener('scroll',function(){
   document.getElementById('txn-header').classList.toggle('scrolled',this.scrollTop>8);
 });
+
 
 /* ══════════════════════════════════════════
    LOGOUT
@@ -2912,16 +3423,14 @@ document.getElementById('export-btn').addEventListener('click',()=>{
 /* ══════════════════════════════════════════
    INIT
 ══════════════════════════════════════════ */
+const loader = document.getElementById('loading-overlay');
+if(loader) loader.classList.add('hidden');
+
 try {
   applyTheme();
   const tdate = document.getElementById('txn-date');
   if(tdate) tdate.value = todayStr();
 } catch(e) { console.error('Init error:', e); }
-finally {
-  // Always hide loading overlay regardless of errors
-  const loader = document.getElementById('loading-overlay');
-  if(loader) loader.classList.add('hidden');
-}
 
 // Always require PIN on startup
 initLogin();
