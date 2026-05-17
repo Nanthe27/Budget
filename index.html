@@ -429,12 +429,33 @@ DESKTOP
         display: none !important;
       }
 
-      #dark-mode-toggle {
-        margin-right: 48px !important;
+      .header-title-interactive {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: opacity var(--ease1) .2s;
       }
 
-      #txn-header .month-nav {
-        margin-right: 48px !important;
+      .header-title-interactive:active {
+        opacity: 0.6;
+      }
+
+      .header-title-interactive::after {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 5px;
+        background: currentColor;
+        clip-path: polygon(0 0, 100% 0, 50% 100%);
+        opacity: 0.5;
+        margin-left: 2px;
+        transition: transform var(--ease1) .3s, opacity var(--ease1) .3s;
+      }
+
+      .portal-open .header-title-interactive::after {
+        transform: rotate(180deg);
+        opacity: 0.8;
       }
     }
 
@@ -3638,7 +3659,7 @@ LOADING OVERLAY
 
     @media(max-width:960px) {
       .portal-fab {
-        display: flex;
+        display: none !important;
       }
     }
   </style>
@@ -3824,7 +3845,7 @@ LOADING OVERLAY
         <div class="main-layout">
           <div class="page-header" id="goals-header">
             <div style="flex:1">
-              <div style="font-size:18px;font-weight:700;letter-spacing:-.3px">Goalkeeper</div>
+              <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" class="header-title-interactive">Goalkeeper</div>
             </div>
             <div class="sync-wrap"></div>
           </div>
@@ -3843,9 +3864,9 @@ LOADING OVERLAY
       <div class="screen" id="home-screen">
         <div class="main-layout">
           <div class="page-header" id="home-header">
-            <div style="flex:1">
+            <div style="flex:1;cursor:pointer" id="home-title-trigger">
               <div style="font-size:12px;color:var(--text3);font-weight:500" id="greeting-time">Good morning</div>
-              <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" id="home-username-display"></div>
+              <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" id="home-username-display" class="header-title-interactive"></div>
             </div>
             <div class="sync-wrap"></div>
             <button class="desktop-add-btn" id="desktop-add-btn">
@@ -3877,7 +3898,7 @@ LOADING OVERLAY
       <div class="screen" id="transactions-screen">
         <div class="main-layout">
           <div class="page-header" id="txn-header">
-            <h1>Transactions</h1>
+            <h1 class="header-title-interactive">Transactions</h1>
             <div class="month-nav">
               <button id="txn-prev-month"><svg viewBox="0 0 24 24">
                   <polyline points="15 18 9 12 15 6" />
@@ -3921,7 +3942,7 @@ LOADING OVERLAY
       <div class="screen" id="analytics-screen">
         <div class="main-layout">
           <div class="page-header">
-            <h1>Analytics</h1>
+            <h1 class="header-title-interactive">Analytics</h1>
             <div class="sync-wrap"></div>
             <button class="desktop-add-btn" id="desktop-add-btn-ana">
               <svg viewBox="0 0 24 24">
@@ -3984,7 +4005,7 @@ LOADING OVERLAY
       <div class="screen" id="more-screen">
         <div class="main-layout">
           <div class="page-header">
-            <h1>Settings</h1>
+            <h1 class="header-title-interactive">Settings</h1>
             <div class="sync-wrap"></div>
             <button class="icon-btn" id="dark-mode-toggle"><svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="5" />
@@ -4529,7 +4550,7 @@ LOADING OVERLAY
     ══════════════════════════════════════════ */
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzK-12oq9m6iZQ3WDaxRS_GrReDp_MLphK0U5ZTZwSAllM64-GxvxBaiDVJ6Lm9o-XP/exec';
     const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#84cc16', '#6b7280', '#1a1a1f'];
-    const APP_VERSION = 'v2.2.0';
+    const APP_VERSION = 'v2.3.0';
 
     /* ══════════════════════════════════════════
        STATE
@@ -4889,13 +4910,18 @@ LOADING OVERLAY
       if (isOpen) {
         portalOverlay.classList.remove('open');
         portalFab.classList.remove('open');
+        document.documentElement.classList.remove('portal-open');
       } else {
         portalOverlay.classList.add('open');
         portalFab.classList.add('open');
+        document.documentElement.classList.add('portal-open');
       }
     }
 
     portalFab.addEventListener('click', togglePortal);
+    document.querySelectorAll('.header-title-interactive, #home-title-trigger').forEach(el => {
+      el.addEventListener('click', togglePortal);
+    });
     portalOverlay.addEventListener('click', (e) => {
       if (e.target === portalOverlay || e.target.classList.contains('portal-container')) togglePortal();
     });
@@ -6403,7 +6429,7 @@ LOADING OVERLAY
     ══════════════════════════════════════════ */
     if ('serviceWorker' in navigator) {
       const swCode = `
-const CACHE='bbn-v8';
+const CACHE='bbn-v9';
 const SHELL=[location.href];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
