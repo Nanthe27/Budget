@@ -437,7 +437,7 @@ DESKTOP
         transition: opacity var(--ease1) .2s;
       }
 
-      .header-title-interactive:active {
+      .header-click-trigger:active {
         opacity: 0.6;
       }
 
@@ -552,6 +552,16 @@ PAGE LAYOUT
       stroke: var(--text2);
       stroke-width: 1.8;
       fill: none;
+    }
+
+    /* Stealth Mode */
+    .stealth-val {
+      transition: filter 0.3s var(--ease1), opacity 0.3 var(--ease1);
+      cursor: pointer;
+    }
+    .stealth-val.blurred {
+      filter: blur(8px);
+      user-select: none;
     }
 
     /* desktop add btn */
@@ -3845,7 +3855,7 @@ LOADING OVERLAY
         <div class="main-layout">
           <div class="page-header" id="goals-header">
             <div style="flex:1">
-              <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" class="header-title-interactive">Goalkeeper</div>
+              <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" class="header-title-interactive header-click-trigger">Goalkeeper</div>
             </div>
             <div class="sync-wrap"></div>
           </div>
@@ -3864,7 +3874,7 @@ LOADING OVERLAY
       <div class="screen" id="home-screen">
         <div class="main-layout">
           <div class="page-header" id="home-header">
-            <div style="flex:1;cursor:pointer" id="home-title-trigger">
+            <div style="flex:1;cursor:pointer" id="home-title-trigger" class="header-click-trigger">
               <div style="font-size:12px;color:var(--text3);font-weight:500" id="greeting-time">Good morning</div>
               <div style="font-size:18px;font-weight:700;letter-spacing:-.3px" id="home-username-display" class="header-title-interactive"></div>
             </div>
@@ -3898,7 +3908,7 @@ LOADING OVERLAY
       <div class="screen" id="transactions-screen">
         <div class="main-layout">
           <div class="page-header" id="txn-header">
-            <h1 class="header-title-interactive">Transactions</h1>
+            <h1 class="header-title-interactive header-click-trigger">Transactions</h1>
             <div class="month-nav">
               <button id="txn-prev-month"><svg viewBox="0 0 24 24">
                   <polyline points="15 18 9 12 15 6" />
@@ -3942,7 +3952,7 @@ LOADING OVERLAY
       <div class="screen" id="analytics-screen">
         <div class="main-layout">
           <div class="page-header">
-            <h1 class="header-title-interactive">Analytics</h1>
+            <h1 class="header-title-interactive header-click-trigger">Analytics</h1>
             <div class="sync-wrap"></div>
             <button class="desktop-add-btn" id="desktop-add-btn-ana">
               <svg viewBox="0 0 24 24">
@@ -4005,7 +4015,7 @@ LOADING OVERLAY
       <div class="screen" id="more-screen">
         <div class="main-layout">
           <div class="page-header">
-            <h1 class="header-title-interactive">Settings</h1>
+            <h1 class="header-title-interactive header-click-trigger">Settings</h1>
             <div class="sync-wrap"></div>
             <button class="icon-btn" id="dark-mode-toggle"><svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="5" />
@@ -4550,7 +4560,7 @@ LOADING OVERLAY
     ══════════════════════════════════════════ */
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzK-12oq9m6iZQ3WDaxRS_GrReDp_MLphK0U5ZTZwSAllM64-GxvxBaiDVJ6Lm9o-XP/exec';
     const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#84cc16', '#6b7280', '#1a1a1f'];
-    const APP_VERSION = 'v2.3.0';
+    const APP_VERSION = 'v2.3.2';
 
     /* ══════════════════════════════════════════
        STATE
@@ -4919,7 +4929,7 @@ LOADING OVERLAY
     }
 
     portalFab.addEventListener('click', togglePortal);
-    document.querySelectorAll('.header-title-interactive, #home-title-trigger').forEach(el => {
+    document.querySelectorAll('.header-click-trigger').forEach(el => {
       el.addEventListener('click', togglePortal);
     });
     portalOverlay.addEventListener('click', (e) => {
@@ -5180,7 +5190,7 @@ LOADING OVERLAY
           </div>
           <div class="gs-mini-stat">
             <div class="gs-mini-label">Expenses</div>
-            <div class="gs-mini-val stealth-val" id="stealth-exp" style="color:var(--danger)">${fmt(exp)}</div>
+            <div class="gs-mini-val" id="stealth-exp" style="color:var(--danger)">${fmt(exp)}</div>
           </div>
         </div>
       </div>
@@ -5206,7 +5216,7 @@ LOADING OVERLAY
           e.stopPropagation();
           el.classList.remove('blurred');
           clearTimeout(timer);
-          timer = setTimeout(() => el.classList.add('blurred'), 5000);
+          timer = setTimeout(() => el.classList.add('blurred'), 4000);
         });
       });
 
@@ -6429,7 +6439,7 @@ LOADING OVERLAY
     ══════════════════════════════════════════ */
     if ('serviceWorker' in navigator) {
       const swCode = `
-const CACHE='bbn-v9';
+const CACHE='bbn-v11';
 const SHELL=[location.href];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
