@@ -22,6 +22,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Ubuntu:wght@300;400;500&display=swap"
     rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <style>
     /* ══════════════════════════════════════════
    TOKENS
@@ -80,6 +82,28 @@
       --shadow-elevated: 0 24px 60px rgba(0, 0, 0, 0.6);
       --shadow-hover: 0 6px 28px rgba(0, 0, 0, 0.2);
     }
+
+    /* Custom Select styles */
+    .cs-wrap { position: relative; width: 100%; font-family: var(--font-b); }
+    .cs-head { padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 14px; transition: border-color .15s; }
+    .cs-head:focus { outline: none; border-color: var(--text3); }
+    .cs-head::after { content: ''; border: solid var(--text3); border-width: 0 2px 2px 0; display: inline-block; padding: 3px; transform: rotate(45deg); margin-bottom: 2px; transition: transform 0.2s; }
+    .cs-head.open::after { transform: rotate(-135deg); margin-bottom: -4px; }
+    .cs-dropdown { position: absolute; top: calc(100% + 4px); left: 0; width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); box-shadow: var(--shadow-elevated); z-index: 9999; max-height: 200px; overflow-y: auto; display: none; }
+    .cs-dropdown.open { display: block; }
+    .cs-opt { padding: 10px 14px; cursor: pointer; color: var(--text); font-size: 14px;}
+    .cs-opt:hover { background: var(--bg3); }
+    .cs-opt.selected { background: var(--primary-bg); color: var(--primary); font-weight: 600; }
+
+    /* Flatpickr Customization */
+    .flatpickr-calendar { background: var(--surface) !important; border: 1px solid var(--border) !important; box-shadow: var(--shadow-elevated) !important; border-radius: var(--r-modal) !important; }
+    .flatpickr-day { color: var(--text) !important; border-radius: 6px !important; }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover { background: var(--primary) !important; color: #000 !important; border-color: var(--primary) !important; font-weight: bold; }
+    .flatpickr-day:hover { background: var(--bg3) !important; }
+    .flatpickr-month, .flatpickr-current-month, .flatpickr-weekday { color: var(--text) !important; fill: var(--text) !important; }
+    .flatpickr-next-month svg, .flatpickr-prev-month svg { fill: var(--text) !important; }
+    .flatpickr-current-month .numInputWrapper span.arrowUp:after { border-bottom-color: var(--text) !important; }
+    .flatpickr-current-month .numInputWrapper span.arrowDown:after { border-top-color: var(--text) !important; }
 
     /* ══════════════════════════════════════════
 RESET
@@ -3313,7 +3337,7 @@ LOADING OVERLAY
       stroke: url(#gs-grad);
       stroke-width: 8;
       stroke-linecap: round;
-      transition: stroke-dasharray 1s var(--ease1);
+      transition: stroke-dashoffset 0.8s var(--ease1), stroke-dasharray 0.8s var(--ease1);
     }
 
     .gs-ring-text {
@@ -4234,30 +4258,49 @@ LOADING OVERLAY
             <button class="icon-btn" id="add-txn-back"><svg viewBox="0 0 24 24">
                 <polyline points="15 18 9 12 15 6" />
               </svg></button>
-            <h1 id="add-txn-title">Add Expense</h1>
+            <h1 id="add-txn-title" style="flex:1">Add Expense</h1>
+            <div id="bundle-toggle-wrap" style="background:var(--bg3);border-radius:100px;display:flex;padding:3px;font-size:12px;font-weight:600;align-items:center;">
+              <div id="toggle-single" style="padding:4px 12px;border-radius:100px;cursor:pointer;background:var(--surface);box-shadow:var(--shadow-hover);color:var(--text);transition:all .2s">Single</div>
+              <div id="toggle-bundle" style="padding:4px 12px;border-radius:100px;cursor:pointer;color:var(--text2);transition:all .2s">Bundle</div>
+            </div>
           </div>
           <div class="page-content" id="add-txn-content"
             style="display:flex;flex-direction:column;padding:0 20px calc(var(--safe-b) + 16px)">
-            <!-- Amount input -->
-            <div style="padding:8px 0 12px">
-              <input id="txn-amount-input" type="number" inputmode="decimal" placeholder="$0.00"
-                style="width:100%;padding:14px 16px;background:var(--bg3);border-radius:var(--r);font-size:28px;font-weight:700;color:var(--text);border:1.5px solid transparent;font-family:var(--mono);letter-spacing:-1px;text-align:center;transition:border-color .15s;"
-                onfocus="this.style.borderColor='var(--text3)'" onblur="this.style.borderColor='transparent'">
-            </div>
-            <!-- Category -->
-            <div class="form-group" style="flex-shrink:0">
-              <label class="form-label">Category</label>
-              <div class="cat-grid" id="txn-cat-grid"></div>
+            
+            <!-- SINGLE MODE WRAPPER -->
+            <div id="single-txn-fields" style="display:flex;flex-direction:column;">
+              <!-- Amount input -->
+              <div style="padding:8px 0 12px">
+                <input id="txn-amount-input" type="number" inputmode="decimal" placeholder="$0.00"
+                  style="width:100%;padding:14px 16px;background:var(--bg3);border-radius:var(--r);font-size:28px;font-weight:700;color:var(--text);border:1.5px solid transparent;font-family:var(--mono);letter-spacing:-1px;text-align:center;transition:border-color .15s;"
+                  onfocus="this.style.borderColor='var(--text3)'" onblur="this.style.borderColor='transparent'">
+              </div>
+              <!-- Category -->
+              <div class="form-group" style="flex-shrink:0">
+                <label class="form-label">Category</label>
+                <div class="cat-grid" id="txn-cat-grid"></div>
 
-              <!-- Smart Goal Selector -->
-              <div id="txn-goal-selector-wrap">
-                <label class="form-label" id="txn-goal-label">Link to Goalkeeper</label>
-                <div class="goal-select-grid" id="txn-goal-grid"></div>
+                <!-- Smart Goal Selector -->
+                <div id="txn-goal-selector-wrap">
+                  <label class="form-label" id="txn-goal-label">Link to Goalkeeper</label>
+                  <div class="goal-select-grid" id="txn-goal-grid"></div>
+                </div>
               </div>
             </div>
+
+            <!-- BUNDLE WRAPPER -->
+            <div id="bundle-txn-fields" style="display:none;flex-direction:column;gap:12px;flex-shrink:0;padding-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <label class="form-label" style="margin:0">Bundle Items</label>
+                <div style="font-size:18px;font-weight:700;color:var(--primary)" id="bundle-total-display">$0.00</div>
+              </div>
+              <div id="bundle-items-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+              <button class="btn-secondary" id="bundle-add-item-btn" style="padding:10px;font-size:14px;border:1px dashed var(--border2);background:transparent;color:var(--text2)">+ Add Item</button>
+            </div>
+
             <!-- Description + Date row -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0">
-              <div class="form-group">
+              <div class="form-group" id="txn-note-group">
                 <label class="form-label">Note</label>
                 <input class="form-input" id="txn-desc" type="text" placeholder="Optional">
               </div>
@@ -4286,7 +4329,10 @@ LOADING OVERLAY
             <div style="flex:1"></div>
             <!-- Footer -->
             <div style="padding:8px 0 0;flex-shrink:0">
-              <button class="btn-primary" id="save-txn-btn">Add Expense</button>
+              <div style="display:flex;gap:8px" id="save-btn-group">
+                <button class="btn-secondary" id="save-another-txn-btn" style="flex:1;background:var(--bg3);color:var(--text)">Save & Add Another</button>
+                <button class="btn-primary" id="save-txn-btn" style="flex:1">Add Expense</button>
+              </div>
               <div class="slide-confirm" id="slide-confirm" style="display:none">
                 <div class="slide-confirm-track">Slide to start new cycle →</div>
                 <div class="slide-confirm-thumb" id="slide-thumb"><svg viewBox="0 0 24 24">
@@ -4552,6 +4598,10 @@ LOADING OVERLAY
           <div style="font-size:32px;font-weight:700;font-family:var(--font-h);color:var(--text)"
             id="goal-detail-saved">$0</div>
           <div style="font-size:14px;color:var(--text3)" id="goal-detail-target">of $0</div>
+          <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;border:1px solid var(--border);margin:16px 24px 0;position:relative">
+            <div id="goal-detail-progress-bar" style="height:100%;background:var(--primary);width:0%;transition:width 0.8s var(--ease1)"></div>
+          </div>
+          <div id="goal-detail-pct" style="font-size:12px;font-weight:700;color:var(--primary);margin-top:6px">0% completed</div>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
@@ -5387,6 +5437,23 @@ LOADING OVERLAY
       const isIncome = type === 'income';
       document.getElementById('add-txn-title').textContent = isIncome ? 'Add Income' : 'Add Expense';
       document.getElementById('save-txn-btn').textContent = isIncome ? 'Add Income' : 'Add Expense';
+      document.getElementById('save-another-txn-btn').style.display = 'block';
+      document.getElementById('bundle-toggle-wrap').style.display = isIncome ? 'none' : 'flex';
+      
+      // Reset to Single Mode
+      state.isBundleMode = false;
+      document.getElementById('toggle-single').style.background = 'var(--surface)';
+      document.getElementById('toggle-single').style.color = 'var(--text)';
+      document.getElementById('toggle-single').style.boxShadow = 'var(--shadow-hover)';
+      document.getElementById('toggle-bundle').style.background = 'transparent';
+      document.getElementById('toggle-bundle').style.color = 'var(--text2)';
+      document.getElementById('toggle-bundle').style.boxShadow = 'none';
+      document.getElementById('single-txn-fields').style.display = 'flex';
+      document.getElementById('bundle-txn-fields').style.display = 'none';
+      document.getElementById('txn-note-group').style.display = 'block';
+      document.getElementById('bundle-items-list').innerHTML = '';
+      if(typeof _updateBundleTotal === 'function') _updateBundleTotal();
+      
       document.getElementById('source-group').style.display = isIncome ? 'block' : 'none';
       document.getElementById('cycle-check-group').style.display = isIncome ? 'block' : 'none';
       renderCatGrid();
@@ -5407,6 +5474,11 @@ LOADING OVERLAY
       const isIncome = t.type === 'income';
       document.getElementById('add-txn-title').textContent = 'Edit Transaction';
       document.getElementById('save-txn-btn').textContent = 'Save Changes';
+      document.getElementById('save-another-txn-btn').style.display = 'none';
+      document.getElementById('bundle-toggle-wrap').style.display = 'none';
+      document.getElementById('single-txn-fields').style.display = 'flex';
+      document.getElementById('bundle-txn-fields').style.display = 'none';
+      document.getElementById('txn-note-group').style.display = 'block';
       document.getElementById('source-group').style.display = isIncome ? 'block' : 'none';
       renderCatGrid();
       renderSourceSelect();
@@ -5586,8 +5658,9 @@ LOADING OVERLAY
       _thb.style.left = '3px';
     });
 
-    async function _doSaveTxn() {
+    async function _doSaveTxn(keepOpen = false) {
       if (state.isSaving) return;
+      if (state.isBundleMode) return _doSaveBundle(keepOpen);
       const amount = parseFloat(document.getElementById('txn-amount-input').value);
       if (!amount || amount <= 0) { toast('Enter an amount', 'error'); return; }
       if (!state.txnCat) { toast('Select a category', 'error'); return; }
@@ -5598,7 +5671,7 @@ LOADING OVERLAY
         return;
       }
       state.isSaving = true;
-      const btn = document.getElementById('save-txn-btn');
+      const btn = document.getElementById(keepOpen ? 'save-another-txn-btn' : 'save-txn-btn');
       const origText = btn.textContent;
       btn.disabled = true; btn.textContent = 'Saving…';
       const createdNow = new Date().toISOString();
@@ -5609,7 +5682,14 @@ LOADING OVERLAY
         incomeSourceId: document.getElementById('txn-source').value || '',
         createdAt: createdNow
       };
-      showScreen(_prevScreenId);
+      
+      if (!keepOpen) {
+        showScreen(_prevScreenId);
+      } else {
+        document.getElementById('txn-amount-input').value = '';
+        document.getElementById('txn-desc').value = '';
+        setTimeout(() => document.getElementById('txn-amount-input').focus(), 10);
+      }
       if (state.editingTxn) {
         const idx = state.transactions.findIndex(t => t.txnId === state.editingTxn.txnId);
         if (idx > -1) state.transactions[idx] = { ...state.transactions[idx], ...txnData };
@@ -5628,16 +5708,8 @@ LOADING OVERLAY
         const tmpId = 'tmp' + Date.now();
         const optimisticTxn = { ...txnData, txnId: tmpId, createdAt: new Date().toISOString() };
         state.transactions.unshift(optimisticTxn);
-        saveCache();
-        refreshCurrentScreen();
-        const r = await api('addTransaction', txnData);
-        if (r.success) {
-          const idx = state.transactions.findIndex(t => t.txnId === tmpId);
-          if (idx > -1) state.transactions[idx].txnId = r.txnId;
-          saveCache();
-        }
 
-        // Linked Goal Logic
+        // Linked Goal Logic (Optimistic Update)
         if (state.linkedGoalId && !state.editingTxn) {
           const g = state.goals.find(x => x.goalId === state.linkedGoalId);
           if (g) {
@@ -5645,8 +5717,9 @@ LOADING OVERLAY
             const adjustAmt = isExp ? amount : -amount;
             g.savedAmount = Math.max(0, (parseFloat(g.savedAmount) || 0) + adjustAmt);
 
+            const tmpGtxnId = 'tmp_gtxn_' + Date.now();
             const gTxn = {
-              gtxnId: 'tmp_gtxn_' + Date.now(),
+              gtxnId: tmpGtxnId,
               userId: state.user.userId,
               goalId: g.goalId,
               type: isExp ? 'add' : 'remove',
@@ -5656,18 +5729,51 @@ LOADING OVERLAY
             };
             if (!state.goalTransactions) state.goalTransactions = [];
             state.goalTransactions.unshift(gTxn);
+
+            // Save cache and refresh current screen (updates goalkeeper progress bar live!)
             saveCache();
+            refreshCurrentScreen();
+
+            // Run backend APIs asynchronously
             api('updateGoal', { goalId: g.goalId, userId: state.user.userId, savedAmount: g.savedAmount });
-            api('addGoalTransaction', { userId: state.user.userId, goalId: g.goalId, type: gTxn.type, amount: amount, note: gTxn.note, date: gTxn.date });
+            api('addGoalTransaction', { userId: state.user.userId, goalId: g.goalId, type: gTxn.type, amount: amount, note: gTxn.note, date: gTxn.date }).then(gr => {
+              if (gr.success) {
+                const idx = state.goalTransactions.findIndex(x => x.gtxnId === tmpGtxnId);
+                if (idx > -1) {
+                  state.goalTransactions[idx].gtxnId = gr.gtxnId;
+                  saveCache();
+                }
+              }
+            });
+          } else {
+            saveCache();
+            refreshCurrentScreen();
           }
+        } else {
+          saveCache();
+          refreshCurrentScreen();
         }
+
+        // Run transaction save API call asynchronously
+        api('addTransaction', txnData).then(r => {
+          if (r.success) {
+            const idx = state.transactions.findIndex(t => t.txnId === tmpId);
+            if (idx > -1) {
+              state.transactions[idx].txnId = r.txnId;
+              saveCache();
+            }
+          }
+        });
       }
       state.isSaving = false;
       btn.disabled = false;
       btn.textContent = origText;
-      state.editingTxn = null;
+      if (!keepOpen) {
+        state.editingTxn = null;
+      }
     }
-    document.getElementById('save-txn-btn').addEventListener('click', _doSaveTxn);
+    document.getElementById('save-txn-btn').addEventListener('click', () => _doSaveTxn(false));
+    document.getElementById('save-another-txn-btn').addEventListener('click', () => _doSaveTxn(true));
 
     /* ══════════════════════════════════════════
        MONTH NAV
@@ -6103,6 +6209,7 @@ LOADING OVERLAY
       });
       const totalRemaining = Math.max(0, totalTarget - totalSaved);
       const overallPct = totalTarget > 0 ? Math.min(100, (totalSaved / totalTarget) * 100) : 0;
+      const overallTextPct = (totalSaved > 0 && overallPct < 1) ? '<1' : overallPct.toFixed(0);
 
       // Render Summary
       const radius = 36;
@@ -6125,7 +6232,7 @@ LOADING OVERLAY
             stroke-dashoffset="${offset}" />
         </svg>
         <div class="gs-ring-text">
-          <div class="gs-ring-pct">${overallPct.toFixed(0)}%</div>
+          <div class="gs-ring-pct">${overallTextPct}%</div>
           <div class="gs-ring-label">Done</div>
         </div>
       </div>
@@ -6156,14 +6263,16 @@ LOADING OVERLAY
         const saved = parseFloat(g.savedAmount) || 0;
         const target = parseFloat(g.targetAmount) || 1;
         const pct = Math.min(100, Math.max(0, (saved / target) * 100));
+        const widthPct = saved > 0 ? Math.max(1, pct) : 0;
+        const textPct = (saved > 0 && pct < 1) ? '<1' : pct.toFixed(0);
         return `
     <div class="source-item goal-card" data-id="${g.goalId}" style="flex-direction:column;align-items:stretch;gap:12px;cursor:pointer">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="source-name" style="font-size:16px">${g.name}</div>
-        <div style="font-size:14px;font-weight:700">${pct.toFixed(0)}%</div>
+        <div style="font-size:14px;font-weight:700">${textPct}%</div>
       </div>
       <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;border:1px solid var(--border)">
-        <div style="height:100%;background:var(--primary);width:${pct}%"></div>
+        <div style="height:100%;background:var(--primary);width:${widthPct}%;transition:width 0.8s var(--ease1)"></div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)">
         <span>Saved: ${fmt(saved)}</span>
@@ -6186,6 +6295,21 @@ LOADING OVERLAY
       document.getElementById('goal-detail-title').textContent = g.name;
       document.getElementById('goal-detail-saved').textContent = fmt(g.savedAmount || 0);
       document.getElementById('goal-detail-target').textContent = 'of ' + fmt(g.targetAmount || 0);
+
+      const saved = parseFloat(g.savedAmount) || 0;
+      const target = parseFloat(g.targetAmount) || 1;
+      const pct = Math.min(100, Math.max(0, (saved / target) * 100));
+      const widthPct = saved > 0 ? Math.max(1, pct) : 0;
+      const textPct = (saved > 0 && pct < 1) ? '<1' : pct.toFixed(0);
+      
+      const progressBar = document.getElementById('goal-detail-progress-bar');
+      const progressPct = document.getElementById('goal-detail-pct');
+      if (progressBar) {
+        progressBar.style.width = widthPct + '%';
+      }
+      if (progressPct) {
+        progressPct.textContent = textPct + '% completed';
+      }
 
       // Render History
       const hist = (state.goalTransactions || []).filter(t => t.goalId === goalId);
@@ -6450,6 +6574,252 @@ LOADING OVERLAY
     });
 
     /* ══════════════════════════════════════════
+       BUNDLE ADD LOGIC
+    ══════════════════════════════════════════ */
+    document.getElementById('toggle-single').addEventListener('click', () => {
+      state.isBundleMode = false;
+      document.getElementById('toggle-single').style.background = 'var(--surface)';
+      document.getElementById('toggle-single').style.color = 'var(--text)';
+      document.getElementById('toggle-single').style.boxShadow = 'var(--shadow-hover)';
+      document.getElementById('toggle-bundle').style.background = 'transparent';
+      document.getElementById('toggle-bundle').style.color = 'var(--text2)';
+      document.getElementById('toggle-bundle').style.boxShadow = 'none';
+      document.getElementById('single-txn-fields').style.display = 'flex';
+      document.getElementById('bundle-txn-fields').style.display = 'none';
+      document.getElementById('txn-note-group').style.display = 'block';
+    });
+
+    document.getElementById('toggle-bundle').addEventListener('click', () => {
+      state.isBundleMode = true;
+      document.getElementById('toggle-bundle').style.background = 'var(--surface)';
+      document.getElementById('toggle-bundle').style.color = 'var(--text)';
+      document.getElementById('toggle-bundle').style.boxShadow = 'var(--shadow-hover)';
+      document.getElementById('toggle-single').style.background = 'transparent';
+      document.getElementById('toggle-single').style.color = 'var(--text2)';
+      document.getElementById('toggle-single').style.boxShadow = 'none';
+      document.getElementById('single-txn-fields').style.display = 'none';
+      document.getElementById('bundle-txn-fields').style.display = 'flex';
+      document.getElementById('txn-note-group').style.display = 'none';
+      
+      if (document.getElementById('bundle-items-list').children.length === 0) {
+        addBundleItemRow();
+      }
+    });
+
+    document.getElementById('bundle-add-item-btn').addEventListener('click', addBundleItemRow);
+
+    function addBundleItemRow() {
+      const list = document.getElementById('bundle-items-list');
+      const div = document.createElement('div');
+      div.className = 'bundle-item-row';
+      div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr auto;gap:6px;background:var(--bg3);padding:10px;border-radius:var(--r-sm)';
+      
+      const catOptions = (state.categories || []).filter(c => c.type === state.txnType).map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+      
+      div.innerHTML = `
+        <input type="text" class="bi-name" placeholder="Item Name" style="font-size:14px;padding:8px 10px;border-radius:4px;background:var(--surface);border:1px solid transparent;width:100%;color:var(--text);font-family:var(--font-b);outline:none;">
+        <input type="number" class="bi-amount" placeholder="$0.00" inputmode="decimal" style="font-size:14px;padding:8px 10px;border-radius:4px;background:var(--surface);border:1px solid transparent;width:100%;color:var(--text);font-family:var(--mono);outline:none;">
+        <button class="icon-btn bi-del" style="width:34px;height:34px;background:var(--danger-bg);border:none;color:var(--danger);display:flex;align-items:center;justify-content:center;border-radius:4px;"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        <select class="bi-cat" style="grid-column: 1 / -1; margin-top:2px;font-size:14px;padding:8px 10px;border-radius:4px;background:var(--surface);border:1px solid transparent;width:100%;color:var(--text);font-family:var(--font-b);outline:none;appearance:none;-webkit-appearance:none;">
+          <option value="">Select Category...</option>
+          ${catOptions}
+        </select>
+      `;
+      list.appendChild(div);
+      
+      div.querySelector('.bi-amount').addEventListener('input', _updateBundleTotal);
+      div.querySelector('.bi-del').addEventListener('click', () => {
+        div.remove();
+        _updateBundleTotal();
+      });
+      makeCustomSelect(div.querySelector('.bi-cat'));
+    }
+
+    function _updateBundleTotal() {
+      let total = 0;
+      document.querySelectorAll('#bundle-items-list .bi-amount').forEach(inp => {
+        total += (parseFloat(inp.value) || 0);
+      });
+      document.getElementById('bundle-total-display').textContent = fmt(total);
+    }
+
+    async function _doSaveBundle(keepOpen) {
+      const rows = document.querySelectorAll('#bundle-items-list .bundle-item-row');
+      const items = [];
+      let hasError = false;
+      rows.forEach(r => {
+        const name = r.querySelector('.bi-name').value.trim();
+        const amt = parseFloat(r.querySelector('.bi-amount').value);
+        const cat = r.querySelector('.bi-cat').value;
+        if (amt > 0 && cat) {
+          items.push({ name, amt, cat });
+        } else if (amt > 0 || name || cat) {
+           hasError = true;
+        }
+      });
+      if (hasError) {
+        toast('Fill out amount & category for each item', 'error');
+        return;
+      }
+      if (items.length === 0) {
+        toast('Add at least one item', 'error');
+        return;
+      }
+
+      state.isSaving = true;
+      const btn = document.getElementById(keepOpen ? 'save-another-txn-btn' : 'save-txn-btn');
+      const origText = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Saving Bundle…';
+      
+      const createdNow = new Date().toISOString();
+      const baseDate = document.getElementById('txn-date').value || todayStr();
+      
+      const promises = [];
+      const newTxns = [];
+      
+      for (const item of items) {
+        const txnData = {
+          userId: state.user.userId, 
+          type: 'expense', 
+          amount: item.amt, 
+          category: item.cat,
+          description: item.name || 'Bundle Item',
+          date: baseDate,
+          incomeSourceId: '',
+          createdAt: createdNow
+        };
+        
+        const tmpId = 'tmp' + Date.now() + Math.random().toString().slice(2,8);
+        const optimisticTxn = { ...txnData, txnId: tmpId, createdAt: new Date().toISOString() };
+        newTxns.unshift(optimisticTxn);
+        
+        promises.push(
+          api('addTransaction', txnData).then(r => {
+            if (r.success) {
+              const idx = state.transactions.findIndex(t => t.txnId === tmpId);
+              if (idx > -1) {
+                state.transactions[idx].txnId = r.txnId;
+              }
+            }
+          })
+        );
+      }
+      
+      state.transactions.unshift(...newTxns);
+      saveCache();
+      
+      if (!keepOpen) {
+        showScreen(_prevScreenId);
+      } else {
+        document.getElementById('bundle-items-list').innerHTML = '';
+        _updateBundleTotal();
+        addBundleItemRow();
+      }
+      toast(keepOpen ? 'Bundle Added ✓' : 'Bundle Saved ✓', 'success');
+      refreshCurrentScreen();
+      
+      Promise.all(promises).then(() => {
+        saveCache();
+      });
+      
+      state.isSaving = false;
+      btn.disabled = false;
+      btn.textContent = origText;
+    }
+
+    /* ══════════════════════════════════════════
+       CUSTOM UI FOR POPUPS & DROPDOWNS
+    ══════════════════════════════════════════ */
+    function initCustomSelects() {
+      document.querySelectorAll('select').forEach(makeCustomSelect);
+    }
+    
+    function makeCustomSelect(selectEl) {
+      if (selectEl._cs) return; 
+      selectEl.style.display = 'none';
+      const wrap = document.createElement('div');
+      wrap.className = 'cs-wrap';
+      if (selectEl.className) wrap.classList.add(...selectEl.className.split(' '));
+      if (selectEl.getAttribute('style')) wrap.style.cssText = selectEl.getAttribute('style');
+      
+      const head = document.createElement('div');
+      head.className = 'cs-head';
+      
+      const drop = document.createElement('div');
+      drop.className = 'cs-dropdown';
+      
+      wrap.appendChild(head);
+      wrap.appendChild(drop);
+      selectEl.parentNode.insertBefore(wrap, selectEl.nextSibling);
+      selectEl._cs = wrap;
+
+      const renderOpts = () => {
+        drop.innerHTML = '';
+        let selectedText = 'Select...';
+        Array.from(selectEl.options).forEach(opt => {
+          if (opt.selected) selectedText = opt.text;
+          if (!opt.value && opt.text === '') return;
+          const oDiv = document.createElement('div');
+          oDiv.className = 'cs-opt' + (opt.selected ? ' selected' : '');
+          oDiv.textContent = opt.text;
+          oDiv.onclick = (e) => {
+            e.stopPropagation();
+            selectEl.value = opt.value;
+            selectEl.dispatchEvent(new Event('change'));
+            renderOpts();
+            drop.classList.remove('open');
+            head.classList.remove('open');
+          };
+          drop.appendChild(oDiv);
+        });
+        head.textContent = selectedText;
+      };
+      
+      head.onclick = (e) => {
+        e.stopPropagation();
+        const isOpen = drop.classList.contains('open');
+        document.querySelectorAll('.cs-dropdown').forEach(d => d.classList.remove('open'));
+        document.querySelectorAll('.cs-head').forEach(h => h.classList.remove('open'));
+        if (!isOpen) {
+          renderOpts();
+          drop.classList.add('open');
+          head.classList.add('open');
+        }
+      };
+      
+      selectEl.addEventListener('change', renderOpts);
+      
+      const origDesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+      if(origDesc && !selectEl._hasOverride) {
+        selectEl._hasOverride = true;
+        Object.defineProperty(selectEl, 'value', {
+          get: function() { return origDesc.get.call(this); },
+          set: function(val) { 
+            origDesc.set.call(this, val); 
+            renderOpts(); 
+          }
+        });
+      }
+
+      renderOpts();
+    }
+    
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.cs-dropdown').forEach(d => d.classList.remove('open'));
+      document.querySelectorAll('.cs-head').forEach(h => h.classList.remove('open'));
+    });
+
+    const origRenderSourceSelect = window.renderSourceSelect;
+    if (origRenderSourceSelect) {
+      window.renderSourceSelect = function() {
+        origRenderSourceSelect.apply(this, arguments);
+        initCustomSelects();
+        const sel = document.getElementById('txn-source');
+        if (sel && sel._cs) sel.dispatchEvent(new Event('change'));
+      }
+    }
+
+    /* ══════════════════════════════════════════
        INIT
     ══════════════════════════════════════════ */
     const loader = document.getElementById('loading-overlay');
@@ -6459,6 +6829,11 @@ LOADING OVERLAY
       applyTheme();
       const tdate = document.getElementById('txn-date');
       if (tdate) tdate.value = todayStr();
+      
+      initCustomSelects();
+      if (typeof flatpickr !== 'undefined') {
+        flatpickr("input[type=date]", { disableMobile: true });
+      }
     } catch (e) { console.error('Init error:', e); }
 
     // Always require PIN on startup
