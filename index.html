@@ -6,6 +6,14 @@
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; img-src 'self' data: https:; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <script>
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      location.replace(`https:${location.href.substring(location.protocol.length)}`);
+    }
+  </script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,8 +30,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Ubuntu:wght@300;400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" integrity="sha384-RkASv+6KfBMW9eknReJIJ6b3UnjKOKC5bOUaNgIY778NFbQ8MtWq9Lr/khUgqtTt" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" integrity="sha384-5JqMv4L/Xa0hfvtF06qboNdhvuYXUku9ZrhZh3bSk8VXF0A/RuSLHpLsSV9Zqhl6" crossorigin="anonymous"></script>
   <style>
     /* ══════════════════════════════════════════
    TOKENS
@@ -3909,7 +3917,9 @@ LOADING OVERLAY
             <button class="numpad-btn" data-n="7">7</button>
             <button class="numpad-btn" data-n="8">8</button>
             <button class="numpad-btn" data-n="9">9</button>
-            <button class="numpad-btn empty"></button>
+            <button class="numpad-btn" id="faceid-btn" style="display:flex;align-items:center;justify-content:center;" onclick="performFaceIdLogin()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>
+            </button>
             <button class="numpad-btn" data-n="0">0</button>
             <button class="numpad-btn empty"></button>
           </div>
@@ -4776,15 +4786,50 @@ LOADING OVERLAY
     document.getElementById('dark-mode-toggle').addEventListener('click', toggleTheme);
     document.getElementById('sidebar-theme')?.addEventListener('click', toggleTheme);
 
+    function sanitizeHTML(str) {
+      if (typeof str !== 'string') return str;
+      return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    /* ══════════════════════════════════════════
+       SECURITY SANITIZATION
+    ══════════════════════════════════════════ */
+    function sanitizeHTML(str) {
+      if (typeof str !== 'string') return str;
+      return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    function unescapeHTML(str) {
+      if (typeof str !== 'string') return str;
+      return str.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    }
+
+    function sanitizeData(data) {
+      if (Array.isArray(data)) return data.map(sanitizeData);
+      if (data !== null && typeof data === 'object') {
+        const sanitized = {};
+        for (const key in data) sanitized[key] = sanitizeData(data[key]);
+        return sanitized;
+      }
+      if (typeof data === 'string') return sanitizeHTML(data);
+      return data;
+    }
+
     /* ══════════════════════════════════════════
        API — optimistic UI approach
     ══════════════════════════════════════════ */
     async function api(action, data = {}) {
-      if (!GAS_URL || GAS_URL.includes('YOUR_GOOGLE')) return mockAPI(action, data);
+      if (!GAS_URL || GAS_URL.includes('YOUR_GOOGLE')) {
+        return sanitizeData(await mockAPI(action, data));
+      }
       try {
         const r = await fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action, data }) });
         const txt = await r.text();
-        try { return JSON.parse(txt); }
+        try { return sanitizeData(JSON.parse(txt)); }
         catch (e) { console.error('GAS non-JSON:', txt.slice(0, 200)); return { success: false, error: 'Server error' }; }
       } catch (e) { console.error('API error:', e); return { success: false, error: e.message }; }
     }
@@ -5015,6 +5060,126 @@ LOADING OVERLAY
 
 
     /* ══════════════════════════════════════════
+       FACE ID LOGIC
+    ══════════════════════════════════════════ */
+    async function performFaceIdLogin() {
+      if (!window.PublicKeyCredential) {
+        toast('Biometrics not supported on this device', 'error');
+        return;
+      }
+      try {
+        const hasCred = localStorage.getItem('bbn-faceid-credential');
+        if (!hasCred) {
+          toast('Please login with PIN first to enable Biometrics', 'info');
+          return;
+        }
+        
+        const challenge = new Uint8Array(32);
+        crypto.getRandomValues(challenge);
+        const assertion = await navigator.credentials.get({
+          publicKey: {
+            challenge,
+            userVerification: "required"
+          }
+        });
+        
+        if (assertion) {
+          const savedPin = localStorage.getItem('bbn-saved-pin');
+          if (savedPin) {
+            pinBuffer = savedPin;
+            updatePinDots();
+            
+            document.querySelectorAll('.pin-dot').forEach(d => d.classList.add('loading'));
+            document.querySelector('#login-screen .numpad')?.classList.add('pin-loading');
+            
+            let targetUser = state.users[0];
+            if (!targetUser) {
+               const rUsers = await api('getUsers');
+               if (rUsers.success) {
+                   state.users = rUsers.users;
+                   targetUser = state.users[0];
+               }
+            }
+            if (!targetUser) {
+                toast('Biometrics error: User not found', 'error');
+                return;
+            }
+            
+            const r = await api('login', { userId: targetUser.userId, pin: pinBuffer });
+            
+            document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('loading'));
+            document.querySelector('#login-screen .numpad')?.classList.remove('pin-loading');
+            
+            if (r.success) {
+              state.user = r.user;
+              localStorage.setItem('bbn-user', JSON.stringify(r.user));
+              localStorage.setItem('bbn-user-ts', Date.now().toString());
+              afterLogin();
+            } else {
+              document.querySelectorAll('.pin-dot').forEach(d => d.classList.add('error'));
+              setTimeout(() => { document.querySelectorAll('.pin-dot').forEach(d => { d.classList.remove('error', 'filled'); }); pinBuffer = ''; }, 800);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(e);
+        toast('Biometrics cancelled or failed', 'error');
+      }
+    }
+
+    async function toggleBiometrics() {
+      if (!window.PublicKeyCredential) {
+        toast('Biometrics not supported on this device', 'error');
+        return;
+      }
+      const hasCred = localStorage.getItem('bbn-faceid-credential');
+      if (hasCred) {
+        localStorage.removeItem('bbn-faceid-credential');
+        localStorage.removeItem('bbn-saved-pin');
+        api('setBiometrics', { userId: state.user.userId, enabled: false });
+        toast('Biometrics Disabled', 'success');
+        if (typeof renderMore === 'function') renderMore();
+      } else {
+        if (!state.user) {
+          toast('Please login first to enable Biometrics', 'info');
+          return;
+        }
+        const p = prompt('Please enter your 4-digit PIN to enable Biometrics:');
+        if (!p || p.length !== 4) {
+          toast('Valid 4-digit PIN required', 'error');
+          return;
+        }
+        try {
+          const challenge = new Uint8Array(32);
+          crypto.getRandomValues(challenge);
+          const userId = new Uint8Array(16);
+          crypto.getRandomValues(userId);
+          
+          const cred = await navigator.credentials.create({
+            publicKey: {
+              challenge,
+              rp: { name: "Budget App" },
+              user: { id: userId, name: state.user.name, displayName: state.user.name },
+              pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+              authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+              timeout: 60000
+            }
+          });
+          if (cred) {
+            localStorage.setItem('bbn-faceid-credential', 'enabled');
+            localStorage.setItem('bbn-saved-pin', p);
+            api('setBiometrics', { userId: state.user.userId, enabled: true });
+            toast('Biometrics Enabled!', 'success');
+            if (typeof renderMore === 'function') renderMore();
+          }
+        } catch(e) {
+          console.error(e);
+          toast('Biometrics setup cancelled or failed', 'error');
+        }
+      }
+    }
+
+    /* 
        PORTAL LOGIC
     ══════════════════════════════════════════ */
     const portalFab = document.getElementById('portal-fab');
@@ -5058,6 +5223,47 @@ LOADING OVERLAY
        AFTER LOGIN
     ══════════════════════════════════════════ */
     function afterLogin() {
+      // Synchronize preference from Google Sheet
+      const localEnabled = !!localStorage.getItem('bbn-faceid-credential');
+      if (state.user.biometrics !== localEnabled) {
+        if (state.user.biometrics) {
+          localStorage.setItem('bbn-faceid-credential', 'enabled');
+          if (pinBuffer && pinBuffer.length === 4) localStorage.setItem('bbn-saved-pin', pinBuffer);
+        } else {
+          localStorage.removeItem('bbn-faceid-credential');
+          localStorage.removeItem('bbn-saved-pin');
+        }
+      } else if (window.PublicKeyCredential && !localEnabled && pinBuffer.length === 4) {
+        setTimeout(async () => {
+          if (confirm('Do you want to enable Biometrics (Face ID / Windows Hello) for faster login?')) {
+            try {
+              const challenge = new Uint8Array(32);
+              crypto.getRandomValues(challenge);
+              const userId = new Uint8Array(16);
+              crypto.getRandomValues(userId);
+              
+              const cred = await navigator.credentials.create({
+                publicKey: {
+                  challenge,
+                  rp: { name: "Budget App" },
+                  user: { id: userId, name: state.user.name, displayName: state.user.name },
+                  pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+                  authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                  timeout: 60000
+                }
+              });
+              if (cred) {
+                localStorage.setItem('bbn-faceid-credential', 'enabled');
+                localStorage.setItem('bbn-saved-pin', pinBuffer);
+                api('setBiometrics', { userId: state.user.userId, enabled: true });
+                toast('Biometrics Enabled!', 'success');
+              }
+            } catch(e) {
+              console.error(e);
+            }
+          }
+        }, 1000);
+      }
       showSidebar(true);
       showNav(true);
       showScreen('home-screen');
@@ -5469,7 +5675,7 @@ LOADING OVERLAY
       state.txnCat = t.category;
       state.txnSource = t.incomeSourceId || '';
       document.getElementById('txn-amount-input').value = t.amount;
-      document.getElementById('txn-desc').value = t.description || '';
+      document.getElementById('txn-desc').value = unescapeHTML(t.description || '');
       document.getElementById('txn-date').value = t.date || todayStr();
       const isIncome = t.type === 'income';
       document.getElementById('add-txn-title').textContent = 'Edit Transaction';
@@ -6034,6 +6240,10 @@ LOADING OVERLAY
       <div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
       <div class="menu-label" id="ml-theme-label">${dark ? 'Light Mode' : 'Dark Mode'}</div>
     </div>
+    <div class="menu-item" id="ml-biometrics">
+      <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg></div>
+      <div class="menu-label">${localStorage.getItem('bbn-faceid-credential') ? 'Disable Biometrics' : 'Enable Biometrics'}</div>
+    </div>
     <div class="menu-item sync-btn" id="ml-sync">
       <div class="menu-icon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
       <div class="menu-label">Sync Data</div>
@@ -6047,6 +6257,7 @@ LOADING OVERLAY
       document.getElementById('ml-income-sources').addEventListener('click', () => { showScreen('sources-screen'); renderSourcesList(); });
       document.getElementById('ml-export').addEventListener('click', () => openModal('export-modal'));
       document.getElementById('ml-theme').addEventListener('click', () => { toggleTheme(); renderMore(); });
+      document.getElementById('ml-biometrics').addEventListener('click', toggleBiometrics);
       document.getElementById('ml-sync').addEventListener('click', forceSync);
       document.getElementById('ml-logout').addEventListener('click', logout);
     }
@@ -6063,7 +6274,7 @@ LOADING OVERLAY
         : `<div class="avatar-fallback">${u.name[0].toUpperCase()}</div>`;
       document.getElementById('profile-name-display').textContent = u.name;
       document.getElementById('profile-sub-display').textContent = 'User ID: ' + u.userId;
-      document.getElementById('profile-img-url').value = u.photoUrl || '';
+      document.getElementById('profile-img-url').value = unescapeHTML(u.photoUrl || '');
     }
 
     document.getElementById('profile-back').addEventListener('click', () => { showScreen('more-screen'); renderMore(); });
@@ -6350,7 +6561,7 @@ LOADING OVERLAY
 
     document.getElementById('goal-edit-btn').addEventListener('click', () => {
       closeModal('goal-detail-modal');
-      document.getElementById('goal-name-input').value = state.editingGoal.name;
+      document.getElementById('goal-name-input').value = unescapeHTML(state.editingGoal.name);
       document.getElementById('goal-target-input').value = state.editingGoal.targetAmount;
       openModal('add-goal-modal');
     });
