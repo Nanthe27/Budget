@@ -6947,11 +6947,12 @@ LOADING OVERLAY
     
     function makeCustomSelect(selectEl) {
       if (selectEl._cs) return; 
+      const origStyle = selectEl.getAttribute('style');
       selectEl.style.display = 'none';
       const wrap = document.createElement('div');
       wrap.className = 'cs-wrap';
       if (selectEl.className) wrap.classList.add(...selectEl.className.split(' '));
-      if (selectEl.getAttribute('style')) wrap.style.cssText = selectEl.getAttribute('style');
+      if (origStyle) wrap.style.cssText = origStyle;
       
       const head = document.createElement('div');
       head.className = 'cs-head';
